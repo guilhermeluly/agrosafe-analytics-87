@@ -9,13 +9,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import LogoDisplay from "../components/LogoDisplay";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useUser();
+  const { login, user } = useUser();
   const { empresa } = useEmpresa();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -26,7 +25,6 @@ export default function Login() {
 
     try {
       const success = await login(email, password);
-      
       if (success) {
         toast({
           title: "Login bem-sucedido",
@@ -51,18 +49,41 @@ export default function Login() {
     }
   };
 
+  // Usuários master admin padrão (ajuste conforme lógica real se mudar)
+  const isMasterAdmin =
+    user &&
+    user.role === "admin" &&
+    (user.email === "Guilhermeluly@hotmail.com" || user.email === "admin@example.com");
+
   return (
     <>
-      <Helmet><title>AgroSafe Analytics - Sistema de Indicadores</title></Helmet>
+      <Helmet>
+        <title>AgroSafe Analytics - Sistema de Indicadores</title>
+      </Helmet>
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
         <div className="w-full max-w-md">
           <div className="mb-2 flex justify-center">
             <h1 className="text-2xl font-bold text-center text-primary">AgroSafe Analytics</h1>
           </div>
-          <div className="mb-6 flex justify-center">
-            <LogoDisplay altura={60} />
+          <div className="mb-4 flex justify-center">
+            {/* Exibe o logo principal do sistema */}
+            {empresa.logo && (
+              <img
+                src={empresa.logo}
+                alt="Logo do sistema"
+                className="max-h-16 object-contain mb-2"
+                style={{ maxWidth: 220 }}
+                draggable={false}
+              />
+            )}
           </div>
-          
+          {/* Alerta para master admin */}
+          {isMasterAdmin && (
+            <div className="mb-4 text-center text-amber-700 bg-amber-100 border border-amber-200 px-2 py-1 rounded text-xs">
+              Como Administrador Master, você pode editar o logo exibido nesta tela em:<br />
+              <b>Menu &gt; Master &gt; Configuração de Logo</b>
+            </div>
+          )}
           <Card className="w-full shadow-lg">
             <CardHeader className="space-y-1">
               <CardTitle className="text-xl font-bold text-center">
@@ -117,9 +138,9 @@ export default function Login() {
               </div>
             </CardFooter>
           </Card>
-          
           <div className="mt-6 text-center text-xs text-gray-600">
-            Desenvolvido por AgroSafe Serviços Empresariais LTDA<br/>
+            Desenvolvido por AgroSafe Serviços Empresariais LTDA
+            <br />
             CNPJ 54.630.417/0001-67
           </div>
         </div>
