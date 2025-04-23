@@ -7,7 +7,11 @@ import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-export default function LogoUpload() {
+interface LogoUploadProps {
+  onUploadComplete?: (logoUrl: string) => void;
+}
+
+export default function LogoUpload({ onUploadComplete }: LogoUploadProps) {
   const { empresa, setEmpresa } = useEmpresa();
   const { user, updateUserPhoto } = useUser();
   const { toast } = useToast();
@@ -21,10 +25,15 @@ export default function LogoUpload() {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = () => {
+      const logoUrl = reader.result as string;
       setEmpresa({
         ...empresa,
-        [qual]: reader.result as string,
+        [qual]: logoUrl,
       });
+      
+      if (qual === "logoCliente" && onUploadComplete) {
+        onUploadComplete(logoUrl);
+      }
     };
     reader.readAsDataURL(file);
   };

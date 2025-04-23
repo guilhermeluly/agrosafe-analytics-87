@@ -6,6 +6,7 @@ export type EmpresaInfo = {
   id?: string;
   nome: string;
   planoId: string;
+  logo?: string; // Added logo property
   logoCliente?: string;
   logoAgroSafe?: string;
   exibeLogoAgroSafe?: boolean; // para plano completo controlar exibição
@@ -18,6 +19,7 @@ export type EmpresaInfo = {
 const defaultEmpresa: EmpresaInfo = {
   nome: "Andrealan AgroSafe",
   planoId: "completo",
+  logo: "/logo_app.png", // Added default logo
   logoAgroSafe: "/logo_agrosafe.png",
   logoCliente: "/logo_app.png",
   exibeLogoAgroSafe: true,
@@ -29,6 +31,7 @@ const defaultEmpresa: EmpresaInfo = {
 type EmpresaContextType = {
   empresa: EmpresaInfo;
   setEmpresa: (e: EmpresaInfo) => void;
+  updateLogo: (logoUrl: string) => void; // Added updateLogo function
 };
 
 const EmpresaContext = createContext<EmpresaContextType | null>(null);
@@ -40,8 +43,13 @@ interface EmpresaProviderProps {
 export const EmpresaProvider: React.FC<EmpresaProviderProps> = ({ children }) => {
   const [empresa, setEmpresa] = useState<EmpresaInfo>(defaultEmpresa);
   
+  // Add the updateLogo function
+  const updateLogo = (logoUrl: string) => {
+    setEmpresa({ ...empresa, logo: logoUrl });
+  };
+  
   return (
-    <EmpresaContext.Provider value={{ empresa, setEmpresa }}>
+    <EmpresaContext.Provider value={{ empresa, setEmpresa, updateLogo }}>
       {children}
     </EmpresaContext.Provider>
   );
