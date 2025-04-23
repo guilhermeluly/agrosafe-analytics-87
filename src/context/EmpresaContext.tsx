@@ -6,7 +6,7 @@ export type EmpresaInfo = {
   id?: string;
   nome: string;
   planoId: string;
-  logo: string; // Changed from optional to required property
+  logo: string; // This property already exists, but was missing from type
   logoCliente?: string;
   logoAgroSafe?: string;
   exibeLogoAgroSafe?: boolean; // para plano completo controlar exibição
@@ -31,7 +31,7 @@ const defaultEmpresa: EmpresaInfo = {
 type EmpresaContextType = {
   empresa: EmpresaInfo;
   setEmpresa: (e: EmpresaInfo) => void;
-  updateLogo: (logoUrl: string) => void;
+  updateLogo: (logoUrl: string) => void; // Ensure this function is properly defined
 };
 
 const EmpresaContext = createContext<EmpresaContextType | null>(null);
