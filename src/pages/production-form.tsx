@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import AppLayout from "../components/AppLayout";
 import { useUser } from "../context/UserContext";
@@ -15,6 +16,18 @@ import {
   calculateOEE,
   adjustSetupTime
 } from "../utils/oeeCalculations";
+
+// Motivos “cadastrados pelo administrador” (troque aqui depois para vir do banco)
+const stopReasons = [
+  "Manutenção",
+  "Troca de Produto",
+  "Falta de Material",
+  "Setup",
+  "Quebra",
+  "Intervalo",
+  "Energia Elétrica",
+  "Outro"
+];
 
 const productionLines = [
   { id: "1", name: "Linha 1", nominalCapacity: 100, standardSetupTime: 15 },
@@ -35,7 +48,6 @@ export default function ProductionForm() {
   const { user } = useUser();
   const { toast } = useToast();
   const isAdmin = user.role === "admin";
-
   const [formData, setFormData] = useState<ProductionData>({
     date: new Date().toISOString().split('T')[0],
     shift: "Manhã",
@@ -48,11 +60,10 @@ export default function ProductionForm() {
     setupTime: 0,
     observations: ""
   });
-
   const [setups, setSetups] = useState<SetupTime[]>([{ tempo: 0 }]);
   const [stops, setStops] = useState<StopTime[]>([]);
-  const [newStop, setNewStop] = useState<StopTime>({ tempo: 0, motivo: "" });
-
+  // Novo estado: parada é escolhida de uma lista
+  const [newStop, setNewStop] = useState<StopTime>({ tempo: 0, motivo: stopReasons[0] });
   const [selectedLine, setSelectedLine] = useState(productionLines[0]);
   const [workingHours, setWorkingHours] = useState(8);
   const [oeePreview, setOeePreview] = useState({
@@ -109,13 +120,14 @@ export default function ProductionForm() {
   const addSetup = () => setSetups([...setups, { tempo: 0 }]);
   const removeSetup = (idx: number) => setSetups(setups.filter((_, i) => i !== idx));
 
+  // Ajuste: motivo vira select!
   const handleStopChange = (field: "tempo" | "motivo", valor: string) => {
     setNewStop({ ...newStop, [field]: field === "tempo" ? Number(valor) : valor });
   };
   const addStop = () => {
     if (newStop.tempo > 0 && newStop.motivo.trim()) {
       setStops([...stops, newStop]);
-      setNewStop({ tempo: 0, motivo: "" });
+      setNewStop({ tempo: 0, motivo: stopReasons[0] });
     }
   };
   const removeStop = (idx: number) => setStops(stops.filter((_, i) => i !== idx));
@@ -126,23 +138,24 @@ export default function ProductionForm() {
 
     toast({
       title: "Dados salvos",
-      description: "Os dados de produção foram salvos com sucesso.",
+      description: "Os dados de produção foram salvos com sucesso."
     });
   };
 
+  // --- VISUAL ---
   return (
     <AppLayout title="Inserção de Dados - OEE">
-      <div className="max-w-4xl mx-auto">
-        <Card>
+      <div className="max-w-4xl mx-auto py-6">
+        <Card className="shadow-lg border-2 border-vividPurple bg-softGray">
           <CardHeader>
-            <CardTitle>Inserir Dados de Produção</CardTitle>
+            <CardTitle className="text-vividPurple text-2xl">Inserir Dados de Produção</CardTitle>
             <CardDescription>
               Preencha todos os campos para calcular o OEE (Eficiência Global do Equipamento)
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <form onSubmit={handleSubmit} className="space-y-8">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                 <div className="space-y-2">
                   <Label htmlFor="date">Data</Label>
                   <Input
@@ -152,9 +165,9 @@ export default function ProductionForm() {
                     value={formData.date}
                     onChange={handleChange}
                     required
+                    className="accent-vividPurple bg-white"
                   />
                 </div>
-
                 <div className="space-y-2">
                   <Label htmlFor="shift">Turno</Label>
                   <select
@@ -162,7 +175,7 @@ export default function ProductionForm() {
                     name="shift"
                     value={formData.shift}
                     onChange={handleChange}
-                    className="w-full rounded-md border border-input bg-background px-3 py-2"
+                    className="w-full rounded-md border bg-background px-3 py-2 border-gray-300"
                     required
                   >
                     {shifts.map(shift => (
@@ -172,7 +185,6 @@ export default function ProductionForm() {
                     ))}
                   </select>
                 </div>
-
                 <div className="space-y-2">
                   <Label htmlFor="location">Linha/Local</Label>
                   <select
@@ -180,7 +192,7 @@ export default function ProductionForm() {
                     name="location"
                     value={formData.location}
                     onChange={handleChange}
-                    className="w-full rounded-md border border-input bg-background px-3 py-2"
+                    className="w-full rounded-md border bg-background px-3 py-2 border-gray-300"
                     required
                   >
                     {productionLines.map(line => (
@@ -192,8 +204,113 @@ export default function ProductionForm() {
                 </div>
               </div>
 
-              <div className="pt-4 border-t">
-                <Card className="bg-muted/50">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white rounded-xl p-5 border mb-2 shadow">
+                <div>
+                  <Label htmlFor="plannedProduction" className="font-bold text-vividPurple">Produção Planejada (unidades)</Label>
+                  <Input
+                    id="plannedProduction"
+                    name="plannedProduction"
+                    type="number"
+                    value={formData.plannedProduction}
+                    onChange={handleChange}
+                    required
+                    className="bg-softGray"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="workingHours" className="font-bold text-vividPurple">Horas Trabalhadas no Turno</Label>
+                  <Input
+                    id="workingHours"
+                    type="number"
+                    value={workingHours}
+                    onChange={e => setWorkingHours(Number(e.target.value))}
+                    required
+                    className="bg-softGray"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="actualProduction" className="font-bold text-vividPurple">Produção Real (unidades)</Label>
+                  <Input
+                    id="actualProduction"
+                    name="actualProduction"
+                    type="number"
+                    value={formData.actualProduction}
+                    onChange={handleChange}
+                    required
+                    className="bg-softGray"
+                  />
+                </div>
+                <div className="grid grid-cols-3 gap-2 mt-4">
+                  <div>
+                    <Label htmlFor="rework" className="font-bold">Retrabalho</Label>
+                    <Input
+                      id="rework"
+                      name="rework"
+                      type="number"
+                      value={formData.rework}
+                      onChange={handleChange}
+                      required
+                      className="bg-softGray"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="scrap" className="font-bold">Refugo</Label>
+                    <Input
+                      id="scrap"
+                      name="scrap"
+                      type="number"
+                      value={formData.scrap}
+                      onChange={handleChange}
+                      required
+                      className="bg-softGray"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="lostPackages" className="font-bold">Embalagens Perdidas</Label>
+                    <Input
+                      id="lostPackages"
+                      name="lostPackages"
+                      type="number"
+                      value={formData.lostPackages}
+                      onChange={handleChange}
+                      required
+                      className="bg-softGray"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {formData.actualProduction > 0 && (
+                <Card className="bg-green-50 dark:bg-green-900/20 shadow border-l-4 border-green-500">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base">Prévia do Cálculo OEE</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-4 gap-2">
+                      <div className="text-center p-2">
+                        <div className="text-sm font-medium">Disponibilidade</div>
+                        <div className="text-2xl font-bold">{oeePreview.availability}%</div>
+                      </div>
+                      <div className="text-center p-2">
+                        <div className="text-sm font-medium">Performance</div>
+                        <div className="text-2xl font-bold">{oeePreview.performance}%</div>
+                      </div>
+                      <div className="text-center p-2">
+                        <div className="text-sm font-medium">Qualidade</div>
+                        <div className="text-2xl font-bold">{oeePreview.quality}%</div>
+                      </div>
+                      <div className="text-center p-2 bg-green-100 dark:bg-green-800/40 rounded-md">
+                        <div className="text-sm font-medium">OEE</div>
+                        <div className="text-2xl font-bold">{oeePreview.oee}%</div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* NOVA ORDEM: setups e paradas vêm DEPOIS! */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <Card className="bg-muted/50 border-l-4 border-vividPurple">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-base">Tempos de Setup</CardTitle>
                   </CardHeader>
@@ -216,7 +333,7 @@ export default function ProductionForm() {
                           )}
                         </div>
                       ))}
-                      <Button type="button" size="sm" variant="default" onClick={addSetup}>
+                      <Button type="button" size="sm" variant="default" onClick={addSetup} className="bg-vividPurple hover:bg-secondaryPurple">
                         Adicionar Setup
                       </Button>
                       <p className="text-xs text-muted-foreground">
@@ -225,10 +342,7 @@ export default function ProductionForm() {
                     </div>
                   </CardContent>
                 </Card>
-              </div>
-
-              <div>
-                <Card className="bg-muted/50">
+                <Card className="bg-muted/50 border-l-4 border-brightOrange">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-base">Paradas</CardTitle>
                   </CardHeader>
@@ -243,14 +357,16 @@ export default function ProductionForm() {
                           onChange={e => handleStopChange("tempo", e.target.value)}
                           className="w-24"
                         />
-                        <Input
-                          type="text"
-                          placeholder="Motivo"
+                        <select
                           value={newStop.motivo}
                           onChange={e => handleStopChange("motivo", e.target.value)}
-                          className="w-[170px]"
-                        />
-                        <Button type="button" size="sm" variant="default" onClick={addStop}>
+                          className="w-[170px] rounded-md border border-gray-300 bg-white h-10 px-2"
+                        >
+                          {stopReasons.map((reason, idx) => (
+                            <option key={idx} value={reason}>{reason}</option>
+                          ))}
+                        </select>
+                        <Button type="button" size="sm" variant="default" onClick={addStop} className="bg-brightOrange hover:bg-softOrange">
                           Adicionar
                         </Button>
                       </div>
@@ -277,127 +393,7 @@ export default function ProductionForm() {
                   </CardContent>
                 </Card>
               </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Card className="bg-muted/50">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-base">Dados do Planejamento</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="plannedProduction">Produção Planejada (unidades)</Label>
-                          <Input
-                            id="plannedProduction"
-                            name="plannedProduction"
-                            type="number"
-                            value={formData.plannedProduction}
-                            onChange={handleChange}
-                            required
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="workingHours">Horas Trabalhadas no Turno</Label>
-                          <Input
-                            id="workingHours"
-                            type="number"
-                            value={workingHours}
-                            onChange={e => setWorkingHours(Number(e.target.value))}
-                            required
-                          />
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-                <div>
-                  <Card className="bg-muted/50">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-base">Dados da Produção</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="actualProduction">Produção Real (unidades)</Label>
-                          <Input
-                            id="actualProduction"
-                            name="actualProduction"
-                            type="number"
-                            value={formData.actualProduction}
-                            onChange={handleChange}
-                            required
-                          />
-                        </div>
-                        <div className="grid grid-cols-3 gap-3">
-                          <div className="space-y-2">
-                            <Label htmlFor="rework">Retrabalho</Label>
-                            <Input
-                              id="rework"
-                              name="rework"
-                              type="number"
-                              value={formData.rework}
-                              onChange={handleChange}
-                              required
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="scrap">Refugo</Label>
-                            <Input
-                              id="scrap"
-                              name="scrap"
-                              type="number"
-                              value={formData.scrap}
-                              onChange={handleChange}
-                              required
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="lostPackages">Embalagens Perdidas</Label>
-                            <Input
-                              id="lostPackages"
-                              name="lostPackages"
-                              type="number"
-                              value={formData.lostPackages}
-                              onChange={handleChange}
-                              required
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </div>
-
-              {formData.actualProduction > 0 && (
-                <Card className="bg-green-50 dark:bg-green-900/20">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-base">Prévia do Cálculo OEE</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-4 gap-2">
-                      <div className="text-center p-2 bg-background rounded-md">
-                        <div className="text-sm font-medium">Disponibilidade</div>
-                        <div className="text-2xl font-bold">{oeePreview.availability}%</div>
-                      </div>
-                      <div className="text-center p-2 bg-background rounded-md">
-                        <div className="text-sm font-medium">Performance</div>
-                        <div className="text-2xl font-bold">{oeePreview.performance}%</div>
-                      </div>
-                      <div className="text-center p-2 bg-background rounded-md">
-                        <div className="text-sm font-medium">Qualidade</div>
-                        <div className="text-2xl font-bold">{oeePreview.quality}%</div>
-                      </div>
-                      <div className="text-center p-2 bg-green-100 dark:bg-green-800/40 rounded-md">
-                        <div className="text-sm font-medium">OEE</div>
-                        <div className="text-2xl font-bold">{oeePreview.oee}%</div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
+              
               <div className="space-y-2">
                 <Label htmlFor="observations">Observações</Label>
                 <Textarea
@@ -406,10 +402,10 @@ export default function ProductionForm() {
                   value={formData.observations || ""}
                   onChange={handleChange}
                   rows={3}
+                  className="bg-white"
                 />
               </div>
-
-              <Button type="submit" className="w-full">
+              <Button type="submit" className="w-full bg-vividPurple hover:bg-secondaryPurple">
                 Salvar Dados
               </Button>
             </form>

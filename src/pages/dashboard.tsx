@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useEmpresa } from "../context/EmpresaContext";
@@ -11,7 +10,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { ArrowDownIcon, ArrowUpIcon, ClockIcon, BarChart3, PieChartIcon, Filter } from "lucide-react";
 
-// Sample production data - in a real app this would come from a database
 const productionData = {
   plannedProduction: 1000,
   actualProduction: 920,
@@ -23,7 +21,6 @@ const productionData = {
   lostPackages: 5,
 };
 
-// Downtime data mock
 const downtimeData = [
   { name: 'Manutenção', minutes: 25, percentage: 25 },
   { name: 'Troca de Produto', minutes: 15, percentage: 15 },
@@ -34,7 +31,6 @@ const downtimeData = [
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
-// OEE Calculation functions
 const calculateAvailability = (plannedTime: number, downtime: number) => {
   return ((plannedTime - downtime) / plannedTime) * 100;
 };
@@ -54,7 +50,6 @@ const calculateOEE = (availability: number, performance: number, quality: number
   return (availability * performance * quality) / 10000; // Divide by 10000 to convert from percentages
 };
 
-// Create the CardIndicador component
 const CardIndicador = ({ label, value, color, icon }: { label: string; value: string; color: string; icon: React.ReactNode }) => {
   return (
     <Card className={`border-l-4 ${color}`}>
@@ -76,8 +71,7 @@ export default function Dashboard() {
   const { user } = useUser();
   const [timeFilter, setTimeFilter] = useState("today");
   const [lineFilter, setLineFilter] = useState("all");
-  
-  // Calculate OEE values
+
   const availability = calculateAvailability(
     productionData.plannedTime,
     productionData.downtime
@@ -99,7 +93,6 @@ export default function Dashboard() {
   
   const oee = calculateOEE(availability, performance, quality);
 
-  // Production trends data (mock)
   const productionTrends = [
     { name: 'Seg', plan: 1000, actual: 950 },
     { name: 'Ter', plan: 1000, actual: 920 },
@@ -109,7 +102,9 @@ export default function Dashboard() {
     { name: 'Sáb', plan: 500, actual: 480 },
     { name: 'Dom', plan: 500, actual: 520 },
   ];
-  
+
+  const setupsCount = 3;
+
   return (
     <AppLayout title="Dashboard - OEE">
       <div className="flex justify-between items-center mb-6">
@@ -158,7 +153,7 @@ export default function Dashboard() {
         </TabsList>
         
         <TabsContent value="overview">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
             <CardIndicador 
               label="Disponibilidade" 
               value={`${availability.toFixed(1)}%`} 
@@ -182,6 +177,12 @@ export default function Dashboard() {
               value={`${oee.toFixed(1)}%`} 
               color="border-amber-500"
               icon={<BarChart3 className="h-4 w-4" />}
+            />
+            <CardIndicador
+              label="Setups"
+              value={`${setupsCount}`}
+              color="border-vividPurple"
+              icon={<span className="font-bold text-vividPurple text-lg">S</span>}
             />
           </div>
           
