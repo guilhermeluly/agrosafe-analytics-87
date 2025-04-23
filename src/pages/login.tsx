@@ -49,79 +49,89 @@ export default function Login() {
     }
   };
 
-  // Usuários master admin padrão (ajuste conforme lógica real se mudar)
   const isMasterAdmin =
     user &&
     user.role === "admin" &&
     (user.email === "Guilhermeluly@hotmail.com" || user.email === "admin@example.com");
 
+  // Paleta de cores/gradiente sugerido para modernizar
+  const bgGradient = "linear-gradient(135deg, #e2d1c3 0%, #f8fafc 60%, #d6bcfa 100%)";
+
   return (
     <>
       <Helmet>
-        <title>AgroSafe Analytics - Sistema de Indicadores</title>
+        {/* Não incluir nome do sistema na aba, deixar só área em branco ou nome do cliente */}
+        <title>{empresa.nome}</title>
       </Helmet>
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
-        <div className="w-full max-w-md">
-          <div className="mb-2 flex justify-center">
-            <h1 className="text-2xl font-bold text-center text-primary">AgroSafe Analytics</h1>
-          </div>
-          <div className="mb-4 flex justify-center">
-            {/* Exibe o logo principal do sistema */}
+      <div
+        className="min-h-screen flex flex-col items-center justify-center"
+        style={{ background: bgGradient }}
+      >
+        <div className="w-full max-w-md shadow-xl rounded-2xl bg-white/80 backdrop-blur-lg border-t-8 border-primary/50 animate-fade-in">
+          <div className="flex flex-col items-center pt-10">
             {empresa.logo && (
               <img
                 src={empresa.logo}
                 alt="Logo do sistema"
-                className="max-h-16 object-contain mb-2"
-                style={{ maxWidth: 220 }}
+                className="max-h-20 object-contain mb-3 drop-shadow-lg hover:scale-105 transition-transform"
+                style={{ maxWidth: "60%" }}
                 draggable={false}
               />
             )}
           </div>
-          {/* Alerta para master admin */}
-          {isMasterAdmin && (
-            <div className="mb-4 text-center text-amber-700 bg-amber-100 border border-amber-200 px-2 py-1 rounded text-xs">
-              Como Administrador Master, você pode editar o logo exibido nesta tela em:<br />
-              <b>Menu &gt; Master &gt; Configuração de Logo</b>
-            </div>
-          )}
-          <Card className="w-full shadow-lg">
-            <CardHeader className="space-y-1">
-              <CardTitle className="text-xl font-bold text-center">
+          <Card className="w-full bg-transparent shadow-none border-none">
+            <CardHeader className="space-y-1 text-center">
+              <CardTitle className="text-2xl font-extrabold tracking-wide text-primary drop-shadow-sm">
                 {empresa.nome} - Indicadores
               </CardTitle>
-              <CardDescription className="text-center">
+              <CardDescription className="text-lg text-neutral-600 mt-2">
                 Sistema de monitoramento de desempenho operacional
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+
+            {/* Info importante para Administrador */}
+            {isMasterAdmin && (
+              <div className="mb-4 text-center text-amber-700 bg-amber-100 border border-amber-200 px-2 py-1 rounded text-xs">
+                Como Administrador Master, você pode editar o logo exibido nesta tela em:<br />
+                <b>Menu &gt; Master &gt; Configuração de Logo</b>
+              </div>
+            )}
+
+            <CardContent className="pb-0">
+              <form onSubmit={handleSubmit} className="space-y-5">
+                <div>
+                  <Label htmlFor="email" className="ml-1">
+                    Email
+                  </Label>
                   <Input
                     id="email"
                     type="email"
                     placeholder="seu@email.com"
+                    autoComplete="username"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="h-10"
+                    className="h-11 text-lg bg-white/70"
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password">Senha</Label>
+                <div>
+                  <Label htmlFor="password" className="ml-1">
+                    Senha
+                  </Label>
                   <Input
                     id="password"
                     type="password"
                     placeholder="********"
+                    autoComplete="current-password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="h-10"
+                    className="h-11 text-lg bg-white/70"
                   />
                 </div>
                 <Button
                   type="submit"
-                  className="w-full"
+                  className="w-full h-11 text-lg font-semibold rounded-full bg-primary hover:bg-primary/90 shadow-md hover:scale-105 transition-transform"
                   disabled={isLoading}
                 >
                   {isLoading ? "Entrando..." : "Entrar"}
@@ -129,7 +139,7 @@ export default function Login() {
               </form>
             </CardContent>
             <CardFooter className="flex flex-col">
-              <div className="text-center text-sm text-gray-500 space-y-1">
+              <div className="text-center text-sm text-gray-500 space-y-1 mt-4">
                 <p className="font-medium">Demonstração - Use uma das contas:</p>
                 <p>Guilhermeluly@hotmail.com / 052004236 (Administrador Master)</p>
                 <p>admin@example.com / admin123 (Administrador)</p>
@@ -138,7 +148,7 @@ export default function Login() {
               </div>
             </CardFooter>
           </Card>
-          <div className="mt-6 text-center text-xs text-gray-600">
+          <div className="mt-10 text-center text-xs text-gray-700 pb-6">
             Desenvolvido por AgroSafe Serviços Empresariais LTDA
             <br />
             CNPJ 54.630.417/0001-67
