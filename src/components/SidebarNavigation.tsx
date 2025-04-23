@@ -42,7 +42,7 @@ interface MenuItem {
   path: string;
   roles: string[];
   isNew?: boolean;
-  onClick?: () => void;
+  onClick?: () => void; // Make onClick properly optional
 }
 
 export default function SidebarNavigation() {
