@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -19,12 +20,14 @@ import { UserProvider } from "./context/UserContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 // Imports for new pages
-// These will need to be created later
 import Companies from "./pages/master/Companies";
 import Users from "./pages/master/Users";
 import Plans from "./pages/master/Plans";
 import MobileApp from "./pages/master/MobileApp";
 import Help from "./pages/Help";
+import DnsConfig from "./pages/master/DnsConfig";
+import ChangePassword from "./pages/master/ChangePassword";
+import LogoConfig from "./pages/master/LogoConfig";
 
 const queryClient = new QueryClient();
 
@@ -132,6 +135,33 @@ const App = () => (
                   element={
                     <ProtectedRoute requiredRoles={["master_admin"]}>
                       <MobileApp />
+                    </ProtectedRoute>
+                  } 
+                />
+                
+                <Route 
+                  path="/dns-config" 
+                  element={
+                    <ProtectedRoute requiredRoles={["master_admin"]}>
+                      <DnsConfig />
+                    </ProtectedRoute>
+                  } 
+                />
+                
+                <Route 
+                  path="/change-password" 
+                  element={
+                    <ProtectedRoute requiredRoles={["master_admin"]}>
+                      <ChangePassword />
+                    </ProtectedRoute>
+                  } 
+                />
+                
+                <Route 
+                  path="/logo-config" 
+                  element={
+                    <ProtectedRoute requiredRoles={["master_admin"]}>
+                      <LogoConfig />
                     </ProtectedRoute>
                   } 
                 />

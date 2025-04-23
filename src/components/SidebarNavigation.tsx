@@ -16,7 +16,12 @@ import {
   Smartphone,
   HelpCircle,
   MenuIcon,
-  Download
+  Download,
+  Target,
+  Globe,
+  PresentationIcon,
+  Lock,
+  Edit
 } from "lucide-react";
 import {
   Sidebar,
@@ -59,6 +64,14 @@ export default function SidebarNavigation() {
     // Here would be the actual implementation for CSV export
   };
 
+  const handlePresentationMode = () => {
+    toast({
+      title: "Modo de Apresentação",
+      description: "Iniciando modo de apresentação dos indicadores."
+    });
+    // Here would be the implementation for presentation mode
+  };
+
   // Define menu items based on user role
   const getMenuItems = (): MenuItem[] => {
     const baseItems: MenuItem[] = [
@@ -86,6 +99,13 @@ export default function SidebarNavigation() {
         label: "Relatórios",
         path: "/relatorios",
         roles: ["master_admin", "admin", "operator", "viewer"]
+      },
+      {
+        icon: PresentationIcon,
+        label: "Modo Apresentação",
+        path: "#",
+        roles: ["master_admin", "admin", "operator", "viewer"],
+        onClick: handlePresentationMode
       }
     ];
 
@@ -94,6 +114,18 @@ export default function SidebarNavigation() {
         icon: Settings,
         label: "Configurações",
         path: "/admin",
+        roles: ["master_admin", "admin"]
+      },
+      {
+        icon: Target,
+        label: "Definir Metas",
+        path: "/goals",
+        roles: ["master_admin", "admin"]
+      },
+      {
+        icon: Database,
+        label: "Banco de Dados",
+        path: "/database",
         roles: ["master_admin", "admin"]
       },
       {
@@ -125,9 +157,27 @@ export default function SidebarNavigation() {
         roles: ["master_admin"]
       },
       {
+        icon: Lock,
+        label: "Alterar Senha",
+        path: "/change-password",
+        roles: ["master_admin"]
+      },
+      {
         icon: Package,
         label: "Planos",
         path: "/plans",
+        roles: ["master_admin"]
+      },
+      {
+        icon: Globe,
+        label: "Configuração DNS",
+        path: "/dns-config",
+        roles: ["master_admin"]
+      },
+      {
+        icon: Edit,
+        label: "Logotipo",
+        path: "/logo-config",
         roles: ["master_admin"]
       },
       {
@@ -162,20 +212,20 @@ export default function SidebarNavigation() {
 
   return (
     <Sidebar>
-      <SidebarHeader className="py-4 border-b">
+      <SidebarHeader className="py-4 border-b bg-gray-900 text-white">
         <div className="px-4 flex items-center justify-between">
           <LogoDisplay altura={40} />
           <SidebarTrigger>
-            <Button variant="ghost" size="icon" className="md:hidden">
+            <Button variant="ghost" size="icon" className="md:hidden text-white hover:bg-gray-800">
               <MenuIcon className="h-5 w-5" />
             </Button>
           </SidebarTrigger>
         </div>
       </SidebarHeader>
       
-      <SidebarContent className="py-2">
+      <SidebarContent className="py-2 bg-gray-900 text-white">
         <SidebarGroup>
-          <SidebarGroupLabel>Menu Principal</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-gray-400">Menu Principal</SidebarGroupLabel>
           <SidebarMenu>
             {menuItems.map((item) => (
               <SidebarMenuItem key={item.path + item.label}>
@@ -184,6 +234,7 @@ export default function SidebarNavigation() {
                   isActive={isActive(item.path)}
                   tooltip={item.label}
                   onClick={item.onClick}
+                  className="hover:bg-gray-800 text-white data-[active=true]:bg-gray-800"
                 >
                   {item.onClick ? (
                     <div className="flex items-center py-2 cursor-pointer">
@@ -213,7 +264,7 @@ export default function SidebarNavigation() {
         </SidebarGroup>
       </SidebarContent>
       
-      <SidebarFooter className="p-4 border-t mt-auto">
+      <SidebarFooter className="p-4 border-t bg-gray-900 text-white mt-auto">
         <div className="flex flex-col gap-2">
           <div className="flex items-center space-x-3 mb-2">
             <Avatar>
@@ -221,11 +272,11 @@ export default function SidebarNavigation() {
               <AvatarFallback>{userInitials}</AvatarFallback>
             </Avatar>
             <div>
-              <div className="font-medium">{user.name}</div>
-              <div className="text-xs text-muted-foreground capitalize">{user.role.replace('_', ' ')}</div>
+              <div className="font-medium text-white">{user.name}</div>
+              <div className="text-xs text-gray-400 capitalize">{user.role.replace('_', ' ')}</div>
             </div>
           </div>
-          <SidebarMenuButton onClick={logout} variant="outline" size="sm">
+          <SidebarMenuButton onClick={logout} variant="outline" size="sm" className="border-gray-600 text-white hover:bg-gray-800">
             <LogOut size={16} className="mr-2" />
             Sair
           </SidebarMenuButton>

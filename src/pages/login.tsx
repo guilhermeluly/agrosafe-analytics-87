@@ -53,16 +53,19 @@ export default function Login() {
 
   return (
     <>
-      <Helmet><title>{empresa.nome} - Indicadores de Produção</title></Helmet>
+      <Helmet><title>AgroSafe Analytics - Sistema de Indicadores</title></Helmet>
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
         <div className="w-full max-w-md">
+          <div className="mb-2 flex justify-center">
+            <h1 className="text-2xl font-bold text-center text-primary">AgroSafe Analytics</h1>
+          </div>
           <div className="mb-6 flex justify-center">
-            <LogoDisplay altura={80} />
+            <LogoDisplay altura={60} />
           </div>
           
           <Card className="w-full shadow-lg">
             <CardHeader className="space-y-1">
-              <CardTitle className="text-2xl font-bold text-center">
+              <CardTitle className="text-xl font-bold text-center">
                 {empresa.nome} - Indicadores
               </CardTitle>
               <CardDescription className="text-center">
@@ -107,7 +110,7 @@ export default function Login() {
             <CardFooter className="flex flex-col">
               <div className="text-center text-sm text-gray-500 space-y-1">
                 <p className="font-medium">Demonstração - Use uma das contas:</p>
-                <p>master@example.com / master123 (Administrador Master)</p>
+                <p>Guilhermeluly@hotmail.com / 052004236 (Administrador Master)</p>
                 <p>admin@example.com / admin123 (Administrador)</p>
                 <p>operator@example.com / operator123 (Operador)</p>
                 <p>viewer@example.com / viewer123 (Visualizador)</p>

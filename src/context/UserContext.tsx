@@ -26,8 +26,8 @@ const mockUsers = [
   {
     id: "1",
     name: "Master Admin",
-    email: "master@example.com",
-    password: "master123",
+    email: "Guilhermeluly@hotmail.com",
+    password: "052004236",
     role: "master_admin" as UserRole,
     photo: "/avatar-1.png",
   },
@@ -63,6 +63,7 @@ type UserContextType = {
   logout: () => void;
   isAuthorized: (requiredRoles: UserRole[]) => boolean;
   updateUserPhoto: (photoUrl: string) => void;
+  updateUserPassword: (currentPassword: string, newPassword: string) => Promise<boolean>;
 };
 
 const UserContext = createContext<UserContextType | null>(null);
@@ -110,9 +111,22 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const updateUserPhoto = (photoUrl: string) => {
     setUser({ ...user, photo: photoUrl });
   };
+  
+  const updateUserPassword = async (currentPassword: string, newPassword: string): Promise<boolean> => {
+    // In a real app, this would call an API
+    const userIndex = mockUsers.findIndex(u => u.email === user.email && u.password === currentPassword);
+    
+    if (userIndex >= 0) {
+      // Update the mock user's password
+      mockUsers[userIndex].password = newPassword;
+      return true;
+    }
+    
+    return false;
+  };
 
   return (
-    <UserContext.Provider value={{ user, login, logout, isAuthorized, updateUserPhoto }}>
+    <UserContext.Provider value={{ user, login, logout, isAuthorized, updateUserPhoto, updateUserPassword }}>
       {children}
     </UserContext.Provider>
   );
