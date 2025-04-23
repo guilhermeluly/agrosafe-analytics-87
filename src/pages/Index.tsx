@@ -10,13 +10,14 @@ import { ArrowRight, BarChart2, FileText } from "lucide-react";
 import AppLayout from "../components/AppLayout";
 
 const Index = () => {
-  const { empresa } = useEmpresa();
+  // const { empresa } = useEmpresa(); // não precisamos mais do nome do cliente
 
   return (
-    <AppLayout title="Início">
+    <AppLayout title="">
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Bem-vindo ao {empresa.nome} - Indicadores</h1>
+          {/* <h1 className="text-2xl font-bold">Bem-vindo ao {empresa.nome} - Indicadores</h1> */}
+          <h1 className="text-2xl font-bold">Bem-vindo ao sistema</h1>
           <LogoDisplay altura={36} />
         </div>
 

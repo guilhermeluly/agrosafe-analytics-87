@@ -54,14 +54,13 @@ export default function Login() {
     user.role === "admin" &&
     (user.email === "Guilhermeluly@hotmail.com" || user.email === "admin@example.com");
 
-  // Paleta de cores/gradiente sugerido para modernizar
   const bgGradient = "linear-gradient(135deg, #e2d1c3 0%, #f8fafc 60%, #d6bcfa 100%)";
 
   return (
     <>
       <Helmet>
-        {/* Não incluir nome do sistema na aba, deixar só área em branco ou nome do cliente */}
-        <title>{empresa.nome}</title>
+        {/* Deixar o title em branco (sem nome do sistema ou cliente) */}
+        <title></title>
       </Helmet>
       <div
         className="min-h-screen flex flex-col items-center justify-center"
@@ -81,22 +80,21 @@ export default function Login() {
           </div>
           <Card className="w-full bg-transparent shadow-none border-none">
             <CardHeader className="space-y-1 text-center">
-              <CardTitle className="text-2xl font-extrabold tracking-wide text-primary drop-shadow-sm">
-                {empresa.nome} - Indicadores
-              </CardTitle>
+              {/* Não exibir nome do cliente ou Indicadores */}
+              {/* <CardTitle> */}
+              {/*    {empresa.nome} - Indicadores */}
+              {/* </CardTitle> */}
+              {/* Exibir apenas o subtítulo do sistema */}
               <CardDescription className="text-lg text-neutral-600 mt-2">
                 Sistema de monitoramento de desempenho operacional
               </CardDescription>
             </CardHeader>
-
-            {/* Info importante para Administrador */}
             {isMasterAdmin && (
               <div className="mb-4 text-center text-amber-700 bg-amber-100 border border-amber-200 px-2 py-1 rounded text-xs">
                 Como Administrador Master, você pode editar o logo exibido nesta tela em:<br />
                 <b>Menu &gt; Master &gt; Configuração de Logo</b>
               </div>
             )}
-
             <CardContent className="pb-0">
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
