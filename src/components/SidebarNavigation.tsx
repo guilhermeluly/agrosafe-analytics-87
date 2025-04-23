@@ -15,7 +15,8 @@ import {
   Package,
   Smartphone,
   HelpCircle,
-  MenuIcon
+  MenuIcon,
+  Download
 } from "lucide-react";
 import {
   Sidebar,
@@ -32,11 +33,21 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import LogoDisplay from "./LogoDisplay";
+import { useToast } from "@/hooks/use-toast";
 
 export default function SidebarNavigation() {
   const { user, logout } = useUser();
   const location = useLocation();
+  const { toast } = useToast();
   const isActive = (path: string) => location.pathname === path;
+
+  const handleExportData = () => {
+    toast({
+      title: "Exportação iniciada",
+      description: "Os dados estão sendo exportados para CSV."
+    });
+    // Here would be the actual implementation for CSV export
+  };
 
   // Define menu items based on user role
   const getMenuItems = () => {
@@ -44,7 +55,7 @@ export default function SidebarNavigation() {
       {
         icon: Home,
         label: "Início",
-        path: "/",
+        path: "/home",
         roles: ["master_admin", "admin", "operator", "viewer"]
       },
       {
@@ -52,7 +63,7 @@ export default function SidebarNavigation() {
         label: "Inserir Dados",
         path: "/production-form",
         roles: ["master_admin", "admin", "operator"],
-        isNew: true
+        isNew: false
       },
       {
         icon: LayoutDashboard,
@@ -74,6 +85,13 @@ export default function SidebarNavigation() {
         label: "Configurações",
         path: "/admin",
         roles: ["master_admin", "admin"]
+      },
+      {
+        icon: Download,
+        label: "Exportar Dados",
+        path: "#",
+        roles: ["master_admin", "admin"],
+        onClick: handleExportData
       }
     ];
     
@@ -150,21 +168,34 @@ export default function SidebarNavigation() {
           <SidebarGroupLabel>Menu Principal</SidebarGroupLabel>
           <SidebarMenu>
             {menuItems.map((item) => (
-              <SidebarMenuItem key={item.path}>
+              <SidebarMenuItem key={item.path + item.label}>
                 <SidebarMenuButton 
-                  asChild 
+                  asChild={!item.onClick}
                   isActive={isActive(item.path)}
                   tooltip={item.label}
+                  onClick={item.onClick}
                 >
-                  <Link to={item.path} className="flex items-center py-2">
-                    <item.icon className="mr-2" size={18} />
-                    <span>{item.label}</span>
-                    {item.isNew && (
-                      <span className="ml-2 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full">
-                        Novo
-                      </span>
-                    )}
-                  </Link>
+                  {item.onClick ? (
+                    <div className="flex items-center py-2 cursor-pointer">
+                      <item.icon className="mr-2 h-5 w-5" />
+                      <span>{item.label}</span>
+                      {item.isNew && (
+                        <span className="ml-2 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full">
+                          Novo
+                        </span>
+                      )}
+                    </div>
+                  ) : (
+                    <Link to={item.path} className="flex items-center py-2">
+                      <item.icon className="mr-2 h-5 w-5" />
+                      <span>{item.label}</span>
+                      {item.isNew && (
+                        <span className="ml-2 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full">
+                          Novo
+                        </span>
+                      )}
+                    </Link>
+                  )}
                 </SidebarMenuButton>
               </SidebarMenuItem>
             ))}

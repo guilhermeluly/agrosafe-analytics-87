@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -42,8 +41,12 @@ const App = () => (
                 <Route path="/login" element={<Login />} />
                 <Route path="/unauthorized" element={<Unauthorized />} />
                 
+                {/* Redirect root to production-form */}
+                <Route path="/" element={<Navigate to="/production-form" replace />} />
+                
+                {/* Home page */}
                 <Route 
-                  path="/" 
+                  path="/home" 
                   element={
                     <ProtectedRoute requiredRoles={["master_admin", "admin", "operator", "viewer"]}>
                       <Index />
