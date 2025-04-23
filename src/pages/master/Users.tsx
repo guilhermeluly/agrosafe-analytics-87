@@ -272,7 +272,7 @@ export default function Users() {
                   <SelectValue placeholder="Filtrar por empresa" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todas as empresas</SelectItem>
+                  <SelectItem value="all_companies">Todas as empresas</SelectItem>
                   {MOCK_COMPANIES.map(company => (
                     <SelectItem key={company.id} value={company.id}>
                       {company.name}
@@ -287,7 +287,7 @@ export default function Users() {
                   <SelectValue placeholder="Filtrar por função" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todas as funções</SelectItem>
+                  <SelectItem value="all_roles">Todas as funções</SelectItem>
                   <SelectItem value="master_admin">Administrador Master</SelectItem>
                   <SelectItem value="admin">Administrador</SelectItem>
                   <SelectItem value="operator">Operador</SelectItem>

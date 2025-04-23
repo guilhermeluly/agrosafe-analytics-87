@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useEmpresa } from "../context/EmpresaContext";
@@ -211,7 +210,7 @@ export default function Relatorios() {
                       <SelectValue placeholder="Todas as linhas" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Todas as linhas</SelectItem>
+                      <SelectItem value="all">Todas as linhas</SelectItem>
                       {PRODUCTION_LINES.map(line => (
                         <SelectItem key={line.id} value={line.id}>
                           {line.name}
@@ -231,7 +230,7 @@ export default function Relatorios() {
                       <SelectValue placeholder="Todos os turnos" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Todos os turnos</SelectItem>
+                      <SelectItem value="all">Todos os turnos</SelectItem>
                       {SHIFTS.map(shift => (
                         <SelectItem key={shift.id} value={shift.id}>
                           {shift.name}
@@ -346,7 +345,7 @@ export default function Relatorios() {
                         <SelectValue placeholder="Todas as linhas" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Todas as linhas</SelectItem>
+                        <SelectItem value="all_lines">Todas as linhas</SelectItem>
                         {PRODUCTION_LINES.map(line => (
                           <SelectItem key={line.id} value={line.id}>
                             {line.name}
@@ -449,7 +448,7 @@ export default function Relatorios() {
                           <SelectValue placeholder="Todas as linhas" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">Todas as linhas</SelectItem>
+                          <SelectItem value="all_lines">Todas as linhas</SelectItem>
                           {PRODUCTION_LINES.map(line => (
                             <SelectItem key={line.id} value={line.id}>
                               {line.name}
