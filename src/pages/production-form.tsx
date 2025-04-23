@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import AppLayout from "../components/AppLayout";
 import { useUser } from "../context/UserContext";
@@ -17,7 +16,6 @@ import {
   adjustSetupTime
 } from "../utils/oeeCalculations";
 
-// Mock data for lines and shifts
 const productionLines = [
   { id: "1", name: "Linha 1", nominalCapacity: 100, standardSetupTime: 15 },
   { id: "2", name: "Linha 2", nominalCapacity: 150, standardSetupTime: 20 },
@@ -30,7 +28,6 @@ const shifts = [
   { id: "3", name: "Noite", startTime: "22:00", endTime: "06:00" }
 ];
 
-// Novo: tipos para setup e parada
 type SetupTime = { tempo: number };
 type StopTime = { tempo: number; motivo: string };
 
@@ -65,17 +62,14 @@ export default function ProductionForm() {
     oee: 0
   });
 
-  // Atualizar linha selecionada
   useEffect(() => {
     const line = productionLines.find(l => l.name === formData.location);
     if (line) setSelectedLine(line);
   }, [formData.location]);
 
-  // Calcular OEE preview
   useEffect(() => {
     if (formData.actualProduction > 0) {
       const plannedTime = workingHours * 60;
-      // Somar todos os tempos de setup
       const somaSetups = setups.reduce((acc, s) => acc + Number(s.tempo || 0), 0);
       const adjustedSetupTime = adjustSetupTime(somaSetups);
       const availability = calculateAvailability(plannedTime, adjustedSetupTime);
@@ -103,13 +97,11 @@ export default function ProductionForm() {
     }
   }, [formData, workingHours, setups, selectedLine]);
 
-  // Mudanças do formulário principal
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: name === "date" ? value : Number(value) || value });
   };
 
-  // Novo: editar setups
   const handleSetupChange = (idx: number, valor: string) => {
     const temp = setups.map((s, i) => i === idx ? { tempo: Number(valor) } : s);
     setSetups(temp);
@@ -117,7 +109,6 @@ export default function ProductionForm() {
   const addSetup = () => setSetups([...setups, { tempo: 0 }]);
   const removeSetup = (idx: number) => setSetups(setups.filter((_, i) => i !== idx));
 
-  // Novo: editar paradas
   const handleStopChange = (field: "tempo" | "motivo", valor: string) => {
     setNewStop({ ...newStop, [field]: field === "tempo" ? Number(valor) : valor });
   };
@@ -129,10 +120,8 @@ export default function ProductionForm() {
   };
   const removeStop = (idx: number) => setStops(stops.filter((_, i) => i !== idx));
 
-  // Salvar
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Aqui salvaria no banco – instrua a conectar Supabase!
     console.log("Production data:", formData, "Setups:", setups, "Paradas:", stops);
 
     toast({
@@ -203,7 +192,6 @@ export default function ProductionForm() {
                 </div>
               </div>
 
-              {/* Setups múltiplos */}
               <div className="pt-4 border-t">
                 <Card className="bg-muted/50">
                   <CardHeader className="pb-2">
@@ -239,7 +227,6 @@ export default function ProductionForm() {
                 </Card>
               </div>
 
-              {/* Paradas */}
               <div>
                 <Card className="bg-muted/50">
                   <CardHeader className="pb-2">
@@ -273,7 +260,13 @@ export default function ProductionForm() {
                             <li key={idx} className="flex items-center gap-2 px-2 py-1 bg-gray-100 rounded">
                               <span className="font-semibold text-sm">{stop.tempo} min</span>
                               <span className="text-xs text-gray-600">{stop.motivo}</span>
-                              <Button type="button" size="xs" variant="ghost" onClick={() => removeStop(idx)}>
+                              <Button 
+                                type="button" 
+                                size="sm" 
+                                variant="ghost" 
+                                onClick={() => removeStop(idx)}
+                                className="h-6 px-2 text-xs"
+                              >
                                 Remover
                               </Button>
                             </li>
@@ -285,7 +278,6 @@ export default function ProductionForm() {
                 </Card>
               </div>
 
-              {/* Planejamento e produção (restante igual) */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Card className="bg-muted/50">
@@ -378,7 +370,6 @@ export default function ProductionForm() {
                 </div>
               </div>
 
-              {/* Prévia OEE */}
               {formData.actualProduction > 0 && (
                 <Card className="bg-green-50 dark:bg-green-900/20">
                   <CardHeader className="pb-2">
