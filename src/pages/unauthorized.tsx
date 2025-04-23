@@ -1,18 +1,17 @@
 
 import React from "react";
-import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { useUser } from "../context/UserContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import AppLayout from "../components/AppLayout";
 
 export default function Unauthorized() {
   const { user, logout } = useUser();
 
   return (
-    <>
-      <Helmet><title>Acesso não autorizado</title></Helmet>
-      <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+    <AppLayout title="Acesso não autorizado">
+      <div className="min-h-[80vh] flex items-center justify-center">
         <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle className="text-xl text-center text-red-600">
@@ -34,6 +33,6 @@ export default function Unauthorized() {
           </CardContent>
         </Card>
       </div>
-    </>
+    </AppLayout>
   );
 }

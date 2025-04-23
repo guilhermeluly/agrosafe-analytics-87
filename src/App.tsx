@@ -5,11 +5,13 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Dashboard from "./pages/dashboard";
 import Relatorios from "./pages/relatorios";
 import Admin from "./pages/admin";
+import MasterAdmin from "./pages/master-admin";
 import Login from "./pages/login";
 import Unauthorized from "./pages/unauthorized";
 import ProductionForm from "./pages/production-form";
@@ -73,6 +75,15 @@ const App = () => (
                   element={
                     <ProtectedRoute requiredRoles={["admin"]}>
                       <Admin />
+                    </ProtectedRoute>
+                  } 
+                />
+                
+                <Route 
+                  path="/master-admin" 
+                  element={
+                    <ProtectedRoute requiredRoles={["admin"]}>
+                      <MasterAdmin />
                     </ProtectedRoute>
                   } 
                 />

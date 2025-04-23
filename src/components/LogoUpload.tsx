@@ -1,9 +1,12 @@
 
 import React, { useRef } from "react";
 import { useEmpresa } from "../context/EmpresaContext";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 export default function LogoUpload() {
   const { empresa, setEmpresa } = useEmpresa();
+  const { toast } = useToast();
 
   const upload = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -21,22 +24,53 @@ export default function LogoUpload() {
     reader.readAsDataURL(file);
   };
 
+  const handleSave = () => {
+    // In a real app, you would save to a backend here
+    toast({
+      title: "Logos salvas",
+      description: "As imagens foram salvas com sucesso.",
+    });
+  };
+
   return (
-    <div>
-      <div className="mb-3">
-        <div>Logo da empresa:</div>
-        {empresa.logoCliente && (
-          <img src={empresa.logoCliente} alt="Preview Cliente" className="h-20 p-1" />
-        )}
-        <input type="file" accept="image/*" onChange={e => upload(e, "logoCliente")} />
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <div className="font-medium">Logo da empresa:</div>
+        <div className="flex items-center gap-4">
+          {empresa.logoCliente && (
+            <img src={empresa.logoCliente} alt="Preview Cliente" className="h-20 p-1 border rounded" />
+          )}
+          <div className="flex flex-col gap-2">
+            <input 
+              type="file" 
+              accept="image/*" 
+              onChange={e => upload(e, "logoCliente")} 
+              className="text-sm" 
+            />
+          </div>
+        </div>
       </div>
-      <div>
-        <div>Logo da <b>AgroSafe</b>:</div>
-        {empresa.logoAgroSafe && (
-          <img src={empresa.logoAgroSafe} alt="Preview AgroSafe" className="h-20 p-1" />
-        )}
-        <input type="file" accept="image/*" onChange={e => upload(e, "logoAgroSafe")} />
+      
+      <div className="space-y-2">
+        <div className="font-medium">Logo da <b>AgroSafe</b>:</div>
+        <div className="flex items-center gap-4">
+          {empresa.logoAgroSafe && (
+            <img src={empresa.logoAgroSafe} alt="Preview AgroSafe" className="h-20 p-1 border rounded" />
+          )}
+          <div className="flex flex-col gap-2">
+            <input 
+              type="file" 
+              accept="image/*" 
+              onChange={e => upload(e, "logoAgroSafe")} 
+              className="text-sm" 
+            />
+          </div>
+        </div>
       </div>
+      
+      <Button onClick={handleSave} className="mt-4">
+        Salvar Logos
+      </Button>
     </div>
   );
 }
