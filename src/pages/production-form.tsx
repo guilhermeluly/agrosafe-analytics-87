@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import AppLayout from "../components/AppLayout";
 import { useUser } from "../context/UserContext";
@@ -15,7 +16,8 @@ import {
   calculateOEE,
   adjustSetupTime
 } from "../utils/oeeCalculations";
-import { Save } from "lucide-react";
+import { Save, Truck, ArrowRight } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const stopReasons = [
   "Manutenção",
@@ -46,6 +48,7 @@ type StopTime = { tempo: number; motivo: string };
 export default function ProductionForm() {
   const { user } = useUser();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   const isAdmin = user.role === "admin";
   const [formData, setFormData] = useState<ProductionData>({
     date: new Date().toISOString().split('T')[0],
@@ -74,6 +77,10 @@ export default function ProductionForm() {
   const [newLineName, setNewLineName] = useState("");
   const [newLineCapacity, setNewLineCapacity] = useState<number>(100);
   const [newLineSetup, setNewLineSetup] = useState<number>(10);
+  const [formErrors, setFormErrors] = useState<{[key: string]: string}>({});
+  const [loadingTime, setLoadingTime] = useState<number>(0);
+  const [unloadingTime, setUnloadingTime] = useState<number>(0);
+  const [unitType, setUnitType] = useState<"unidades" | "kg">("unidades");
 
   const allLines = [...productionLines, ...customLines];
 
@@ -115,6 +122,11 @@ export default function ProductionForm() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: name === "date" ? value : Number(value) || value });
+    
+    // Limpar erro do campo quando ele for preenchido
+    if (formErrors[name]) {
+      setFormErrors({...formErrors, [name]: ''});
+    }
   };
 
   const handleSetupChange = (idx: number, valor: string) => {
@@ -148,9 +160,33 @@ export default function ProductionForm() {
     }
   };
 
+  const validateForm = () => {
+    const errors: {[key: string]: string} = {};
+    
+    if (!formData.date) errors.date = "Data é obrigatória";
+    if (!formData.shift) errors.shift = "Turno é obrigatório";
+    if (!formData.location) errors.location = "Local é obrigatório";
+    if (!formData.plannedProduction) errors.plannedProduction = "Produção planejada é obrigatória";
+    if (!formData.actualProduction) errors.actualProduction = "Produção real é obrigatória";
+    if (!workingHours || workingHours <= 0) errors.workingHours = "Tempo disponível é obrigatório";
+    
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Production data:", formData, "Setups:", setups, "Paradas:", stops);
+    
+    if (!validateForm()) {
+      toast({
+        variant: "destructive",
+        title: "Erro de validação",
+        description: "Por favor, preencha todos os campos obrigatórios."
+      });
+      return;
+    }
+    
+    console.log("Production data:", formData, "Setups:", setups, "Paradas:", stops, "Carga/Descarga:", { loading: loadingTime, unloading: unloadingTime });
 
     toast({
       title: "Dados salvos",
@@ -160,19 +196,19 @@ export default function ProductionForm() {
 
   return (
     <AppLayout title="Inserção de Dados - OEE">
-      <div className="max-w-4xl mx-auto py-6">
+      <div className="max-w-4xl mx-auto py-2 md:py-6">
         <Card className="shadow-lg border-2 border-vividPurple bg-softGray">
           <CardHeader>
-            <CardTitle className="text-vividPurple text-2xl">Inserir Dados de Produção</CardTitle>
+            <CardTitle className="text-vividPurple text-xl md:text-2xl">Inserir Dados de Produção</CardTitle>
             <CardDescription>
               Preencha todos os campos para calcular o OEE (Eficiência Global do Equipamento)
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-8">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <form onSubmit={handleSubmit} className="space-y-6 md:space-y-8">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-4 md:mb-6">
                 <div className="space-y-2">
-                  <Label htmlFor="date">Data</Label>
+                  <Label htmlFor="date" className={formErrors.date ? "text-destructive" : ""}>Data *</Label>
                   <Input
                     id="date"
                     name="date"
@@ -180,17 +216,18 @@ export default function ProductionForm() {
                     value={formData.date}
                     onChange={handleChange}
                     required
-                    className="accent-vividPurple bg-white"
+                    className={`accent-vividPurple bg-white ${formErrors.date ? "border-destructive" : ""}`}
                   />
+                  {formErrors.date && <p className="text-xs text-destructive">{formErrors.date}</p>}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="shift">Turno</Label>
+                  <Label htmlFor="shift" className={formErrors.shift ? "text-destructive" : ""}>Turno *</Label>
                   <select
                     id="shift"
                     name="shift"
                     value={formData.shift}
                     onChange={handleChange}
-                    className="w-full rounded-md border bg-background px-3 py-2 border-gray-300"
+                    className={`w-full rounded-md border bg-background px-3 py-2 border-gray-300 ${formErrors.shift ? "border-destructive" : ""}`}
                     required
                   >
                     {shifts.map(shift => (
@@ -199,57 +236,76 @@ export default function ProductionForm() {
                       </option>
                     ))}
                   </select>
+                  {formErrors.shift && <p className="text-xs text-destructive">{formErrors.shift}</p>}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="location">Linha/Local</Label>
+                  <Label htmlFor="location" className={formErrors.location ? "text-destructive" : ""}>Linha/Local *</Label>
                   <select
                     id="location"
                     name="location"
                     value={formData.location}
                     onChange={handleChange}
-                    className="w-full rounded-md border bg-background px-3 py-2 border-gray-300"
+                    className={`w-full rounded-md border bg-background px-3 py-2 border-gray-300 ${formErrors.location ? "border-destructive" : ""}`}
                     required
                   >
                     {allLines.map(line => (
                       <option key={line.id} value={line.name}>
-                        {line.name} - Cap: {line.nominalCapacity} un/h
+                        {line.name} - Cap: {line.nominalCapacity} {unitType}/h
                       </option>
                     ))}
                   </select>
-                  <div className="flex items-center gap-2 mt-2">
-                    <Input
-                      placeholder="Novo local"
-                      value={newLineName}
-                      onChange={e => setNewLineName(e.target.value)}
-                      className="w-28"
-                    />
-                    <Input
-                      type="number"
-                      min={1}
-                      placeholder="Capac."
-                      value={newLineCapacity}
-                      onChange={e => setNewLineCapacity(Number(e.target.value))}
-                      className="w-20"
-                    />
-                    <Input
-                      type="number"
-                      min={1}
-                      placeholder="Setup (min)"
-                      value={newLineSetup}
-                      onChange={e => setNewLineSetup(Number(e.target.value))}
-                      className="w-20"
-                    />
-                    <Button type="button" size="sm" onClick={handleAddLine} className="bg-vividPurple hover:bg-secondaryPurple">
-                      Adicionar Local
-                    </Button>
+                  {formErrors.location && <p className="text-xs text-destructive">{formErrors.location}</p>}
+                  
+                  <div className="flex flex-col space-y-2 mt-2">
+                    <div className="flex items-center gap-2">
+                      <Input
+                        placeholder="Novo local"
+                        value={newLineName}
+                        onChange={e => setNewLineName(e.target.value)}
+                        className="w-full md:w-28"
+                      />
+                      <Input
+                        type="number"
+                        min={1}
+                        placeholder="Capac."
+                        value={newLineCapacity}
+                        onChange={e => setNewLineCapacity(Number(e.target.value))}
+                        className="w-20"
+                      />
+                      <select
+                        value={unitType}
+                        onChange={e => setUnitType(e.target.value as "unidades" | "kg")}
+                        className="w-24 h-10 rounded-md border border-gray-300 bg-white px-2"
+                      >
+                        <option value="unidades">un/h</option>
+                        <option value="kg">kg/h</option>
+                      </select>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="number"
+                        min={1}
+                        placeholder="Setup (min)"
+                        value={newLineSetup}
+                        onChange={e => setNewLineSetup(Number(e.target.value))}
+                        className="w-32"
+                      />
+                      <Button type="button" size="sm" onClick={handleAddLine} className="bg-vividPurple hover:bg-secondaryPurple">
+                        Adicionar Local
+                      </Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Capacidade nominal em {unitType}/hora e tempo padrão de setup (min).
+                    </p>
                   </div>
-                  <p className="text-xs text-muted-foreground">Adicione novos locais com capacidade (un/h) e tempo padrão de setup (min).</p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white rounded-xl p-5 border mb-2 shadow">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 bg-white rounded-xl p-3 md:p-5 border mb-2 shadow">
                 <div>
-                  <Label htmlFor="plannedProduction" className="font-bold text-vividPurple">Produção Planejada (unidades)</Label>
+                  <Label htmlFor="plannedProduction" className={`font-bold text-vividPurple ${formErrors.plannedProduction ? "text-destructive" : ""}`}>
+                    Produção Planejada ({unitType}) *
+                  </Label>
                   <Input
                     id="plannedProduction"
                     name="plannedProduction"
@@ -257,22 +313,33 @@ export default function ProductionForm() {
                     value={formData.plannedProduction}
                     onChange={handleChange}
                     required
-                    className="bg-softGray"
+                    className={`bg-softGray ${formErrors.plannedProduction ? "border-destructive" : ""}`}
                   />
+                  {formErrors.plannedProduction && <p className="text-xs text-destructive">{formErrors.plannedProduction}</p>}
                 </div>
                 <div>
-                  <Label htmlFor="workingHours" className="font-bold text-vividPurple">Horas Trabalhadas no Turno</Label>
+                  <Label htmlFor="workingHours" className={`font-bold text-vividPurple ${formErrors.workingHours ? "text-destructive" : ""}`}>
+                    Horas Trabalhadas no Turno *
+                  </Label>
                   <Input
                     id="workingHours"
                     type="number"
                     value={workingHours}
-                    onChange={e => setWorkingHours(Number(e.target.value))}
+                    onChange={e => {
+                      setWorkingHours(Number(e.target.value));
+                      if (formErrors.workingHours) {
+                        setFormErrors({...formErrors, workingHours: ''});
+                      }
+                    }}
                     required
-                    className="bg-softGray"
+                    className={`bg-softGray ${formErrors.workingHours ? "border-destructive" : ""}`}
                   />
+                  {formErrors.workingHours && <p className="text-xs text-destructive">{formErrors.workingHours}</p>}
                 </div>
                 <div>
-                  <Label htmlFor="actualProduction" className="font-bold text-vividPurple">Produção Real (unidades)</Label>
+                  <Label htmlFor="actualProduction" className={`font-bold text-vividPurple ${formErrors.actualProduction ? "text-destructive" : ""}`}>
+                    Produção Real ({unitType}) *
+                  </Label>
                   <Input
                     id="actualProduction"
                     name="actualProduction"
@@ -280,8 +347,9 @@ export default function ProductionForm() {
                     value={formData.actualProduction}
                     onChange={handleChange}
                     required
-                    className="bg-softGray"
+                    className={`bg-softGray ${formErrors.actualProduction ? "border-destructive" : ""}`}
                   />
+                  {formErrors.actualProduction && <p className="text-xs text-destructive">{formErrors.actualProduction}</p>}
                 </div>
                 <div className="grid grid-cols-3 gap-2 mt-4">
                   <div>
@@ -323,13 +391,59 @@ export default function ProductionForm() {
                 </div>
               </div>
 
+              {/* Novos indicadores de carregamento e descarregamento */}
+              <Card className="bg-cyan-50 shadow border-l-4 border-cyan-500">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base flex items-center">
+                    <Truck className="w-5 h-5 mr-2" />
+                    Logística - Carregamento e Descarregamento
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="loadingTime" className="font-bold text-gray-700">
+                        Tempo de Carregamento (min)
+                      </Label>
+                      <Input
+                        id="loadingTime"
+                        type="number"
+                        min={0}
+                        value={loadingTime}
+                        onChange={e => setLoadingTime(Number(e.target.value))}
+                        className="bg-white"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Tempo médio gasto para carregar materiais
+                      </p>
+                    </div>
+                    <div>
+                      <Label htmlFor="unloadingTime" className="font-bold text-gray-700">
+                        Tempo de Descarregamento (min)
+                      </Label>
+                      <Input
+                        id="unloadingTime"
+                        type="number"
+                        min={0}
+                        value={unloadingTime}
+                        onChange={e => setUnloadingTime(Number(e.target.value))}
+                        className="bg-white"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Tempo médio gasto para descarregar produtos
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
               {formData.actualProduction > 0 && (
                 <Card className="bg-green-50 dark:bg-green-900/20 shadow border-l-4 border-green-500">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-base">Prévia do Cálculo OEE</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-4 gap-2">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                       <div className="text-center p-2">
                         <div className="text-sm font-medium">Disponibilidade</div>
                         <div className="text-2xl font-bold">{oeePreview.availability}%</div>
@@ -351,7 +465,7 @@ export default function ProductionForm() {
                 </Card>
               )}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
                 <Card className="bg-muted/50 border-l-4 border-vividPurple">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-base">Tempos de Setup</CardTitle>
@@ -390,7 +504,7 @@ export default function ProductionForm() {
                   </CardHeader>
                   <CardContent>
                     <div className="flex flex-col gap-3">
-                      <div className="flex gap-2 items-center">
+                      <div className="flex gap-2 items-center flex-wrap">
                         <Input
                           type="number"
                           min={0}
@@ -402,7 +516,7 @@ export default function ProductionForm() {
                         <select
                           value={newStop.motivo}
                           onChange={e => handleStopChange("motivo", e.target.value)}
-                          className="w-[170px] rounded-md border border-gray-300 bg-white h-10 px-2"
+                          className="w-full md:w-[170px] rounded-md border border-gray-300 bg-white h-10 px-2"
                         >
                           {stopReasons.map((reason, idx) => (
                             <option key={idx} value={reason}>{reason}</option>
@@ -423,7 +537,7 @@ export default function ProductionForm() {
                                 size="sm" 
                                 variant="ghost" 
                                 onClick={() => removeStop(idx)}
-                                className="h-6 px-2 text-xs"
+                                className="h-6 px-2 text-xs ml-auto"
                               >
                                 Remover
                               </Button>

@@ -5,6 +5,9 @@ import { useUser } from "../context/UserContext";
 import { useEmpresa } from "../context/EmpresaContext";
 import SidebarNavigation from "./SidebarNavigation";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { MenuIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -14,6 +17,7 @@ interface AppLayoutProps {
 export default function AppLayout({ children, title }: AppLayoutProps) {
   const { user } = useUser();
   const { empresa } = useEmpresa();
+  const isMobile = useIsMobile();
 
   // Only show the sidebar if the user is authenticated
   if (!user.isAuthenticated) {
@@ -27,7 +31,25 @@ export default function AppLayout({ children, title }: AppLayoutProps) {
         <div className="flex min-h-screen w-full flex-col">
           <div className="flex flex-1 w-full">
             <SidebarNavigation />
-            <main className="flex-1 p-6 overflow-auto">
+            <main className="flex-1 p-3 md:p-6 overflow-auto">
+              {isMobile && (
+                <div className="mb-4 flex items-center">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="mr-2"
+                    aria-label="Toggle menu"
+                    onClick={() => {
+                      const sidebarTrigger = document.querySelector('[data-sidebar-trigger]');
+                      if (sidebarTrigger) {
+                        (sidebarTrigger as HTMLButtonElement).click();
+                      }
+                    }}
+                  >
+                    <MenuIcon className="h-5 w-5" />
+                  </Button>
+                </div>
+              )}
               {children}
             </main>
           </div>
