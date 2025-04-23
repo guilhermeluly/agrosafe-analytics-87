@@ -1,13 +1,22 @@
 
-import React from "react";
+import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import Header from "../components/Header";
 import LogoDisplay from "../components/LogoDisplay";
 import { useEmpresa } from "../context/EmpresaContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ArrowRight } from "lucide-react";
 
 const Index = () => {
   const { empresa } = useEmpresa();
+  const navigate = useNavigate();
+
+  // Redirect to insert data page
+  useEffect(() => {
+    navigate("/production-form");
+  }, [navigate]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -19,7 +28,7 @@ const Index = () => {
 
         <Card className="mb-8">
           <CardHeader>
-            <CardTitle>Bem-vindo ao OEE Performance Hub</CardTitle>
+            <CardTitle>Bem-vindo ao {empresa.nome} - Indicadores</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-lg text-gray-600 mb-4">
@@ -28,6 +37,15 @@ const Index = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
               <Card className="p-4 hover:bg-gray-50 cursor-pointer">
+                <Link to="/production-form" className="block">
+                  <h3 className="font-bold text-xl mb-2">Inserir Dados</h3>
+                  <p className="text-gray-500">
+                    Cadastre informações de produção e paradas
+                  </p>
+                </Link>
+              </Card>
+
+              <Card className="p-4 hover:bg-gray-50 cursor-pointer">
                 <Link to="/dashboard" className="block">
                   <h3 className="font-bold text-xl mb-2">Dashboard</h3>
                   <p className="text-gray-500">
@@ -35,15 +53,15 @@ const Index = () => {
                   </p>
                 </Link>
               </Card>
-
-              <Card className="p-4 hover:bg-gray-50 cursor-pointer">
-                <Link to="/relatorios" className="block">
-                  <h3 className="font-bold text-xl mb-2">Relatórios</h3>
-                  <p className="text-gray-500">
-                    Acesse relatórios detalhados de performance
-                  </p>
+            </div>
+            
+            <div className="mt-6">
+              <Button variant="outline" asChild className="w-full">
+                <Link to="/production-form">
+                  Acessar Inserção de Dados
+                  <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
-              </Card>
+              </Button>
             </div>
           </CardContent>
         </Card>

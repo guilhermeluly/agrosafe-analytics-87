@@ -26,11 +26,16 @@ export default function AppLayout({ children, title }: AppLayoutProps) {
     <>
       <Helmet><title>{pageTitle}</title></Helmet>
       <SidebarProvider>
-        <div className="flex min-h-screen w-full">
-          <SidebarNavigation />
-          <main className="flex-1 p-6 overflow-auto">
-            {children}
-          </main>
+        <div className="flex min-h-screen w-full flex-col">
+          <div className="flex flex-1 w-full">
+            <SidebarNavigation />
+            <main className="flex-1 p-6 overflow-auto">
+              {children}
+            </main>
+          </div>
+          <footer className="bg-gray-100 border-t p-4 text-center text-xs text-gray-600">
+            Desenvolvido por AgroSafe Serviços Empresariais LTDA CNPJ 54.630.417/0001-67
+          </footer>
         </div>
       </SidebarProvider>
     </>

@@ -14,7 +14,8 @@ import {
   Users,
   Package,
   Smartphone,
-  HelpCircle
+  HelpCircle,
+  MenuIcon
 } from "lucide-react";
 import {
   Sidebar,
@@ -25,9 +26,11 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarGroupLabel,
-  SidebarGroup
+  SidebarGroup,
+  SidebarTrigger
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import LogoDisplay from "./LogoDisplay";
 
 export default function SidebarNavigation() {
@@ -45,16 +48,17 @@ export default function SidebarNavigation() {
         roles: ["master_admin", "admin", "operator", "viewer"]
       },
       {
+        icon: FileText,
+        label: "Inserir Dados",
+        path: "/production-form",
+        roles: ["master_admin", "admin", "operator"],
+        isNew: true
+      },
+      {
         icon: LayoutDashboard,
         label: "Dashboard",
         path: "/dashboard",
         roles: ["master_admin", "admin", "operator", "viewer"]
-      },
-      {
-        icon: FileText,
-        label: "Inserir Dados",
-        path: "/production-form",
-        roles: ["master_admin", "admin", "operator"]
       },
       {
         icon: BarChart2,
@@ -130,13 +134,18 @@ export default function SidebarNavigation() {
 
   return (
     <Sidebar>
-      <SidebarHeader className="py-4">
-        <div className="px-4">
+      <SidebarHeader className="py-4 border-b">
+        <div className="px-4 flex items-center justify-between">
           <LogoDisplay altura={40} />
+          <SidebarTrigger>
+            <Button variant="ghost" size="icon" className="md:hidden">
+              <MenuIcon className="h-5 w-5" />
+            </Button>
+          </SidebarTrigger>
         </div>
       </SidebarHeader>
       
-      <SidebarContent>
+      <SidebarContent className="py-2">
         <SidebarGroup>
           <SidebarGroupLabel>Menu Principal</SidebarGroupLabel>
           <SidebarMenu>
@@ -147,10 +156,10 @@ export default function SidebarNavigation() {
                   isActive={isActive(item.path)}
                   tooltip={item.label}
                 >
-                  <Link to={item.path} className="flex items-center">
+                  <Link to={item.path} className="flex items-center py-2">
                     <item.icon className="mr-2" size={18} />
                     <span>{item.label}</span>
-                    {item.path === "/production-form" && (
+                    {item.isNew && (
                       <span className="ml-2 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full">
                         Novo
                       </span>
@@ -163,7 +172,7 @@ export default function SidebarNavigation() {
         </SidebarGroup>
       </SidebarContent>
       
-      <SidebarFooter className="p-4">
+      <SidebarFooter className="p-4 border-t mt-auto">
         <div className="flex flex-col gap-2">
           <div className="flex items-center space-x-3 mb-2">
             <Avatar>
