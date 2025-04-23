@@ -15,6 +15,7 @@ import {
   calculateOEE,
   adjustSetupTime
 } from "../utils/oeeCalculations";
+import { Save } from "lucide-react";
 
 const stopReasons = [
   "Manutenção",
@@ -446,7 +447,11 @@ export default function ProductionForm() {
                   className="bg-white"
                 />
               </div>
-              <Button type="submit" className="w-full bg-vividPurple hover:bg-secondaryPurple">
+              <Button
+                type="submit"
+                className="w-full h-12 text-lg font-bold rounded-full bg-vividPurple hover:bg-primary/90 shadow-lg flex items-center justify-center gap-2 animate-fade-in"
+              >
+                <Save className="w-5 h-5" />
                 Salvar Dados
               </Button>
             </form>

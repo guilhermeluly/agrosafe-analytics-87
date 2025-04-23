@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
@@ -137,13 +136,7 @@ export default function Login() {
               </form>
             </CardContent>
             <CardFooter className="flex flex-col">
-              <div className="text-center text-sm text-gray-500 space-y-1 mt-4">
-                <p className="font-medium">Demonstração - Use uma das contas:</p>
-                <p>Guilhermeluly@hotmail.com / 052004236 (Administrador Master)</p>
-                <p>admin@example.com / admin123 (Administrador)</p>
-                <p>operator@example.com / operator123 (Operador)</p>
-                <p>viewer@example.com / viewer123 (Visualizador)</p>
-              </div>
+              {/* Removido o bloco com emails e senhas de demonstração */}
             </CardFooter>
           </Card>
           <div className="mt-10 text-center text-xs text-gray-700 pb-6">
