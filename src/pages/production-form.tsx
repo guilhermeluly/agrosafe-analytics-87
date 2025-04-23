@@ -2,12 +2,14 @@
 import React, { useState, useEffect } from "react";
 import AppLayout from "../components/AppLayout";
 import { useUser } from "../context/UserContext";
+import { getPlanoById } from "../config/planos";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input"; // Added the missing import
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   calculateAvailability,
   calculatePerformance,
@@ -15,13 +17,14 @@ import {
   calculateOEE,
   adjustSetupTime
 } from "../utils/oeeCalculations";
-import { Save } from "lucide-react";
+import { Save, Settings, FileText } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import ProductionFormFields from "@/components/production-form/ProductionFormFields";
 import SetupTimesSection from "@/components/production-form/SetupTimesSection";
 import StopsSection from "@/components/production-form/StopsSection";
 import LogisticsSection from "@/components/production-form/LogisticsSection";
 import OEEPreviewSection from "@/components/production-form/OEEPreviewSection";
+import RegistrySection from "@/components/production-form/RegistrySection";
 
 const stopReasons = [
   "Manutenção",
@@ -53,7 +56,8 @@ export default function ProductionForm() {
   const { user } = useUser();
   const { toast } = useToast();
   const isMobile = useIsMobile();
-  const isAdmin = user.role === "admin";
+  const isAdmin = user.role === "admin" || user.role === "master_admin";
+  const [activeTab, setActiveTab] = useState("inserir");
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split('T')[0],
     shift: "Manhã",
@@ -78,13 +82,14 @@ export default function ProductionForm() {
     oee: 0
   });
   const [customLines, setCustomLines] = useState<{ id: string, name: string, nominalCapacity: number, standardSetupTime: number }[]>([]);
-  const [newLineName, setNewLineName] = useState("");
-  const [newLineCapacity, setNewLineCapacity] = useState<number>(100);
-  const [newLineSetup, setNewLineSetup] = useState<number>(10);
   const [formErrors, setFormErrors] = useState<{[key: string]: string}>({});
   const [loadingTime, setLoadingTime] = useState<number>(0);
   const [unloadingTime, setUnloadingTime] = useState<number>(0);
   const [unitType, setUnitType] = useState<"unidades" | "kg">("unidades");
+
+  // Verificar se o usuário tem acesso ao módulo de logística baseado no plano
+  const plano = getPlanoById(user?.planoId || "basico");
+  const showLogistics = isAdmin || (plano && plano.id === "completo");
 
   const allLines = [...productionLines, ...customLines];
 
@@ -141,19 +146,6 @@ export default function ProductionForm() {
   };
   const removeStop = (idx: number) => setStops(prev => prev.filter((_, i) => i !== idx));
 
-  const handleAddLine = () => {
-    if (newLineName.trim() && newLineCapacity > 0) {
-      const id = (customLines.length + productionLines.length + 1).toString();
-      setCustomLines([
-        ...customLines,
-        { id, name: newLineName.trim(), nominalCapacity: newLineCapacity, standardSetupTime: newLineSetup }
-      ]);
-      setNewLineName("");
-      setNewLineCapacity(100);
-      setNewLineSetup(10);
-    }
-  };
-
   const validateForm = () => {
     const errors: {[key: string]: string} = {};
     if (!formData.date) errors.date = "Data é obrigatória";
@@ -186,172 +178,197 @@ export default function ProductionForm() {
   return (
     <AppLayout title="Inserção de Dados - OEE">
       <div className="max-w-4xl mx-auto py-2 md:py-6">
-        <Card className="shadow-lg border-2 border-vividPurple bg-softGray">
-          <CardHeader>
-            <CardTitle className="text-vividPurple text-xl md:text-2xl">Inserir Dados de Produção</CardTitle>
-            <CardDescription>
-              Preencha todos os campos para calcular o OEE (Eficiência Global do Equipamento)
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6 md:space-y-8">
-              <ProductionFormFields
-                formData={formData}
-                setFormData={setFormData}
-                formErrors={formErrors}
-                setFormErrors={setFormErrors}
-                allLines={allLines}
-                shifts={shifts}
-                newLineName={newLineName}
-                setNewLineName={setNewLineName}
-                newLineCapacity={newLineCapacity}
-                setNewLineCapacity={setNewLineCapacity}
-                newLineSetup={newLineSetup}
-                setNewLineSetup={setNewLineSetup}
-                handleAddLine={handleAddLine}
-                setUnitType={setUnitType}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
+            <h1 className="text-2xl font-bold text-vividPurple">Sistema OEE</h1>
+            <TabsList className="ml-auto">
+              <TabsTrigger value="inserir" className="flex items-center gap-2">
+                <FileText size={16} />
+                <span>Inserir Dados</span>
+              </TabsTrigger>
+              {isAdmin && (
+                <TabsTrigger value="cadastros" className="flex items-center gap-2">
+                  <Settings size={16} />
+                  <span>Cadastros</span>
+                </TabsTrigger>
+              )}
+            </TabsList>
+          </div>
+          
+          <TabsContent value="inserir">
+            <Card className="shadow-lg border-2 border-vividPurple bg-softGray">
+              <CardHeader>
+                <CardTitle className="text-vividPurple text-xl md:text-2xl">Inserir Dados de Produção</CardTitle>
+                <CardDescription>
+                  Preencha todos os campos para calcular o OEE (Eficiência Global do Equipamento)
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSubmit} className="space-y-6 md:space-y-8">
+                  <ProductionFormFields
+                    formData={formData}
+                    setFormData={setFormData}
+                    formErrors={formErrors}
+                    setFormErrors={setFormErrors}
+                    allLines={allLines}
+                    shifts={shifts}
+                    unitType={unitType}
+                  />
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 bg-white rounded-xl p-3 md:p-5 border mb-2 shadow">
+                    <div>
+                      <Label htmlFor="plannedProduction" className={`font-bold text-vividPurple ${formErrors.plannedProduction ? "text-destructive" : ""}`}>
+                        Produção Planejada ({unitType}) *
+                      </Label>
+                      <Input
+                        id="plannedProduction"
+                        name="plannedProduction"
+                        type="number"
+                        value={formData.plannedProduction}
+                        onChange={e => setFormData(f => ({ ...f, plannedProduction: Number(e.target.value) }))}
+                        required
+                        className={`bg-softGray ${formErrors.plannedProduction ? "border-destructive" : ""}`}
+                      />
+                      {formErrors.plannedProduction && <p className="text-xs text-destructive">{formErrors.plannedProduction}</p>}
+                    </div>
+                    <div>
+                      <Label htmlFor="workingHours" className={`font-bold text-vividPurple ${formErrors.workingHours ? "text-destructive" : ""}`}>
+                        Horas Trabalhadas no Turno *
+                      </Label>
+                      <Input
+                        id="workingHours"
+                        type="number"
+                        value={workingHours}
+                        onChange={e => {
+                          setWorkingHours(Number(e.target.value));
+                          if (formErrors.workingHours) {
+                            setFormErrors({...formErrors, workingHours: ''});
+                          }
+                        }}
+                        required
+                        className={`bg-softGray ${formErrors.workingHours ? "border-destructive" : ""}`}
+                      />
+                      {formErrors.workingHours && <p className="text-xs text-destructive">{formErrors.workingHours}</p>}
+                    </div>
+                    <div>
+                      <Label htmlFor="actualProduction" className={`font-bold text-vividPurple ${formErrors.actualProduction ? "text-destructive" : ""}`}>
+                        Produção Real ({unitType}) *
+                      </Label>
+                      <Input
+                        id="actualProduction"
+                        name="actualProduction"
+                        type="number"
+                        value={formData.actualProduction}
+                        onChange={e => setFormData(f => ({ ...f, actualProduction: Number(e.target.value) }))}
+                        required
+                        className={`bg-softGray ${formErrors.actualProduction ? "border-destructive" : ""}`}
+                      />
+                      {formErrors.actualProduction && <p className="text-xs text-destructive">{formErrors.actualProduction}</p>}
+                    </div>
+                    <div className="grid grid-cols-3 gap-2 mt-4">
+                      <div>
+                        <Label htmlFor="rework" className="font-bold">Retrabalho</Label>
+                        <Input
+                          id="rework"
+                          name="rework"
+                          type="number"
+                          value={formData.rework}
+                          onChange={e => setFormData(f => ({ ...f, rework: Number(e.target.value) }))}
+                          required
+                          className="bg-softGray"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="scrap" className="font-bold">Refugo</Label>
+                        <Input
+                          id="scrap"
+                          name="scrap"
+                          type="number"
+                          value={formData.scrap}
+                          onChange={e => setFormData(f => ({ ...f, scrap: Number(e.target.value) }))}
+                          required
+                          className="bg-softGray"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="lostPackages" className="font-bold">Embalagens Perdidas</Label>
+                        <Input
+                          id="lostPackages"
+                          name="lostPackages"
+                          type="number"
+                          value={formData.lostPackages}
+                          onChange={e => setFormData(f => ({ ...f, lostPackages: Number(e.target.value) }))}
+                          required
+                          className="bg-softGray"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <LogisticsSection
+                    loadingTime={loadingTime}
+                    setLoadingTime={setLoadingTime}
+                    unloadingTime={unloadingTime}
+                    setUnloadingTime={setUnloadingTime}
+                    showLogistics={showLogistics}
+                  />
+
+                  {formData.actualProduction > 0 && <OEEPreviewSection oeePreview={oeePreview} />}
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
+                    <SetupTimesSection
+                      setups={setups}
+                      handleSetupChange={handleSetupChange}
+                      addSetup={addSetup}
+                      removeSetup={removeSetup}
+                      standardSetupTime={selectedLine.standardSetupTime}
+                    />
+                    <StopsSection
+                      stops={stops}
+                      newStop={newStop}
+                      stopReasons={stopReasons}
+                      setNewStop={setNewStop}
+                      addStop={addStop}
+                      removeStop={removeStop}
+                      handleStopChange={handleStopChange}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="observations">Observações</Label>
+                    <Textarea
+                      id="observations"
+                      name="observations"
+                      value={formData.observations || ""}
+                      onChange={e => setFormData(f => ({ ...f, observations: e.target.value }))}
+                      rows={3}
+                      className="bg-white"
+                    />
+                  </div>
+                  <Button
+                    type="submit"
+                    className="w-full h-12 text-lg font-bold rounded-full bg-vividPurple hover:bg-primary/90 shadow-lg flex items-center justify-center gap-2 animate-fade-in"
+                  >
+                    <Save className="w-5 h-5" />
+                    Salvar Dados
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          {isAdmin && (
+            <TabsContent value="cadastros">
+              <RegistrySection 
+                customLines={customLines}
+                setCustomLines={setCustomLines}
+                productionLines={productionLines}
                 unitType={unitType}
+                setUnitType={setUnitType}
               />
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 bg-white rounded-xl p-3 md:p-5 border mb-2 shadow">
-                <div>
-                  <Label htmlFor="plannedProduction" className={`font-bold text-vividPurple ${formErrors.plannedProduction ? "text-destructive" : ""}`}>
-                    Produção Planejada ({unitType}) *
-                  </Label>
-                  <Input
-                    id="plannedProduction"
-                    name="plannedProduction"
-                    type="number"
-                    value={formData.plannedProduction}
-                    onChange={e => setFormData(f => ({ ...f, plannedProduction: Number(e.target.value) }))}
-                    required
-                    className={`bg-softGray ${formErrors.plannedProduction ? "border-destructive" : ""}`}
-                  />
-                  {formErrors.plannedProduction && <p className="text-xs text-destructive">{formErrors.plannedProduction}</p>}
-                </div>
-                <div>
-                  <Label htmlFor="workingHours" className={`font-bold text-vividPurple ${formErrors.workingHours ? "text-destructive" : ""}`}>
-                    Horas Trabalhadas no Turno *
-                  </Label>
-                  <Input
-                    id="workingHours"
-                    type="number"
-                    value={workingHours}
-                    onChange={e => {
-                      setWorkingHours(Number(e.target.value));
-                      if (formErrors.workingHours) {
-                        setFormErrors({...formErrors, workingHours: ''});
-                      }
-                    }}
-                    required
-                    className={`bg-softGray ${formErrors.workingHours ? "border-destructive" : ""}`}
-                  />
-                  {formErrors.workingHours && <p className="text-xs text-destructive">{formErrors.workingHours}</p>}
-                </div>
-                <div>
-                  <Label htmlFor="actualProduction" className={`font-bold text-vividPurple ${formErrors.actualProduction ? "text-destructive" : ""}`}>
-                    Produção Real ({unitType}) *
-                  </Label>
-                  <Input
-                    id="actualProduction"
-                    name="actualProduction"
-                    type="number"
-                    value={formData.actualProduction}
-                    onChange={e => setFormData(f => ({ ...f, actualProduction: Number(e.target.value) }))}
-                    required
-                    className={`bg-softGray ${formErrors.actualProduction ? "border-destructive" : ""}`}
-                  />
-                  {formErrors.actualProduction && <p className="text-xs text-destructive">{formErrors.actualProduction}</p>}
-                </div>
-                <div className="grid grid-cols-3 gap-2 mt-4">
-                  <div>
-                    <Label htmlFor="rework" className="font-bold">Retrabalho</Label>
-                    <Input
-                      id="rework"
-                      name="rework"
-                      type="number"
-                      value={formData.rework}
-                      onChange={e => setFormData(f => ({ ...f, rework: Number(e.target.value) }))}
-                      required
-                      className="bg-softGray"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="scrap" className="font-bold">Refugo</Label>
-                    <Input
-                      id="scrap"
-                      name="scrap"
-                      type="number"
-                      value={formData.scrap}
-                      onChange={e => setFormData(f => ({ ...f, scrap: Number(e.target.value) }))}
-                      required
-                      className="bg-softGray"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="lostPackages" className="font-bold">Embalagens Perdidas</Label>
-                    <Input
-                      id="lostPackages"
-                      name="lostPackages"
-                      type="number"
-                      value={formData.lostPackages}
-                      onChange={e => setFormData(f => ({ ...f, lostPackages: Number(e.target.value) }))}
-                      required
-                      className="bg-softGray"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <LogisticsSection
-                loadingTime={loadingTime}
-                setLoadingTime={setLoadingTime}
-                unloadingTime={unloadingTime}
-                setUnloadingTime={setUnloadingTime}
-              />
-
-              {formData.actualProduction > 0 && <OEEPreviewSection oeePreview={oeePreview} />}
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
-                <SetupTimesSection
-                  setups={setups}
-                  handleSetupChange={handleSetupChange}
-                  addSetup={addSetup}
-                  removeSetup={removeSetup}
-                  standardSetupTime={selectedLine.standardSetupTime}
-                />
-                <StopsSection
-                  stops={stops}
-                  newStop={newStop}
-                  stopReasons={stopReasons}
-                  setNewStop={setNewStop}
-                  addStop={addStop}
-                  removeStop={removeStop}
-                  handleStopChange={handleStopChange}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="observations">Observações</Label>
-                <Textarea
-                  id="observations"
-                  name="observations"
-                  value={formData.observations || ""}
-                  onChange={e => setFormData(f => ({ ...f, observations: e.target.value }))}
-                  rows={3}
-                  className="bg-white"
-                />
-              </div>
-              <Button
-                type="submit"
-                className="w-full h-12 text-lg font-bold rounded-full bg-vividPurple hover:bg-primary/90 shadow-lg flex items-center justify-center gap-2 animate-fade-in"
-              >
-                <Save className="w-5 h-5" />
-                Salvar Dados
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+            </TabsContent>
+          )}
+        </Tabs>
       </div>
     </AppLayout>
   );

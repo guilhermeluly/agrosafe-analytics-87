@@ -10,6 +10,7 @@ interface LogisticsSectionProps {
   setLoadingTime: (v: number) => void;
   unloadingTime: number;
   setUnloadingTime: (v: number) => void;
+  showLogistics: boolean;
 }
 
 export default function LogisticsSection({
@@ -17,7 +18,10 @@ export default function LogisticsSection({
   setLoadingTime,
   unloadingTime,
   setUnloadingTime,
+  showLogistics
 }: LogisticsSectionProps) {
+  if (!showLogistics) return null;
+  
   return (
     <Card className="bg-cyan-50 shadow border-l-4 border-cyan-500">
       <CardHeader className="pb-2">

@@ -46,8 +46,8 @@ export default function SetupTimesSection({
           <Button type="button" size="sm" variant="default" onClick={addSetup} className="bg-vividPurple hover:bg-secondaryPurple">
             Adicionar Setup
           </Button>
-          <p className="text-xs text-muted-foreground">
-            Tempo padrão: {standardSetupTime} min
+          <p className="text-xs text-muted-foreground mt-2">
+            Tempo padrão da linha: {standardSetupTime} min
           </p>
         </div>
       </CardContent>
