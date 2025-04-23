@@ -35,6 +35,16 @@ import { Button } from "@/components/ui/button";
 import LogoDisplay from "./LogoDisplay";
 import { useToast } from "@/hooks/use-toast";
 
+// Define interface for menu items
+interface MenuItem {
+  icon: React.ComponentType<any>;
+  label: string;
+  path: string;
+  roles: string[];
+  isNew?: boolean;
+  onClick?: () => void;
+}
+
 export default function SidebarNavigation() {
   const { user, logout } = useUser();
   const location = useLocation();
@@ -50,8 +60,8 @@ export default function SidebarNavigation() {
   };
 
   // Define menu items based on user role
-  const getMenuItems = () => {
-    const baseItems = [
+  const getMenuItems = (): MenuItem[] => {
+    const baseItems: MenuItem[] = [
       {
         icon: Home,
         label: "Início",
@@ -79,7 +89,7 @@ export default function SidebarNavigation() {
       }
     ];
 
-    const adminItems = [
+    const adminItems: MenuItem[] = [
       {
         icon: Settings,
         label: "Configurações",
@@ -95,7 +105,7 @@ export default function SidebarNavigation() {
       }
     ];
     
-    const masterAdminItems = [
+    const masterAdminItems: MenuItem[] = [
       {
         icon: UserCog,
         label: "Gerenciamento do Sistema",
