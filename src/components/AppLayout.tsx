@@ -13,17 +13,16 @@ interface AppLayoutProps {
 
 export default function AppLayout({ children, title }: AppLayoutProps) {
   const { user } = useUser();
-  // const { empresa } = useEmpresa();
+  const { empresa } = useEmpresa();
 
   // Only show the sidebar if the user is authenticated
   if (!user.isAuthenticated) {
     return <>{children}</>;
   }
 
-  // Não mostrar nome do cliente ou nome do sistema no título!
   return (
     <>
-      <Helmet><title></title></Helmet>
+      <Helmet><title>{title}</title></Helmet>
       <SidebarProvider>
         <div className="flex min-h-screen w-full flex-col">
           <div className="flex flex-1 w-full">
