@@ -1,13 +1,12 @@
 
 import { getPlanoById } from "../config/planos";
 
-export function getLogoRules(planoId: string, opcionalAgroSafe?: boolean) {
+export function getLogoRules(planoId: string, exibeLogoAgroSafe?: boolean) {
   const plano = getPlanoById(planoId);
-  if (!plano) return { agrosafe: true, cliente: false };
-
+  
+  // Define regras de exibição de logo conforme o plano
   return {
-    agrosafe: plano.logoAgroSafeOpcional ? !!opcionalAgroSafe : plano.logoAgroSafe,
     cliente: plano.logoCliente,
-    agrosafeOpcional: plano.logoAgroSafeOpcional,
+    agrosafe: plano.logoAgroSafeOpcional ? exibeLogoAgroSafe : plano.logoAgroSafe
   };
 }

@@ -29,7 +29,7 @@ interface EmpresaProviderProps {
   children: ReactNode;
 }
 
-export function EmpresaProvider({ children }: EmpresaProviderProps) {
+export const EmpresaProvider: React.FC<EmpresaProviderProps> = ({ children }) => {
   const [empresa, setEmpresa] = useState<EmpresaInfo>(defaultEmpresa);
   
   return (
@@ -37,10 +37,10 @@ export function EmpresaProvider({ children }: EmpresaProviderProps) {
       {children}
     </EmpresaContext.Provider>
   );
-}
+};
 
 export function useEmpresa() {
-  const v = useContext(EmpresaContext);
-  if (!v) throw new Error("useEmpresa deve estar dentro do provider");
-  return v;
+  const context = useContext(EmpresaContext);
+  if (!context) throw new Error("useEmpresa deve estar dentro do provider");
+  return context;
 }
