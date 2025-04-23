@@ -19,6 +19,14 @@ import { EmpresaProvider } from "./context/EmpresaContext";
 import { UserProvider } from "./context/UserContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 
+// Imports for new pages
+// These will need to be created later
+import Companies from "./pages/master/Companies";
+import Users from "./pages/master/Users";
+import Plans from "./pages/master/Plans";
+import MobileApp from "./pages/master/MobileApp";
+import Help from "./pages/Help";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -37,7 +45,7 @@ const App = () => (
                 <Route 
                   path="/" 
                   element={
-                    <ProtectedRoute requiredRoles={["admin", "operator", "viewer"]}>
+                    <ProtectedRoute requiredRoles={["master_admin", "admin", "operator", "viewer"]}>
                       <Index />
                     </ProtectedRoute>
                   } 
@@ -46,7 +54,7 @@ const App = () => (
                 <Route 
                   path="/dashboard" 
                   element={
-                    <ProtectedRoute requiredRoles={["admin", "operator", "viewer"]}>
+                    <ProtectedRoute requiredRoles={["master_admin", "admin", "operator", "viewer"]}>
                       <Dashboard />
                     </ProtectedRoute>
                   } 
@@ -55,7 +63,7 @@ const App = () => (
                 <Route 
                   path="/relatorios" 
                   element={
-                    <ProtectedRoute requiredRoles={["admin", "operator", "viewer"]}>
+                    <ProtectedRoute requiredRoles={["master_admin", "admin", "operator", "viewer"]}>
                       <Relatorios />
                     </ProtectedRoute>
                   } 
@@ -64,7 +72,7 @@ const App = () => (
                 <Route 
                   path="/production-form" 
                   element={
-                    <ProtectedRoute requiredRoles={["admin", "operator"]}>
+                    <ProtectedRoute requiredRoles={["master_admin", "admin", "operator"]}>
                       <ProductionForm />
                     </ProtectedRoute>
                   } 
@@ -73,7 +81,7 @@ const App = () => (
                 <Route 
                   path="/admin" 
                   element={
-                    <ProtectedRoute requiredRoles={["admin"]}>
+                    <ProtectedRoute requiredRoles={["master_admin", "admin"]}>
                       <Admin />
                     </ProtectedRoute>
                   } 
@@ -82,8 +90,54 @@ const App = () => (
                 <Route 
                   path="/master-admin" 
                   element={
-                    <ProtectedRoute requiredRoles={["admin"]}>
+                    <ProtectedRoute requiredRoles={["master_admin"]}>
                       <MasterAdmin />
+                    </ProtectedRoute>
+                  } 
+                />
+                
+                {/* New master admin specific routes */}
+                <Route 
+                  path="/companies" 
+                  element={
+                    <ProtectedRoute requiredRoles={["master_admin"]}>
+                      <Companies />
+                    </ProtectedRoute>
+                  } 
+                />
+                
+                <Route 
+                  path="/users" 
+                  element={
+                    <ProtectedRoute requiredRoles={["master_admin"]}>
+                      <Users />
+                    </ProtectedRoute>
+                  } 
+                />
+                
+                <Route 
+                  path="/plans" 
+                  element={
+                    <ProtectedRoute requiredRoles={["master_admin"]}>
+                      <Plans />
+                    </ProtectedRoute>
+                  } 
+                />
+                
+                <Route 
+                  path="/mobile-app" 
+                  element={
+                    <ProtectedRoute requiredRoles={["master_admin"]}>
+                      <MobileApp />
+                    </ProtectedRoute>
+                  } 
+                />
+                
+                <Route 
+                  path="/help" 
+                  element={
+                    <ProtectedRoute requiredRoles={["master_admin", "admin", "operator", "viewer"]}>
+                      <Help />
                     </ProtectedRoute>
                   } 
                 />

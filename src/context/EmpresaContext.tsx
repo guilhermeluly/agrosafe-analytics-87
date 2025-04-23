@@ -3,11 +3,16 @@ import React, { createContext, useContext, useState, ReactNode } from "react";
 import { getPlanoById } from "../config/planos";
 
 export type EmpresaInfo = {
+  id?: string;
   nome: string;
   planoId: string;
   logoCliente?: string;
   logoAgroSafe?: string;
   exibeLogoAgroSafe?: boolean; // para plano completo controlar exibição
+  unidadeCapacidade: 'unidades/h' | 'kg/h';
+  dataVencimento?: string;
+  dataCadastro?: string;
+  ativo?: boolean;
 };
 
 const defaultEmpresa: EmpresaInfo = {
@@ -16,6 +21,9 @@ const defaultEmpresa: EmpresaInfo = {
   logoAgroSafe: "/logo_agrosafe.png",
   logoCliente: "/logo_app.png",
   exibeLogoAgroSafe: true,
+  unidadeCapacidade: 'unidades/h',
+  dataCadastro: new Date().toISOString().split('T')[0],
+  ativo: true
 };
 
 type EmpresaContextType = {

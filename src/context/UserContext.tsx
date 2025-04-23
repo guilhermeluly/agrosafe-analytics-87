@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useState, ReactNode } from "react";
 
-export type UserRole = "admin" | "operator" | "viewer";
+export type UserRole = "master_admin" | "admin" | "operator" | "viewer";
 
 export interface UserInfo {
   id: string;
@@ -9,6 +9,8 @@ export interface UserInfo {
   email: string;
   role: UserRole;
   isAuthenticated: boolean;
+  photo?: string;
+  companyId?: string;
 }
 
 const defaultUser: UserInfo = {
@@ -23,24 +25,35 @@ const defaultUser: UserInfo = {
 const mockUsers = [
   {
     id: "1",
+    name: "Master Admin",
+    email: "master@example.com",
+    password: "master123",
+    role: "master_admin" as UserRole,
+    photo: "/avatar-1.png",
+  },
+  {
+    id: "2",
     name: "Admin User",
     email: "admin@example.com",
     password: "admin123",
     role: "admin" as UserRole,
+    photo: "/avatar-2.png",
   },
   {
-    id: "2",
+    id: "3",
     name: "Operator User",
     email: "operator@example.com",
     password: "operator123",
     role: "operator" as UserRole,
+    photo: "/avatar-3.png",
   },
   {
-    id: "3",
+    id: "4",
     name: "Viewer User",
     email: "viewer@example.com",
     password: "viewer123",
     role: "viewer" as UserRole,
+    photo: "/avatar-4.png",
   },
 ];
 
@@ -49,6 +62,7 @@ type UserContextType = {
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
   isAuthorized: (requiredRoles: UserRole[]) => boolean;
+  updateUserPhoto: (photoUrl: string) => void;
 };
 
 const UserContext = createContext<UserContextType | null>(null);
@@ -73,6 +87,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         email: foundUser.email,
         role: foundUser.role,
         isAuthenticated: true,
+        photo: foundUser.photo,
       });
       return true;
     }
@@ -85,11 +100,19 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
   const isAuthorized = (requiredRoles: UserRole[]): boolean => {
     if (!user.isAuthenticated) return false;
+    
+    // Master admin has access to everything
+    if (user.role === "master_admin") return true;
+    
     return requiredRoles.includes(user.role);
   };
 
+  const updateUserPhoto = (photoUrl: string) => {
+    setUser({ ...user, photo: photoUrl });
+  };
+
   return (
-    <UserContext.Provider value={{ user, login, logout, isAuthorized }}>
+    <UserContext.Provider value={{ user, login, logout, isAuthorized, updateUserPhoto }}>
       {children}
     </UserContext.Provider>
   );

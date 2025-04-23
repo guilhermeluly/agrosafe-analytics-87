@@ -9,7 +9,12 @@ import {
   BarChart2, 
   Home,
   LogOut,
-  UserCog
+  UserCog,
+  Database,
+  Users,
+  Package,
+  Smartphone,
+  HelpCircle
 } from "lucide-react";
 import {
   Sidebar,
@@ -22,6 +27,7 @@ import {
   SidebarGroupLabel,
   SidebarGroup
 } from "@/components/ui/sidebar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import LogoDisplay from "./LogoDisplay";
 
 export default function SidebarNavigation() {
@@ -36,25 +42,25 @@ export default function SidebarNavigation() {
         icon: Home,
         label: "Início",
         path: "/",
-        roles: ["admin", "operator", "viewer"]
+        roles: ["master_admin", "admin", "operator", "viewer"]
       },
       {
         icon: LayoutDashboard,
         label: "Dashboard",
         path: "/dashboard",
-        roles: ["admin", "operator", "viewer"]
+        roles: ["master_admin", "admin", "operator", "viewer"]
       },
       {
         icon: FileText,
         label: "Inserir Dados",
         path: "/production-form",
-        roles: ["admin", "operator"]
+        roles: ["master_admin", "admin", "operator"]
       },
       {
         icon: BarChart2,
         label: "Relatórios",
         path: "/relatorios",
-        roles: ["admin", "operator", "viewer"]
+        roles: ["master_admin", "admin", "operator", "viewer"]
       }
     ];
 
@@ -63,16 +69,46 @@ export default function SidebarNavigation() {
         icon: Settings,
         label: "Configurações",
         path: "/admin",
-        roles: ["admin"]
+        roles: ["master_admin", "admin"]
       }
     ];
     
     const masterAdminItems = [
       {
         icon: UserCog,
-        label: "Admin Master",
+        label: "Gerenciamento do Sistema",
         path: "/master-admin",
-        roles: ["admin"]
+        roles: ["master_admin"]
+      },
+      {
+        icon: Database,
+        label: "Empresas",
+        path: "/companies",
+        roles: ["master_admin"]
+      },
+      {
+        icon: Users,
+        label: "Usuários",
+        path: "/users",
+        roles: ["master_admin"]
+      },
+      {
+        icon: Package,
+        label: "Planos",
+        path: "/plans",
+        roles: ["master_admin"]
+      },
+      {
+        icon: Smartphone,
+        label: "Aplicativo Mobile",
+        path: "/mobile-app",
+        roles: ["master_admin"]
+      },
+      {
+        icon: HelpCircle,
+        label: "Ajuda",
+        path: "/help",
+        roles: ["master_admin", "admin", "operator", "viewer"]
       }
     ];
 
@@ -80,17 +116,17 @@ export default function SidebarNavigation() {
     
     if (user.role === "admin") {
       menuItems = [...menuItems, ...adminItems];
-      
-      // Only show master admin for the main admin account
-      if (user.id === "1") {
-        menuItems = [...menuItems, ...masterAdminItems];
-      }
+    }
+    
+    if (user.role === "master_admin") {
+      menuItems = [...menuItems, ...adminItems, ...masterAdminItems];
     }
     
     return menuItems.filter(item => item.roles.includes(user.role));
   };
 
   const menuItems = getMenuItems();
+  const userInitials = user.name.split(' ').map(n => n[0]).join('').toUpperCase();
 
   return (
     <Sidebar>
@@ -111,9 +147,14 @@ export default function SidebarNavigation() {
                   isActive={isActive(item.path)}
                   tooltip={item.label}
                 >
-                  <Link to={item.path}>
+                  <Link to={item.path} className="flex items-center">
                     <item.icon className="mr-2" size={18} />
                     <span>{item.label}</span>
+                    {item.path === "/production-form" && (
+                      <span className="ml-2 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full">
+                        Novo
+                      </span>
+                    )}
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -124,9 +165,15 @@ export default function SidebarNavigation() {
       
       <SidebarFooter className="p-4">
         <div className="flex flex-col gap-2">
-          <div className="text-sm text-muted-foreground">
-            Logado como: <span className="font-medium">{user.name}</span>
-            <div className="text-xs">Nível: {user.role}</div>
+          <div className="flex items-center space-x-3 mb-2">
+            <Avatar>
+              <AvatarImage src={user.photo} alt={user.name} />
+              <AvatarFallback>{userInitials}</AvatarFallback>
+            </Avatar>
+            <div>
+              <div className="font-medium">{user.name}</div>
+              <div className="text-xs text-muted-foreground capitalize">{user.role.replace('_', ' ')}</div>
+            </div>
           </div>
           <SidebarMenuButton onClick={logout} variant="outline" size="sm">
             <LogOut size={16} className="mr-2" />

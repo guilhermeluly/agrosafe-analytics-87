@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../context/UserContext";
+import { useEmpresa } from "../context/EmpresaContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +15,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useUser();
+  const { empresa } = useEmpresa();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -50,12 +52,12 @@ export default function Login() {
 
   return (
     <>
-      <Helmet><title>Login - OEE Performance Hub</title></Helmet>
+      <Helmet><title>{empresa.nome} - Indicadores de Produção</title></Helmet>
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <Card className="w-full max-w-md">
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl font-bold text-center">
-              OEE Performance Hub
+              {empresa.nome} - Indicadores de Produção
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -92,9 +94,10 @@ export default function Login() {
               
               <div className="mt-4 text-center text-sm text-gray-500">
                 <p>Demonstração - Use uma das contas:</p>
-                <p>admin@example.com / admin123</p>
-                <p>operator@example.com / operator123</p>
-                <p>viewer@example.com / viewer123</p>
+                <p>master@example.com / master123 (Administrador Master)</p>
+                <p>admin@example.com / admin123 (Administrador)</p>
+                <p>operator@example.com / operator123 (Operador)</p>
+                <p>viewer@example.com / viewer123 (Visualizador)</p>
               </div>
             </form>
           </CardContent>
