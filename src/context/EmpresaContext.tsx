@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, ReactNode } from "react";
 import { getPlanoById } from "../config/planos";
 
 export type EmpresaInfo = {
@@ -18,13 +18,20 @@ const defaultEmpresa: EmpresaInfo = {
   exibeLogoAgroSafe: true,
 };
 
-const EmpresaContext = createContext<{
+type EmpresaContextType = {
   empresa: EmpresaInfo;
   setEmpresa: (e: EmpresaInfo) => void;
-} | null>(null);
+};
 
-export function EmpresaProvider({ children }) {
+const EmpresaContext = createContext<EmpresaContextType | null>(null);
+
+interface EmpresaProviderProps {
+  children: ReactNode;
+}
+
+export function EmpresaProvider({ children }: EmpresaProviderProps) {
   const [empresa, setEmpresa] = useState<EmpresaInfo>(defaultEmpresa);
+  
   return (
     <EmpresaContext.Provider value={{ empresa, setEmpresa }}>
       {children}
