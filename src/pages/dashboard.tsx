@@ -71,6 +71,7 @@ export default function Dashboard() {
   const { user } = useUser();
   const [timeFilter, setTimeFilter] = useState("today");
   const [lineFilter, setLineFilter] = useState("all");
+  const [showTooltip, setShowTooltip] = useState(false);
 
   const availability = calculateAvailability(
     productionData.plannedTime,
@@ -142,6 +143,23 @@ export default function Dashboard() {
               <SelectItem value="line3">Linha 3</SelectItem>
             </SelectContent>
           </Select>
+        </div>
+        <div className="flex items-center ml-auto">
+          <button
+            type="button"
+            className="rounded-md px-3 py-1 bg-muted-foreground text-white font-medium opacity-60 cursor-not-allowed relative"
+            onMouseEnter={() => setShowTooltip(true)}
+            onMouseLeave={() => setShowTooltip(false)}
+            disabled
+            tabIndex={-1}
+          >
+            + Novo Indicador
+            {showTooltip &&
+              <span className="absolute z-10 left-1/2 -translate-x-1/2 top-full mt-1 px-2 py-1 bg-black text-white text-xs rounded shadow">
+                Em breve!
+              </span>
+            }
+          </button>
         </div>
       </div>
       

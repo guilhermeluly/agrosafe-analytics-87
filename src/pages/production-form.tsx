@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import AppLayout from "../components/AppLayout";
 import { useUser } from "../context/UserContext";
@@ -17,7 +16,6 @@ import {
   adjustSetupTime
 } from "../utils/oeeCalculations";
 
-// Motivos “cadastrados pelo administrador” (troque aqui depois para vir do banco)
 const stopReasons = [
   "Manutenção",
   "Troca de Produto",
@@ -62,7 +60,6 @@ export default function ProductionForm() {
   });
   const [setups, setSetups] = useState<SetupTime[]>([{ tempo: 0 }]);
   const [stops, setStops] = useState<StopTime[]>([]);
-  // Novo estado: parada é escolhida de uma lista
   const [newStop, setNewStop] = useState<StopTime>({ tempo: 0, motivo: stopReasons[0] });
   const [selectedLine, setSelectedLine] = useState(productionLines[0]);
   const [workingHours, setWorkingHours] = useState(8);
@@ -72,11 +69,17 @@ export default function ProductionForm() {
     quality: 0,
     oee: 0
   });
+  const [customLines, setCustomLines] = useState<{ id: string, name: string, nominalCapacity: number, standardSetupTime: number }[]>([]);
+  const [newLineName, setNewLineName] = useState("");
+  const [newLineCapacity, setNewLineCapacity] = useState<number>(100);
+  const [newLineSetup, setNewLineSetup] = useState<number>(10);
+
+  const allLines = [...productionLines, ...customLines];
 
   useEffect(() => {
-    const line = productionLines.find(l => l.name === formData.location);
+    const line = allLines.find(l => l.name === formData.location);
     if (line) setSelectedLine(line);
-  }, [formData.location]);
+  }, [formData.location, allLines]);
 
   useEffect(() => {
     if (formData.actualProduction > 0) {
@@ -120,7 +123,6 @@ export default function ProductionForm() {
   const addSetup = () => setSetups([...setups, { tempo: 0 }]);
   const removeSetup = (idx: number) => setSetups(setups.filter((_, i) => i !== idx));
 
-  // Ajuste: motivo vira select!
   const handleStopChange = (field: "tempo" | "motivo", valor: string) => {
     setNewStop({ ...newStop, [field]: field === "tempo" ? Number(valor) : valor });
   };
@@ -132,6 +134,19 @@ export default function ProductionForm() {
   };
   const removeStop = (idx: number) => setStops(stops.filter((_, i) => i !== idx));
 
+  const handleAddLine = () => {
+    if (newLineName.trim() && newLineCapacity > 0) {
+      const id = (customLines.length + productionLines.length + 1).toString();
+      setCustomLines([
+        ...customLines,
+        { id, name: newLineName.trim(), nominalCapacity: newLineCapacity, standardSetupTime: newLineSetup }
+      ]);
+      setNewLineName("");
+      setNewLineCapacity(100);
+      setNewLineSetup(10);
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Production data:", formData, "Setups:", setups, "Paradas:", stops);
@@ -142,7 +157,6 @@ export default function ProductionForm() {
     });
   };
 
-  // --- VISUAL ---
   return (
     <AppLayout title="Inserção de Dados - OEE">
       <div className="max-w-4xl mx-auto py-6">
@@ -195,12 +209,40 @@ export default function ProductionForm() {
                     className="w-full rounded-md border bg-background px-3 py-2 border-gray-300"
                     required
                   >
-                    {productionLines.map(line => (
+                    {allLines.map(line => (
                       <option key={line.id} value={line.name}>
                         {line.name} - Cap: {line.nominalCapacity} un/h
                       </option>
                     ))}
                   </select>
+                  <div className="flex items-center gap-2 mt-2">
+                    <Input
+                      placeholder="Novo local"
+                      value={newLineName}
+                      onChange={e => setNewLineName(e.target.value)}
+                      className="w-28"
+                    />
+                    <Input
+                      type="number"
+                      min={1}
+                      placeholder="Capac."
+                      value={newLineCapacity}
+                      onChange={e => setNewLineCapacity(Number(e.target.value))}
+                      className="w-20"
+                    />
+                    <Input
+                      type="number"
+                      min={1}
+                      placeholder="Setup (min)"
+                      value={newLineSetup}
+                      onChange={e => setNewLineSetup(Number(e.target.value))}
+                      className="w-20"
+                    />
+                    <Button type="button" size="sm" onClick={handleAddLine} className="bg-vividPurple hover:bg-secondaryPurple">
+                      Adicionar Local
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">Adicione novos locais com capacidade (un/h) e tempo padrão de setup (min).</p>
                 </div>
               </div>
 
@@ -308,7 +350,6 @@ export default function ProductionForm() {
                 </Card>
               )}
 
-              {/* NOVA ORDEM: setups e paradas vêm DEPOIS! */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <Card className="bg-muted/50 border-l-4 border-vividPurple">
                   <CardHeader className="pb-2">
@@ -415,4 +456,3 @@ export default function ProductionForm() {
     </AppLayout>
   );
 }
-// ATENÇÃO: Esse arquivo está ficando grande. Considere pedir refatoração em componentes menores se precisar evoluir!
