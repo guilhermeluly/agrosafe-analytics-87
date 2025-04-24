@@ -60,7 +60,6 @@ export default function ProductionForm() {
   const isAdmin = user.role === "admin" || user.role === "master_admin";
   const [activeTab, setActiveTab] = useState("inserir");
   const [selectedType, setSelectedType] = useState<"selector" | "production" | "logistics">("selector");
-  const [logisticsType, setLogisticsType] = useState<"loading" | "unloading" | null>(null);
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split('T')[0],
     shift: "Manhã",
@@ -343,6 +342,14 @@ export default function ProductionForm() {
                         </div>
                       </div>
 
+                      <LogisticsSection
+                        loadingTime={loadingTime}
+                        setLoadingTime={setLoadingTime}
+                        unloadingTime={unloadingTime}
+                        setUnloadingTime={setUnloadingTime}
+                        showLogistics={true}
+                      />
+
                       {formData.actualProduction > 0 && <OEEPreviewSection oeePreview={oeePreview} />}
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
@@ -384,13 +391,8 @@ export default function ProductionForm() {
                       </Button>
                     </form>
                   ) : (
-                    <LogisticsSection 
-                      type={logisticsType}
-                      setType={setLogisticsType}
-                      loadingTime={loadingTime}
-                      setLoadingTime={setLoadingTime}
-                      unloadingTime={unloadingTime}
-                      setUnloadingTime={setUnloadingTime}
+                    <MovimentacaoFormFields 
+                      onSave={handleSaveMovimentacao} 
                     />
                   )}
                 </CardContent>
