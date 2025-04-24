@@ -10,6 +10,7 @@ export interface UserInfo {
   isAuthenticated: boolean;
   photo?: string;
   companyId?: string;
+  planoId?: string;
 }
 
 const defaultUser: UserInfo = {
@@ -18,6 +19,7 @@ const defaultUser: UserInfo = {
   email: "",
   role: "viewer",
   isAuthenticated: false,
+  planoId: "basico",
 };
 
 // Mock user data for demonstration
@@ -90,6 +92,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         role: foundUser.role,
         isAuthenticated: true,
         photo: foundUser.photo,
+        planoId: foundUser.id === "1" ? "completo" : foundUser.id === "2" ? "medio" : "basico",
       };
       setUser(userInfo);
       

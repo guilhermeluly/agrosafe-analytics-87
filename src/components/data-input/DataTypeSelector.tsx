@@ -4,7 +4,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { FileText, Truck } from "lucide-react";
 import { useUser } from "@/context/UserContext";
 import { getPlanoById } from "@/config/planos";
-import { Button } from "@/components/ui/button";
 
 interface DataTypeSelectorProps {
   onSelectType: (type: "production" | "logistics") => void;
