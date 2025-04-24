@@ -1,14 +1,12 @@
-
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Save, Plus, Trash2, ArrowRight, ArrowLeft } from "lucide-react";
+import { Save, Plus, Trash2, ArrowLeft } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
-import { Separator } from "@/components/ui/separator";
 import TruckTypeSelector, { TruckType } from './TruckTypeSelector';
 
 const defaultTruckTypes: TruckType[] = [
@@ -19,7 +17,7 @@ const defaultTruckTypes: TruckType[] = [
   { id: '5', name: '3/4', capacity: 4000 },
 ];
 
-type TruckEntry = {
+type VehicleEntry = {
   id: string;
   startTime: string;
   endTime: string;
@@ -29,13 +27,14 @@ type TruckEntry = {
   observacoes: string;
   setupTime?: number;
   truckType: string;
+  placa: string;
 };
 
 type MovimentacaoData = {
   date: string;
   shift: string;
   tempoDisponivel: number;
-  entries: TruckEntry[];
+  entries: VehicleEntry[];
   status: "draft" | "completed";
 };
 
@@ -50,7 +49,7 @@ export default function MovimentacaoFormFields({ onSave }: MovimentacaoFormField
   const [expedicaoData, setExpedicaoData] = useState<MovimentacaoData>({
     date: new Date().toISOString().split('T')[0],
     shift: "Manhã",
-    tempoDisponivel: 480, // 8 hours in minutes
+    tempoDisponivel: 480,
     entries: [],
     status: "draft"
   });
@@ -58,57 +57,32 @@ export default function MovimentacaoFormFields({ onSave }: MovimentacaoFormField
   const [descargaData, setDescargaData] = useState<MovimentacaoData>({
     date: new Date().toISOString().split('T')[0],
     shift: "Manhã",
-    tempoDisponivel: 480, // 8 hours in minutes
+    tempoDisponivel: 480,
     entries: [],
     status: "draft"
   });
 
-  const [newExpedicao, setNewExpedicao] = useState<Omit<TruckEntry, "id">>({
+  const [newExpedicao, setNewExpedicao] = useState<Omit<VehicleEntry, "id">>({
     startTime: "",
     endTime: "",
     pesoNota: 0,
     pesoBalanca: 0,
     numPessoas: 1,
     observacoes: "",
-    truckType: ""
+    truckType: "",
+    placa: ""
   });
 
-  const [newDescarga, setNewDescarga] = useState<Omit<TruckEntry, "id">>({
+  const [newDescarga, setNewDescarga] = useState<Omit<VehicleEntry, "id">>({
     startTime: "",
     endTime: "",
     pesoNota: 0,
     pesoBalanca: 0,
     numPessoas: 1,
     observacoes: "",
-    truckType: ""
+    truckType: "",
+    placa: ""
   });
-
-  const calculateMetrics = (data: MovimentacaoData) => {
-    if (!data.entries.length) return { setupMedioMinutos: 0, pesoTotal: 0, eficiencia: 0 };
-    
-    let totalPeso = 0;
-    let totalSetupTime = 0;
-    
-    data.entries.forEach(entry => {
-      totalPeso += Number(entry.pesoBalanca) || 0;
-      
-      if (entry.startTime && entry.endTime) {
-        const start = new Date(`2000-01-01T${entry.startTime}:00`);
-        const end = new Date(`2000-01-01T${entry.endTime}:00`);
-        const diffMinutes = (end.getTime() - start.getTime()) / 60000;
-        totalSetupTime += diffMinutes;
-      }
-    });
-    
-    const setupMedio = totalSetupTime / data.entries.length;
-    const eficiencia = (totalPeso / (data.tempoDisponivel / 60)) * 100; // kg per hour efficiency
-    
-    return {
-      setupMedioMinutos: Math.round(setupMedio),
-      pesoTotal: totalPeso,
-      eficiencia: Math.round(eficiencia) / 100 // kg per minute
-    };
-  };
 
   const calculateSetupTime = (startTime: string, endTime: string, numPessoas: number) => {
     if (!startTime || !endTime) return 0;
@@ -121,18 +95,18 @@ export default function MovimentacaoFormFields({ onSave }: MovimentacaoFormField
   };
 
   const addExpedicaoEntry = () => {
-    if (!newExpedicao.startTime || !newExpedicao.endTime) {
+    if (!newExpedicao.startTime || !newExpedicao.endTime || !newExpedicao.placa) {
       toast({
         variant: "destructive",
         title: "Campos obrigatórios",
-        description: "Hora inicial e final são obrigatórios"
+        description: "Hora inicial, final e placa do veículo são obrigatórios"
       });
       return;
     }
     
     const setupTime = calculateSetupTime(newExpedicao.startTime, newExpedicao.endTime, newExpedicao.numPessoas);
     
-    const newEntry: TruckEntry = {
+    const newEntry: VehicleEntry = {
       id: Date.now().toString(),
       ...newExpedicao,
       setupTime
@@ -150,28 +124,29 @@ export default function MovimentacaoFormFields({ onSave }: MovimentacaoFormField
       pesoBalanca: 0,
       numPessoas: 1,
       observacoes: "",
-      truckType: ""
+      truckType: "",
+      placa: ""
     });
     
     toast({
-      title: "Caminhão adicionado",
-      description: "Dados do caminhão foram adicionados à expedição"
+      title: "Veículo adicionado",
+      description: "Dados do veículo foram adicionados à expedição"
     });
   };
 
   const addDescargaEntry = () => {
-    if (!newDescarga.startTime || !newDescarga.endTime) {
+    if (!newDescarga.startTime || !newDescarga.endTime || !newDescarga.placa) {
       toast({
         variant: "destructive",
         title: "Campos obrigatórios",
-        description: "Hora inicial e final são obrigatórios"
+        description: "Hora inicial, final e placa do veículo são obrigatórios"
       });
       return;
     }
     
     const setupTime = calculateSetupTime(newDescarga.startTime, newDescarga.endTime, newDescarga.numPessoas);
     
-    const newEntry: TruckEntry = {
+    const newEntry: VehicleEntry = {
       id: Date.now().toString(),
       ...newDescarga,
       setupTime
@@ -189,108 +164,16 @@ export default function MovimentacaoFormFields({ onSave }: MovimentacaoFormField
       pesoBalanca: 0,
       numPessoas: 1,
       observacoes: "",
-      truckType: ""
+      truckType: "",
+      placa: ""
     });
     
     toast({
-      title: "Caminhão adicionado",
-      description: "Dados do caminhão foram adicionados ao descarregamento"
+      title: "Veículo adicionado",
+      description: "Dados do veículo foram adicionados ao descarregamento"
     });
   };
 
-  const removeExpedicaoEntry = (id: string) => {
-    setExpedicaoData(prev => ({
-      ...prev,
-      entries: prev.entries.filter(entry => entry.id !== id)
-    }));
-  };
-
-  const removeDescargaEntry = (id: string) => {
-    setDescargaData(prev => ({
-      ...prev,
-      entries: prev.entries.filter(entry => entry.id !== id)
-    }));
-  };
-
-  const saveExpedicaoPartial = () => {
-    const data = {
-      ...expedicaoData,
-      status: "draft",
-      metrics: calculateMetrics(expedicaoData)
-    };
-    
-    onSave({ type: "expedicao", data });
-    
-    toast({
-      title: "Dados salvos parcialmente",
-      description: "Os dados de expedição foram salvos como rascunho"
-    });
-  };
-
-  const finalizeExpedicao = () => {
-    if (expedicaoData.entries.length === 0) {
-      toast({
-        variant: "destructive",
-        title: "Nenhum dado registrado",
-        description: "Adicione pelo menos um caminhão antes de finalizar"
-      });
-      return;
-    }
-    
-    const data = {
-      ...expedicaoData,
-      status: "completed",
-      metrics: calculateMetrics(expedicaoData)
-    };
-    
-    onSave({ type: "expedicao", data });
-    
-    toast({
-      title: "Dados finalizados",
-      description: "Os dados de expedição foram finalizados com sucesso"
-    });
-  };
-
-  const saveDescargaPartial = () => {
-    const data = {
-      ...descargaData,
-      status: "draft",
-      metrics: calculateMetrics(descargaData)
-    };
-    
-    onSave({ type: "descarga", data });
-    
-    toast({
-      title: "Dados salvos parcialmente",
-      description: "Os dados de descarregamento foram salvos como rascunho"
-    });
-  };
-
-  const finalizeDescarga = () => {
-    if (descargaData.entries.length === 0) {
-      toast({
-        variant: "destructive",
-        title: "Nenhum dado registrado",
-        description: "Adicione pelo menos um caminhão antes de finalizar"
-      });
-      return;
-    }
-    
-    const data = {
-      ...descargaData,
-      status: "completed",
-      metrics: calculateMetrics(descargaData)
-    };
-    
-    onSave({ type: "descarga", data });
-    
-    toast({
-      title: "Dados finalizados",
-      description: "Os dados de descarregamento foram finalizados com sucesso"
-    });
-  };
-
-  // Component for selecting the type of operation
   const TypeSelector = () => (
     <Card className="mb-6">
       <CardHeader className="bg-cyan-50 text-cyan-800 rounded-t-lg">
@@ -308,7 +191,7 @@ export default function MovimentacaoFormFields({ onSave }: MovimentacaoFormField
           >
             <span className="text-lg font-semibold">Expedição</span>
             <span className="text-sm">(Carregamento)</span>
-            <ArrowRight className="w-6 h-6" />
+            <ArrowLeft className="w-6 h-6" />
           </Button>
           <Button
             onClick={() => setSelectedType("descarga")}
@@ -316,55 +199,69 @@ export default function MovimentacaoFormFields({ onSave }: MovimentacaoFormField
           >
             <span className="text-lg font-semibold">Recebimento</span>
             <span className="text-sm">(Descarregamento)</span>
-            <ArrowRight className="w-6 h-6" />
+            <ArrowLeft className="w-6 h-6" />
           </Button>
         </div>
       </CardContent>
     </Card>
   );
 
-  // Component for the Expedição (Loading) form
-  const ExpedicaoForm = () => {
-    const metrics = calculateMetrics(expedicaoData);
+  const renderEntryForm = (
+    type: "expedicao" | "descarga",
+    data: MovimentacaoData,
+    newEntry: Omit<VehicleEntry, "id">,
+    setNewEntry: React.Dispatch<React.SetStateAction<Omit<VehicleEntry, "id">>>,
+    addEntry: () => void,
+    removeEntry: (id: string) => void
+  ) => {
+    const isExpedicao = type === "expedicao";
+    const title = isExpedicao ? "Expedição (Carregamento)" : "Recebimento (Descarregamento)";
+    const bgColor = isExpedicao ? "bg-green-500" : "bg-blue-600";
     
     return (
       <Card>
-        <CardHeader className="bg-green-500 text-white rounded-t-lg">
+        <CardHeader className={`${bgColor} text-white rounded-t-lg`}>
           <CardTitle className="flex justify-between items-center">
-            <span>Expedição (Carregamento)</span>
+            <span>{title}</span>
             <Button 
               variant="ghost" 
               onClick={() => setSelectedType("selector")}
-              className="text-white hover:text-green-100 flex items-center"
+              className="text-white hover:text-gray-100 flex items-center"
             >
               <ArrowLeft className="mr-1 h-4 w-4" />
               Voltar
             </Button>
           </CardTitle>
           <CardDescription className="text-gray-100">
-            Registro de carregamento de caminhões - {expedicaoData.entries.length} caminhões registrados
+            Registro de {isExpedicao ? "carregamento" : "descarregamento"} de veículos - {data.entries.length} veículos registrados
           </CardDescription>
         </CardHeader>
         
         <CardContent className="pt-6 space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <Label htmlFor="expedicao-date">Data *</Label>
+              <Label htmlFor={`${type}-date`}>Data *</Label>
               <Input
-                id="expedicao-date"
+                id={`${type}-date`}
                 type="date"
-                value={expedicaoData.date}
-                onChange={(e) => setExpedicaoData(prev => ({...prev, date: e.target.value}))}
+                value={data.date}
+                onChange={(e) => isExpedicao ? 
+                  setExpedicaoData(prev => ({...prev, date: e.target.value})) :
+                  setDescargaData(prev => ({...prev, date: e.target.value}))
+                }
                 required
                 className="bg-white"
               />
             </div>
             <div>
-              <Label htmlFor="expedicao-shift">Turno *</Label>
+              <Label htmlFor={`${type}-shift`}>Turno *</Label>
               <select
-                id="expedicao-shift"
-                value={expedicaoData.shift}
-                onChange={(e) => setExpedicaoData(prev => ({...prev, shift: e.target.value}))}
+                id={`${type}-shift`}
+                value={data.shift}
+                onChange={(e) => isExpedicao ?
+                  setExpedicaoData(prev => ({...prev, shift: e.target.value})) :
+                  setDescargaData(prev => ({...prev, shift: e.target.value}))
+                }
                 className="w-full rounded-md border bg-background px-3 py-2 border-gray-300"
                 required
               >
@@ -374,42 +271,28 @@ export default function MovimentacaoFormFields({ onSave }: MovimentacaoFormField
               </select>
             </div>
             <div>
-              <Label htmlFor="expedicao-tempoDisponivel">Tempo Disponível (min) *</Label>
+              <Label htmlFor={`${type}-tempoDisponivel`}>Tempo Disponível (min) *</Label>
               <Input
-                id="expedicao-tempoDisponivel"
+                id={`${type}-tempoDisponivel`}
                 type="number"
-                value={expedicaoData.tempoDisponivel}
-                onChange={(e) => setExpedicaoData(prev => ({...prev, tempoDisponivel: Number(e.target.value)}))}
+                value={data.tempoDisponivel}
+                onChange={(e) => isExpedicao ?
+                  setExpedicaoData(prev => ({...prev, tempoDisponivel: Number(e.target.value)})) :
+                  setDescargaData(prev => ({...prev, tempoDisponivel: Number(e.target.value)}))
+                }
                 required
                 className="bg-white"
               />
             </div>
           </div>
           
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <h3 className="font-medium text-lg mb-4">Indicadores</h3>
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <p className="text-sm text-gray-500">Tempo médio de setup</p>
-                <p className="text-xl font-bold">{metrics.setupMedioMinutos} min</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Peso total expedido</p>
-                <p className="text-xl font-bold">{metrics.pesoTotal} kg</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Eficiência</p>
-                <p className="text-xl font-bold">{metrics.eficiencia} kg/min</p>
-              </div>
-            </div>
-          </div>
-          
-          {expedicaoData.entries.length > 0 && (
+          {data.entries.length > 0 && (
             <div className="rounded-md border overflow-hidden">
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Tipo</TableHead>
+                    <TableHead>Placa</TableHead>
                     <TableHead>Início</TableHead>
                     <TableHead>Fim</TableHead>
                     <TableHead>Tempo</TableHead>
@@ -420,9 +303,10 @@ export default function MovimentacaoFormFields({ onSave }: MovimentacaoFormField
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {expedicaoData.entries.map((entry) => (
+                  {data.entries.map((entry) => (
                     <TableRow key={entry.id}>
                       <TableCell>{defaultTruckTypes.find(t => t.id === entry.truckType)?.name || 'N/A'}</TableCell>
+                      <TableCell>{entry.placa}</TableCell>
                       <TableCell>{entry.startTime}</TableCell>
                       <TableCell>{entry.endTime}</TableCell>
                       <TableCell>{entry.setupTime || 0} min</TableCell>
@@ -433,7 +317,7 @@ export default function MovimentacaoFormFields({ onSave }: MovimentacaoFormField
                         <Button 
                           variant="ghost" 
                           size="sm" 
-                          onClick={() => removeExpedicaoEntry(entry.id)}
+                          onClick={() => removeEntry(entry.id)}
                           className="h-8 w-8 p-0"
                         >
                           <Trash2 className="h-4 w-4" />
@@ -447,87 +331,100 @@ export default function MovimentacaoFormFields({ onSave }: MovimentacaoFormField
           )}
           
           <div className="bg-white p-4 border rounded-lg">
-            <h3 className="font-medium mb-4">Adicionar Novo Caminhão</h3>
+            <h3 className="font-medium mb-4">Adicionar Novo Veículo</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <div>
-                <Label htmlFor="new-exp-startTime">Hora Início *</Label>
+                <Label htmlFor={`new-${type}-placa`}>Placa do Veículo *</Label>
                 <Input
-                  id="new-exp-startTime"
+                  id={`new-${type}-placa`}
+                  type="text"
+                  value={newEntry.placa}
+                  onChange={(e) => setNewEntry(prev => ({...prev, placa: e.target.value.toUpperCase()}))}
+                  className="bg-white uppercase"
+                  required
+                  placeholder="ABC1234"
+                  maxLength={7}
+                />
+              </div>
+              <div>
+                <Label htmlFor={`new-${type}-startTime`}>Hora Início *</Label>
+                <Input
+                  id={`new-${type}-startTime`}
                   type="time"
-                  value={newExpedicao.startTime}
-                  onChange={(e) => setNewExpedicao(prev => ({...prev, startTime: e.target.value}))}
+                  value={newEntry.startTime}
+                  onChange={(e) => setNewEntry(prev => ({...prev, startTime: e.target.value}))}
                   className="bg-white"
                   required
                 />
               </div>
               <div>
-                <Label htmlFor="new-exp-endTime">Hora Fim *</Label>
+                <Label htmlFor={`new-${type}-endTime`}>Hora Fim *</Label>
                 <Input
-                  id="new-exp-endTime"
+                  id={`new-${type}-endTime`}
                   type="time"
-                  value={newExpedicao.endTime}
-                  onChange={(e) => setNewExpedicao(prev => ({...prev, endTime: e.target.value}))}
+                  value={newEntry.endTime}
+                  onChange={(e) => setNewEntry(prev => ({...prev, endTime: e.target.value}))}
                   className="bg-white"
                   required
                 />
               </div>
               <div>
-                <Label htmlFor="new-exp-numPessoas">Nº de Pessoas *</Label>
+                <Label htmlFor={`new-${type}-numPessoas`}>Nº de Pessoas *</Label>
                 <Input
-                  id="new-exp-numPessoas"
+                  id={`new-${type}-numPessoas`}
                   type="number"
                   min="1"
-                  value={newExpedicao.numPessoas}
-                  onChange={(e) => setNewExpedicao(prev => ({...prev, numPessoas: Number(e.target.value)}))}
+                  value={newEntry.numPessoas}
+                  onChange={(e) => setNewEntry(prev => ({...prev, numPessoas: Number(e.target.value)}))}
                   className="bg-white"
                   required
                 />
               </div>
               <div>
-                <Label htmlFor="new-exp-pesoNota">Peso da Nota (kg) *</Label>
+                <Label htmlFor={`new-${type}-pesoNota`}>Peso da Nota (kg) *</Label>
                 <Input
-                  id="new-exp-pesoNota"
+                  id={`new-${type}-pesoNota`}
                   type="number"
-                  value={newExpedicao.pesoNota}
-                  onChange={(e) => setNewExpedicao(prev => ({...prev, pesoNota: Number(e.target.value)}))}
+                  value={newEntry.pesoNota}
+                  onChange={(e) => setNewEntry(prev => ({...prev, pesoNota: Number(e.target.value)}))}
                   className="bg-white"
                   required
                 />
               </div>
               <div>
-                <Label htmlFor="new-exp-pesoBalanca">Peso na Balança (kg) *</Label>
+                <Label htmlFor={`new-${type}-pesoBalanca`}>Peso na Balança (kg) *</Label>
                 <Input
-                  id="new-exp-pesoBalanca"
+                  id={`new-${type}-pesoBalanca`}
                   type="number"
-                  value={newExpedicao.pesoBalanca}
-                  onChange={(e) => setNewExpedicao(prev => ({...prev, pesoBalanca: Number(e.target.value)}))}
+                  value={newEntry.pesoBalanca}
+                  onChange={(e) => setNewEntry(prev => ({...prev, pesoBalanca: Number(e.target.value)}))}
                   className="bg-white"
                   required
                 />
               </div>
               <div className="md:col-span-2 lg:col-span-3">
-                <Label htmlFor="new-exp-observacoes">Observações</Label>
+                <Label htmlFor={`new-${type}-observacoes`}>Observações</Label>
                 <Textarea
-                  id="new-exp-observacoes"
-                  value={newExpedicao.observacoes}
-                  onChange={(e) => setNewExpedicao(prev => ({...prev, observacoes: e.target.value}))}
+                  id={`new-${type}-observacoes`}
+                  value={newEntry.observacoes}
+                  onChange={(e) => setNewEntry(prev => ({...prev, observacoes: e.target.value}))}
                   rows={2}
                   className="bg-white"
                 />
               </div>
               <div className="md:col-span-2 lg:col-span-3">
                 <TruckTypeSelector
-                  selectedType={newExpedicao.truckType}
-                  onTypeChange={(typeId) => setNewExpedicao(prev => ({ ...prev, truckType: typeId }))}
+                  selectedType={newEntry.truckType}
+                  onTypeChange={(typeId) => setNewEntry(prev => ({ ...prev, truckType: typeId }))}
                 />
               </div>
               <div className="md:col-span-2 lg:col-span-3">
                 <Button 
-                  onClick={addExpedicaoEntry}
+                  onClick={addEntry}
                   className="w-full flex items-center justify-center gap-2"
                 >
                   <Plus className="h-4 w-4" />
-                  Adicionar Caminhão
+                  Adicionar Veículo
                 </Button>
               </div>
             </div>
@@ -536,14 +433,47 @@ export default function MovimentacaoFormFields({ onSave }: MovimentacaoFormField
           <div className="flex justify-between gap-4 pt-4 border-t">
             <Button
               variant="outline"
-              onClick={saveExpedicaoPartial}
+              onClick={() => {
+                const data = {
+                  type,
+                  data: isExpedicao ? expedicaoData : descargaData,
+                  status: "draft"
+                };
+                onSave(data);
+                toast({
+                  title: "Dados salvos parcialmente",
+                  description: `Os dados de ${isExpedicao ? "expedição" : "descarregamento"} foram salvos como rascunho`
+                });
+              }}
               className="flex-1"
             >
               Salvar Parcialmente
             </Button>
             <Button
-              onClick={finalizeExpedicao}
-              className="flex-1 bg-green-600 hover:bg-green-700"
+              onClick={() => {
+                if ((isExpedicao ? expedicaoData : descargaData).entries.length === 0) {
+                  toast({
+                    variant: "destructive",
+                    title: "Nenhum dado registrado",
+                    description: "Adicione pelo menos um veículo antes de finalizar"
+                  });
+                  return;
+                }
+                
+                const data = {
+                  type,
+                  data: isExpedicao ? expedicaoData : descargaData,
+                  status: "completed"
+                };
+                
+                onSave(data);
+                
+                toast({
+                  title: "Dados finalizados",
+                  description: `Os dados de ${isExpedicao ? "expedição" : "descarregamento"} foram finalizados com sucesso`
+                });
+              }}
+              className={`flex-1 ${isExpedicao ? "bg-green-600 hover:bg-green-700" : "bg-blue-600 hover:bg-blue-700"}`}
             >
               Finalizar Preenchimento
             </Button>
@@ -553,245 +483,34 @@ export default function MovimentacaoFormFields({ onSave }: MovimentacaoFormField
     );
   };
 
-  // Component for the Descarga (Unloading) form
-  const DescargaForm = () => {
-    const metrics = calculateMetrics(descargaData);
-    
-    return (
-      <Card>
-        <CardHeader className="bg-blue-600 text-white rounded-t-lg">
-          <CardTitle className="flex justify-between items-center">
-            <span>Descarregamento (Recebimento)</span>
-            <Button 
-              variant="ghost" 
-              onClick={() => setSelectedType("selector")}
-              className="text-white hover:text-blue-100 flex items-center"
-            >
-              <ArrowLeft className="mr-1 h-4 w-4" />
-              Voltar
-            </Button>
-          </CardTitle>
-          <CardDescription className="text-gray-100">
-            Registro de descarregamento de caminhões - {descargaData.entries.length} caminhões registrados
-          </CardDescription>
-        </CardHeader>
-        
-        <CardContent className="pt-6 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <Label htmlFor="descarga-date">Data *</Label>
-              <Input
-                id="descarga-date"
-                type="date"
-                value={descargaData.date}
-                onChange={(e) => setDescargaData(prev => ({...prev, date: e.target.value}))}
-                required
-                className="bg-white"
-              />
-            </div>
-            <div>
-              <Label htmlFor="descarga-shift">Turno *</Label>
-              <select
-                id="descarga-shift"
-                value={descargaData.shift}
-                onChange={(e) => setDescargaData(prev => ({...prev, shift: e.target.value}))}
-                className="w-full rounded-md border bg-background px-3 py-2 border-gray-300"
-                required
-              >
-                <option value="Manhã">Manhã</option>
-                <option value="Tarde">Tarde</option>
-                <option value="Noite">Noite</option>
-              </select>
-            </div>
-            <div>
-              <Label htmlFor="descarga-tempoDisponivel">Tempo Disponível (min) *</Label>
-              <Input
-                id="descarga-tempoDisponivel"
-                type="number"
-                value={descargaData.tempoDisponivel}
-                onChange={(e) => setDescargaData(prev => ({...prev, tempoDisponivel: Number(e.target.value)}))}
-                required
-                className="bg-white"
-              />
-            </div>
-          </div>
-          
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <h3 className="font-medium text-lg mb-4">Indicadores</h3>
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <p className="text-sm text-gray-500">Tempo médio de descarga</p>
-                <p className="text-xl font-bold">{metrics.setupMedioMinutos} min</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Peso total recebido</p>
-                <p className="text-xl font-bold">{metrics.pesoTotal} kg</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Eficiência</p>
-                <p className="text-xl font-bold">{metrics.eficiencia} kg/min</p>
-              </div>
-            </div>
-          </div>
-          
-          {descargaData.entries.length > 0 && (
-            <div className="rounded-md border overflow-hidden">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Tipo</TableHead>
-                    <TableHead>Início</TableHead>
-                    <TableHead>Fim</TableHead>
-                    <TableHead>Tempo</TableHead>
-                    <TableHead>Pessoas</TableHead>
-                    <TableHead>Peso Nota</TableHead>
-                    <TableHead>Peso Balança</TableHead>
-                    <TableHead>Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {descargaData.entries.map((entry) => (
-                    <TableRow key={entry.id}>
-                      <TableCell>{defaultTruckTypes.find(t => t.id === entry.truckType)?.name || 'N/A'}</TableCell>
-                      <TableCell>{entry.startTime}</TableCell>
-                      <TableCell>{entry.endTime}</TableCell>
-                      <TableCell>{entry.setupTime || 0} min</TableCell>
-                      <TableCell>{entry.numPessoas}</TableCell>
-                      <TableCell>{entry.pesoNota} kg</TableCell>
-                      <TableCell>{entry.pesoBalanca} kg</TableCell>
-                      <TableCell>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          onClick={() => removeDescargaEntry(entry.id)}
-                          className="h-8 w-8 p-0"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-          
-          <div className="bg-white p-4 border rounded-lg">
-            <h3 className="font-medium mb-4">Adicionar Novo Caminhão</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div>
-                <Label htmlFor="new-desc-startTime">Hora Início *</Label>
-                <Input
-                  id="new-desc-startTime"
-                  type="time"
-                  value={newDescarga.startTime}
-                  onChange={(e) => setNewDescarga(prev => ({...prev, startTime: e.target.value}))}
-                  className="bg-white"
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="new-desc-endTime">Hora Fim *</Label>
-                <Input
-                  id="new-desc-endTime"
-                  type="time"
-                  value={newDescarga.endTime}
-                  onChange={(e) => setNewDescarga(prev => ({...prev, endTime: e.target.value}))}
-                  className="bg-white"
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="new-desc-numPessoas">Nº de Pessoas *</Label>
-                <Input
-                  id="new-desc-numPessoas"
-                  type="number"
-                  min="1"
-                  value={newDescarga.numPessoas}
-                  onChange={(e) => setNewDescarga(prev => ({...prev, numPessoas: Number(e.target.value)}))}
-                  className="bg-white"
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="new-desc-pesoNota">Peso da Nota (kg) *</Label>
-                <Input
-                  id="new-desc-pesoNota"
-                  type="number"
-                  value={newDescarga.pesoNota}
-                  onChange={(e) => setNewDescarga(prev => ({...prev, pesoNota: Number(e.target.value)}))}
-                  className="bg-white"
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="new-desc-pesoBalanca">Peso na Balança (kg) *</Label>
-                <Input
-                  id="new-desc-pesoBalanca"
-                  type="number"
-                  value={newDescarga.pesoBalanca}
-                  onChange={(e) => setNewDescarga(prev => ({...prev, pesoBalanca: Number(e.target.value)}))}
-                  className="bg-white"
-                  required
-                />
-              </div>
-              <div className="md:col-span-2 lg:col-span-3">
-                <Label htmlFor="new-desc-observacoes">Observações</Label>
-                <Textarea
-                  id="new-desc-observacoes"
-                  value={newDescarga.observacoes}
-                  onChange={(e) => setNewDescarga(prev => ({...prev, observacoes: e.target.value}))}
-                  rows={2}
-                  className="bg-white"
-                />
-              </div>
-              <div className="md:col-span-2 lg:col-span-3">
-                <TruckTypeSelector
-                  selectedType={newDescarga.truckType}
-                  onTypeChange={(typeId) => setNewDescarga(prev => ({ ...prev, truckType: typeId }))}
-                />
-              </div>
-              <div className="md:col-span-2 lg:col-span-3">
-                <Button 
-                  onClick={addDescargaEntry}
-                  className="w-full flex items-center justify-center gap-2"
-                >
-                  <Plus className="h-4 w-4" />
-                  Adicionar Caminhão
-                </Button>
-              </div>
-            </div>
-          </div>
-          
-          <div className="flex justify-between gap-4 pt-4 border-t">
-            <Button
-              variant="outline"
-              onClick={saveDescargaPartial}
-              className="flex-1"
-            >
-              Salvar Parcialmente
-            </Button>
-            <Button
-              onClick={finalizeDescarga}
-              className="flex-1 bg-blue-600 hover:bg-blue-700"
-            >
-              Finalizar Preenchimento
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  };
-
-  // Render the selected form based on state
   return (
     <div className="space-y-8">
       {selectedType === "selector" ? (
         <TypeSelector />
       ) : selectedType === "expedicao" ? (
-        <ExpedicaoForm />
+        renderEntryForm(
+          "expedicao",
+          expedicaoData,
+          newExpedicao,
+          setNewExpedicao,
+          addExpedicaoEntry,
+          (id) => setExpedicaoData(prev => ({
+            ...prev,
+            entries: prev.entries.filter(entry => entry.id !== id)
+          }))
+        )
       ) : (
-        <DescargaForm />
+        renderEntryForm(
+          "descarga",
+          descargaData,
+          newDescarga,
+          setNewDescarga,
+          addDescargaEntry,
+          (id) => setDescargaData(prev => ({
+            ...prev,
+            entries: prev.entries.filter(entry => entry.id !== id)
+          }))
+        )
       )}
     </div>
   );
