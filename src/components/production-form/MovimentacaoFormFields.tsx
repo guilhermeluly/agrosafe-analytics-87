@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -9,6 +8,7 @@ import { Save, Plus, Trash2, ArrowRight } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
+import TruckTypeSelector from './TruckTypeSelector';
 
 type TruckEntry = {
   id: string;
@@ -19,6 +19,7 @@ type TruckEntry = {
   numPessoas: number;
   observacoes: string;
   setupTime?: number;
+  truckType: string;
 };
 
 type MovimentacaoData = {
@@ -57,7 +58,8 @@ export default function MovimentacaoFormFields({ onSave }: MovimentacaoFormField
     pesoNota: 0,
     pesoBalanca: 0,
     numPessoas: 1,
-    observacoes: ""
+    observacoes: "",
+    truckType: ""
   });
 
   const [newDescarga, setNewDescarga] = useState<Omit<TruckEntry, "id">>({
@@ -69,7 +71,6 @@ export default function MovimentacaoFormFields({ onSave }: MovimentacaoFormField
     observacoes: ""
   });
 
-  // Function to generate metrics
   const calculateMetrics = (data: MovimentacaoData) => {
     if (!data.entries.length) return { setupMedioMinutos: 0, pesoTotal: 0, eficiencia: 0 };
     
@@ -97,7 +98,6 @@ export default function MovimentacaoFormFields({ onSave }: MovimentacaoFormField
     };
   };
 
-  // Calculate setup time for a single entry
   const calculateSetupTime = (startTime: string, endTime: string, numPessoas: number) => {
     if (!startTime || !endTime) return 0;
     
@@ -108,7 +108,6 @@ export default function MovimentacaoFormFields({ onSave }: MovimentacaoFormField
     return Math.round(diffMinutes / (numPessoas || 1));
   };
 
-  // Add new entry to Expedição
   const addExpedicaoEntry = () => {
     if (!newExpedicao.startTime || !newExpedicao.endTime) {
       toast({
@@ -138,7 +137,8 @@ export default function MovimentacaoFormFields({ onSave }: MovimentacaoFormField
       pesoNota: 0,
       pesoBalanca: 0,
       numPessoas: 1,
-      observacoes: ""
+      observacoes: "",
+      truckType: ""
     });
     
     toast({
@@ -147,7 +147,6 @@ export default function MovimentacaoFormFields({ onSave }: MovimentacaoFormField
     });
   };
 
-  // Add new entry to Descarga
   const addDescargaEntry = () => {
     if (!newDescarga.startTime || !newDescarga.endTime) {
       toast({
@@ -186,7 +185,6 @@ export default function MovimentacaoFormFields({ onSave }: MovimentacaoFormField
     });
   };
 
-  // Remove entry
   const removeExpedicaoEntry = (id: string) => {
     setExpedicaoData(prev => ({
       ...prev,
@@ -201,7 +199,6 @@ export default function MovimentacaoFormFields({ onSave }: MovimentacaoFormField
     }));
   };
 
-  // Save data actions
   const saveExpedicaoPartial = () => {
     const data = {
       ...expedicaoData,
@@ -280,7 +277,6 @@ export default function MovimentacaoFormFields({ onSave }: MovimentacaoFormField
     });
   };
 
-  // UI Components for entry forms
   const ExpedicaoForm = () => {
     const metrics = calculateMetrics(expedicaoData);
     
@@ -351,12 +347,12 @@ export default function MovimentacaoFormFields({ onSave }: MovimentacaoFormField
             </div>
           </div>
           
-          {/* Registered trucks table */}
           {expedicaoData.entries.length > 0 && (
             <div className="rounded-md border overflow-hidden">
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead>Tipo</TableHead>
                     <TableHead>Início</TableHead>
                     <TableHead>Fim</TableHead>
                     <TableHead>Tempo</TableHead>
@@ -369,6 +365,7 @@ export default function MovimentacaoFormFields({ onSave }: MovimentacaoFormField
                 <TableBody>
                   {expedicaoData.entries.map((entry) => (
                     <TableRow key={entry.id}>
+                      <TableCell>{defaultTruckTypes.find(t => t.id === entry.truckType)?.name || 'N/A'}</TableCell>
                       <TableCell>{entry.startTime}</TableCell>
                       <TableCell>{entry.endTime}</TableCell>
                       <TableCell>{entry.setupTime || 0} min</TableCell>
@@ -392,7 +389,6 @@ export default function MovimentacaoFormFields({ onSave }: MovimentacaoFormField
             </div>
           )}
           
-          {/* New truck entry form */}
           <div className="bg-white p-4 border rounded-lg">
             <h3 className="font-medium mb-4">Adicionar Novo Caminhão</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -460,6 +456,12 @@ export default function MovimentacaoFormFields({ onSave }: MovimentacaoFormField
                   onChange={(e) => setNewExpedicao(prev => ({...prev, observacoes: e.target.value}))}
                   rows={2}
                   className="bg-white"
+                />
+              </div>
+              <div className="md:col-span-2 lg:col-span-3">
+                <TruckTypeSelector
+                  selectedType={newExpedicao.truckType}
+                  onTypeChange={(typeId) => setNewExpedicao(prev => ({ ...prev, truckType: typeId }))}
                 />
               </div>
               <div className="md:col-span-2 lg:col-span-3">
@@ -564,12 +566,12 @@ export default function MovimentacaoFormFields({ onSave }: MovimentacaoFormField
             </div>
           </div>
           
-          {/* Registered trucks table */}
           {descargaData.entries.length > 0 && (
             <div className="rounded-md border overflow-hidden">
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead>Tipo</TableHead>
                     <TableHead>Início</TableHead>
                     <TableHead>Fim</TableHead>
                     <TableHead>Tempo</TableHead>
@@ -582,6 +584,7 @@ export default function MovimentacaoFormFields({ onSave }: MovimentacaoFormField
                 <TableBody>
                   {descargaData.entries.map((entry) => (
                     <TableRow key={entry.id}>
+                      <TableCell>{defaultTruckTypes.find(t => t.id === entry.truckType)?.name || 'N/A'}</TableCell>
                       <TableCell>{entry.startTime}</TableCell>
                       <TableCell>{entry.endTime}</TableCell>
                       <TableCell>{entry.setupTime || 0} min</TableCell>
@@ -605,7 +608,6 @@ export default function MovimentacaoFormFields({ onSave }: MovimentacaoFormField
             </div>
           )}
           
-          {/* New truck entry form */}
           <div className="bg-white p-4 border rounded-lg">
             <h3 className="font-medium mb-4">Adicionar Novo Caminhão</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -673,6 +675,12 @@ export default function MovimentacaoFormFields({ onSave }: MovimentacaoFormField
                   onChange={(e) => setNewDescarga(prev => ({...prev, observacoes: e.target.value}))}
                   rows={2}
                   className="bg-white"
+                />
+              </div>
+              <div className="md:col-span-2 lg:col-span-3">
+                <TruckTypeSelector
+                  selectedType={newDescarga.truckType}
+                  onTypeChange={(typeId) => setNewDescarga(prev => ({ ...prev, truckType: typeId }))}
                 />
               </div>
               <div className="md:col-span-2 lg:col-span-3">

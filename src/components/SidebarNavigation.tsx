@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useUser } from "../context/UserContext";
@@ -41,7 +40,6 @@ import LogoDisplay from "./LogoDisplay";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-// Define interface for menu items
 interface MenuItem {
   icon: React.ComponentType<any>;
   label: string;
@@ -63,7 +61,6 @@ export default function SidebarNavigation() {
       title: "Exportação iniciada",
       description: "Os dados estão sendo exportados para CSV."
     });
-    // Here would be the actual implementation for CSV export
   };
 
   const handlePresentationMode = () => {
@@ -71,10 +68,15 @@ export default function SidebarNavigation() {
       title: "Modo de Apresentação",
       description: "Iniciando modo de apresentação dos indicadores."
     });
-    // Here would be the implementation for presentation mode
   };
 
-  // Define menu items based on user role
+  const handleSidebarTrigger = () => {
+    const sidebarContent = document.querySelector('[data-sidebar-content]');
+    if (sidebarContent) {
+      sidebarContent.classList.toggle('hidden');
+    }
+  };
+
   const getMenuItems = (): MenuItem[] => {
     const baseItems: MenuItem[] = [
       {
@@ -218,7 +220,12 @@ export default function SidebarNavigation() {
         <div className="px-4 flex items-center justify-between">
           <LogoDisplay altura={40} />
           <SidebarTrigger asChild>
-            <Button variant="ghost" size="icon" className="md:hidden text-white hover:bg-gray-800">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="md:hidden text-white hover:bg-gray-800"
+              onClick={handleSidebarTrigger}
+            >
               <Menu className="h-5 w-5" />
             </Button>
           </SidebarTrigger>
@@ -232,11 +239,13 @@ export default function SidebarNavigation() {
             {menuItems.map((item) => (
               <SidebarMenuItem key={item.path + item.label}>
                 {item.onClick ? (
-                  // For buttons with onClick handlers
                   <SidebarMenuButton 
                     isActive={isActive(item.path)}
                     tooltip={item.label}
-                    onClick={item.onClick}
+                    onClick={() => {
+                      item.onClick?.();
+                      if (isMobile) handleSidebarTrigger();
+                    }}
                     className="hover:bg-gray-800 text-white data-[active=true]:bg-gray-800"
                   >
                     <div className="flex items-center gap-2">
@@ -250,12 +259,12 @@ export default function SidebarNavigation() {
                     </div>
                   </SidebarMenuButton>
                 ) : (
-                  // For navigation links
                   <SidebarMenuButton 
                     asChild
                     isActive={isActive(item.path)}
                     tooltip={item.label}
                     className="hover:bg-gray-800 text-white data-[active=true]:bg-gray-800"
+                    onClick={isMobile ? handleSidebarTrigger : undefined}
                   >
                     <Link to={item.path} className="flex items-center gap-2">
                       <item.icon className="h-5 w-5" />
