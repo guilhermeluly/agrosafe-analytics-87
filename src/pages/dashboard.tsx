@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { useEmpresa } from "../context/EmpresaContext";
 import LogoDisplay from "../components/LogoDisplay";
@@ -9,25 +9,452 @@ import { useUser } from "../context/UserContext";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { ArrowDownIcon, ArrowUpIcon, ClockIcon, BarChart3, PieChartIcon, Filter } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
-const productionData = {
-  plannedProduction: 1000,
-  actualProduction: 920,
-  downtime: 45, // minutes
-  plannedTime: 480, // minutes (8 hours)
-  idealCycleTime: 0.4, // minutes per unit
-  rework: 15,
-  scrap: 25,
-  lostPackages: 5,
+const baseProductionData = {
+  today: {
+    all: {
+      plannedProduction: 1000,
+      actualProduction: 920,
+      downtime: 45, // minutes
+      plannedTime: 480, // minutes (8 hours)
+      idealCycleTime: 0.4, // minutes per unit
+      rework: 15,
+      scrap: 25,
+      lostPackages: 5,
+    },
+    line1: {
+      plannedProduction: 500,
+      actualProduction: 470,
+      downtime: 20,
+      plannedTime: 480,
+      idealCycleTime: 0.4,
+      rework: 8,
+      scrap: 12,
+      lostPackages: 2,
+    },
+    line2: {
+      plannedProduction: 300,
+      actualProduction: 290,
+      downtime: 15,
+      plannedTime: 480,
+      idealCycleTime: 0.4,
+      rework: 4,
+      scrap: 8,
+      lostPackages: 2,
+    },
+    line3: {
+      plannedProduction: 200,
+      actualProduction: 160,
+      downtime: 10,
+      plannedTime: 480,
+      idealCycleTime: 0.4,
+      rework: 3,
+      scrap: 5,
+      lostPackages: 1,
+    },
+  },
+  yesterday: {
+    all: {
+      plannedProduction: 1000,
+      actualProduction: 950,
+      downtime: 30,
+      plannedTime: 480,
+      idealCycleTime: 0.4,
+      rework: 10,
+      scrap: 20,
+      lostPackages: 3,
+    },
+    line1: {
+      plannedProduction: 500,
+      actualProduction: 480,
+      downtime: 15,
+      plannedTime: 480,
+      idealCycleTime: 0.4,
+      rework: 5,
+      scrap: 10,
+      lostPackages: 1,
+    },
+    line2: {
+      plannedProduction: 300,
+      actualProduction: 295,
+      downtime: 10,
+      plannedTime: 480,
+      idealCycleTime: 0.4,
+      rework: 3,
+      scrap: 5,
+      lostPackages: 1,
+    },
+    line3: {
+      plannedProduction: 200,
+      actualProduction: 175,
+      downtime: 5,
+      plannedTime: 480,
+      idealCycleTime: 0.4,
+      rework: 2,
+      scrap: 5,
+      lostPackages: 1,
+    },
+  },
+  week: {
+    all: {
+      plannedProduction: 5000,
+      actualProduction: 4800,
+      downtime: 200,
+      plannedTime: 2400,
+      idealCycleTime: 0.4,
+      rework: 70,
+      scrap: 100,
+      lostPackages: 20,
+    },
+    line1: {
+      plannedProduction: 2500,
+      actualProduction: 2400,
+      downtime: 100,
+      plannedTime: 2400,
+      idealCycleTime: 0.4,
+      rework: 35,
+      scrap: 50,
+      lostPackages: 10,
+    },
+    line2: {
+      plannedProduction: 1500,
+      actualProduction: 1450,
+      downtime: 60,
+      plannedTime: 2400,
+      idealCycleTime: 0.4,
+      rework: 20,
+      scrap: 30,
+      lostPackages: 6,
+    },
+    line3: {
+      plannedProduction: 1000,
+      actualProduction: 950,
+      downtime: 40,
+      plannedTime: 2400,
+      idealCycleTime: 0.4,
+      rework: 15,
+      scrap: 20,
+      lostPackages: 4,
+    },
+  },
+  month: {
+    all: {
+      plannedProduction: 20000,
+      actualProduction: 19200,
+      downtime: 800,
+      plannedTime: 9600,
+      idealCycleTime: 0.4,
+      rework: 300,
+      scrap: 400,
+      lostPackages: 80,
+    },
+    line1: {
+      plannedProduction: 10000,
+      actualProduction: 9600,
+      downtime: 400,
+      plannedTime: 9600,
+      idealCycleTime: 0.4,
+      rework: 150,
+      scrap: 200,
+      lostPackages: 40,
+    },
+    line2: {
+      plannedProduction: 6000,
+      actualProduction: 5800,
+      downtime: 240,
+      plannedTime: 9600,
+      idealCycleTime: 0.4,
+      rework: 90,
+      scrap: 120,
+      lostPackages: 24,
+    },
+    line3: {
+      plannedProduction: 4000,
+      actualProduction: 3800,
+      downtime: 160,
+      plannedTime: 9600,
+      idealCycleTime: 0.4,
+      rework: 60,
+      scrap: 80,
+      lostPackages: 16,
+    },
+  }
 };
 
-const downtimeData = [
-  { name: 'Manutenção', minutes: 25, percentage: 25 },
-  { name: 'Troca de Produto', minutes: 15, percentage: 15 },
-  { name: 'Quebra', minutes: 20, percentage: 20 },
-  { name: 'Setup', minutes: 10, percentage: 10 },
-  { name: 'Falta de Material', minutes: 30, percentage: 30 },
-];
+const baseDowntimeData = {
+  today: {
+    all: [
+      { name: 'Manutenção', minutes: 25, percentage: 25 },
+      { name: 'Troca de Produto', minutes: 15, percentage: 15 },
+      { name: 'Quebra', minutes: 20, percentage: 20 },
+      { name: 'Setup', minutes: 10, percentage: 10 },
+      { name: 'Falta de Material', minutes: 30, percentage: 30 },
+    ],
+    line1: [
+      { name: 'Manutenção', minutes: 10, percentage: 20 },
+      { name: 'Troca de Produto', minutes: 8, percentage: 16 },
+      { name: 'Quebra', minutes: 12, percentage: 24 },
+      { name: 'Setup', minutes: 5, percentage: 10 },
+      { name: 'Falta de Material', minutes: 15, percentage: 30 },
+    ],
+    line2: [
+      { name: 'Manutenção', minutes: 8, percentage: 27 },
+      { name: 'Troca de Produto', minutes: 5, percentage: 17 },
+      { name: 'Quebra', minutes: 6, percentage: 20 },
+      { name: 'Setup', minutes: 3, percentage: 10 },
+      { name: 'Falta de Material', minutes: 8, percentage: 26 },
+    ],
+    line3: [
+      { name: 'Manutenção', minutes: 7, percentage: 30 },
+      { name: 'Troca de Produto', minutes: 2, percentage: 10 },
+      { name: 'Quebra', minutes: 2, percentage: 10 },
+      { name: 'Setup', minutes: 2, percentage: 10 },
+      { name: 'Falta de Material', minutes: 7, percentage: 40 },
+    ],
+  },
+  yesterday: {
+    all: [
+      { name: 'Manutenção', minutes: 15, percentage: 20 },
+      { name: 'Troca de Produto', minutes: 10, percentage: 13 },
+      { name: 'Quebra', minutes: 15, percentage: 20 },
+      { name: 'Setup', minutes: 12, percentage: 16 },
+      { name: 'Falta de Material', minutes: 23, percentage: 31 },
+    ],
+    line1: [
+      { name: 'Manutenção', minutes: 8, percentage: 20 },
+      { name: 'Troca de Produto', minutes: 5, percentage: 13 },
+      { name: 'Quebra', minutes: 8, percentage: 20 },
+      { name: 'Setup', minutes: 6, percentage: 16 },
+      { name: 'Falta de Material', minutes: 12, percentage: 31 },
+    ],
+    line2: [
+      { name: 'Manutenção', minutes: 5, percentage: 20 },
+      { name: 'Troca de Produto', minutes: 3, percentage: 13 },
+      { name: 'Quebra', minutes: 5, percentage: 20 },
+      { name: 'Setup', minutes: 4, percentage: 16 },
+      { name: 'Falta de Material', minutes: 8, percentage: 31 },
+    ],
+    line3: [
+      { name: 'Manutenção', minutes: 2, percentage: 20 },
+      { name: 'Troca de Produto', minutes: 2, percentage: 13 },
+      { name: 'Quebra', minutes: 2, percentage: 20 },
+      { name: 'Setup', minutes: 2, percentage: 16 },
+      { name: 'Falta de Material', minutes: 3, percentage: 31 },
+    ],
+  },
+  week: {
+    all: [
+      { name: 'Manutenção', minutes: 100, percentage: 22 },
+      { name: 'Troca de Produto', minutes: 80, percentage: 18 },
+      { name: 'Quebra', minutes: 90, percentage: 20 },
+      { name: 'Setup', minutes: 50, percentage: 11 },
+      { name: 'Falta de Material', minutes: 130, percentage: 29 },
+    ],
+    line1: [
+      { name: 'Manutenção', minutes: 50, percentage: 22 },
+      { name: 'Troca de Produto', minutes: 40, percentage: 18 },
+      { name: 'Quebra', minutes: 45, percentage: 20 },
+      { name: 'Setup', minutes: 25, percentage: 11 },
+      { name: 'Falta de Material', minutes: 65, percentage: 29 },
+    ],
+    line2: [
+      { name: 'Manutenção', minutes: 30, percentage: 22 },
+      { name: 'Troca de Produto', minutes: 24, percentage: 18 },
+      { name: 'Quebra', minutes: 27, percentage: 20 },
+      { name: 'Setup', minutes: 15, percentage: 11 },
+      { name: 'Falta de Material', minutes: 39, percentage: 29 },
+    ],
+    line3: [
+      { name: 'Manutenção', minutes: 20, percentage: 22 },
+      { name: 'Troca de Produto', minutes: 16, percentage: 18 },
+      { name: 'Quebra', minutes: 18, percentage: 20 },
+      { name: 'Setup', minutes: 10, percentage: 11 },
+      { name: 'Falta de Material', minutes: 26, percentage: 29 },
+    ],
+  },
+  month: {
+    all: [
+      { name: 'Manutenção', minutes: 400, percentage: 23 },
+      { name: 'Troca de Produto', minutes: 320, percentage: 18 },
+      { name: 'Quebra', minutes: 360, percentage: 20 },
+      { name: 'Setup', minutes: 200, percentage: 11 },
+      { name: 'Falta de Material', minutes: 520, percentage: 28 },
+    ],
+    line1: [
+      { name: 'Manutenção', minutes: 200, percentage: 23 },
+      { name: 'Troca de Produto', minutes: 160, percentage: 18 },
+      { name: 'Quebra', minutes: 180, percentage: 20 },
+      { name: 'Setup', minutes: 100, percentage: 11 },
+      { name: 'Falta de Material', minutes: 260, percentage: 28 },
+    ],
+    line2: [
+      { name: 'Manutenção', minutes: 120, percentage: 23 },
+      { name: 'Troca de Produto', minutes: 96, percentage: 18 },
+      { name: 'Quebra', minutes: 108, percentage: 20 },
+      { name: 'Setup', minutes: 60, percentage: 11 },
+      { name: 'Falta de Material', minutes: 156, percentage: 28 },
+    ],
+    line3: [
+      { name: 'Manutenção', minutes: 80, percentage: 23 },
+      { name: 'Troca de Produto', minutes: 64, percentage: 18 },
+      { name: 'Quebra', minutes: 72, percentage: 20 },
+      { name: 'Setup', minutes: 40, percentage: 11 },
+      { name: 'Falta de Material', minutes: 104, percentage: 28 },
+    ],
+  }
+};
+
+const baseProductionTrends = {
+  today: {
+    all: [
+      { name: '8h', plan: 125, actual: 120 },
+      { name: '10h', plan: 125, actual: 115 },
+      { name: '12h', plan: 125, actual: 130 },
+      { name: '14h', plan: 125, actual: 110 },
+      { name: '16h', plan: 125, actual: 125 },
+      { name: '18h', plan: 125, actual: 118 },
+      { name: '20h', plan: 125, actual: 122 },
+      { name: '22h', plan: 125, actual: 130 },
+    ],
+    line1: [
+      { name: '8h', plan: 65, actual: 62 },
+      { name: '10h', plan: 65, actual: 60 },
+      { name: '12h', plan: 65, actual: 68 },
+      { name: '14h', plan: 65, actual: 58 },
+      { name: '16h', plan: 65, actual: 65 },
+      { name: '18h', plan: 65, actual: 61 },
+      { name: '20h', plan: 65, actual: 64 },
+      { name: '22h', plan: 65, actual: 67 },
+    ],
+    line2: [
+      { name: '8h', plan: 35, actual: 34 },
+      { name: '10h', plan: 35, actual: 33 },
+      { name: '12h', plan: 35, actual: 37 },
+      { name: '14h', plan: 35, actual: 32 },
+      { name: '16h', plan: 35, actual: 35 },
+      { name: '18h', plan: 35, actual: 35 },
+      { name: '20h', plan: 35, actual: 35 },
+      { name: '22h', plan: 35, actual: 36 },
+    ],
+    line3: [
+      { name: '8h', plan: 25, actual: 24 },
+      { name: '10h', plan: 25, actual: 22 },
+      { name: '12h', plan: 25, actual: 25 },
+      { name: '14h', plan: 25, actual: 20 },
+      { name: '16h', plan: 25, actual: 25 },
+      { name: '18h', plan: 25, actual: 23 },
+      { name: '20h', plan: 25, actual: 23 },
+      { name: '22h', plan: 25, actual: 27 },
+    ],
+  },
+  yesterday: {
+    all: [
+      { name: '8h', plan: 125, actual: 122 },
+      { name: '10h', plan: 125, actual: 120 },
+      { name: '12h', plan: 125, actual: 128 },
+      { name: '14h', plan: 125, actual: 118 },
+      { name: '16h', plan: 125, actual: 126 },
+      { name: '18h', plan: 125, actual: 124 },
+      { name: '20h', plan: 125, actual: 125 },
+      { name: '22h', plan: 125, actual: 127 },
+    ],
+    line1: [
+      { name: '8h', plan: 65, actual: 64 },
+      { name: '10h', plan: 65, actual: 63 },
+      { name: '12h', plan: 65, actual: 67 },
+      { name: '14h', plan: 65, actual: 62 },
+      { name: '16h', plan: 65, actual: 66 },
+      { name: '18h', plan: 65, actual: 65 },
+      { name: '20h', plan: 65, actual: 65 },
+      { name: '22h', plan: 65, actual: 66 },
+    ],
+    line2: [
+      { name: '8h', plan: 35, actual: 35 },
+      { name: '10h', plan: 35, actual: 34 },
+      { name: '12h', plan: 35, actual: 36 },
+      { name: '14h', plan: 35, actual: 33 },
+      { name: '16h', plan: 35, actual: 35 },
+      { name: '18h', plan: 35, actual: 35 },
+      { name: '20h', plan: 35, actual: 35 },
+      { name: '22h', plan: 35, actual: 35 },
+    ],
+    line3: [
+      { name: '8h', plan: 25, actual: 23 },
+      { name: '10h', plan: 25, actual: 23 },
+      { name: '12h', plan: 25, actual: 25 },
+      { name: '14h', plan: 25, actual: 23 },
+      { name: '16h', plan: 25, actual: 25 },
+      { name: '18h', plan: 25, actual: 24 },
+      { name: '20h', plan: 25, actual: 25 },
+      { name: '22h', plan: 25, actual: 26 },
+    ],
+  },
+  week: {
+    all: [
+      { name: 'Seg', plan: 1000, actual: 950 },
+      { name: 'Ter', plan: 1000, actual: 920 },
+      { name: 'Qua', plan: 1000, actual: 980 },
+      { name: 'Qui', plan: 1000, actual: 890 },
+      { name: 'Sex', plan: 1000, actual: 940 },
+      { name: 'Sáb', plan: 500, actual: 480 },
+      { name: 'Dom', plan: 500, actual: 520 },
+    ],
+    line1: [
+      { name: 'Seg', plan: 500, actual: 480 },
+      { name: 'Ter', plan: 500, actual: 470 },
+      { name: 'Qua', plan: 500, actual: 490 },
+      { name: 'Qui', plan: 500, actual: 460 },
+      { name: 'Sex', plan: 500, actual: 480 },
+      { name: 'Sáb', plan: 250, actual: 240 },
+      { name: 'Dom', plan: 250, actual: 260 },
+    ],
+    line2: [
+      { name: 'Seg', plan: 300, actual: 290 },
+      { name: 'Ter', plan: 300, actual: 280 },
+      { name: 'Qua', plan: 300, actual: 295 },
+      { name: 'Qui', plan: 300, actual: 270 },
+      { name: 'Sex', plan: 300, actual: 290 },
+      { name: 'Sáb', plan: 150, actual: 145 },
+      { name: 'Dom', plan: 150, actual: 155 },
+    ],
+    line3: [
+      { name: 'Seg', plan: 200, actual: 180 },
+      { name: 'Ter', plan: 200, actual: 170 },
+      { name: 'Qua', plan: 200, actual: 195 },
+      { name: 'Qui', plan: 200, actual: 160 },
+      { name: 'Sex', plan: 200, actual: 170 },
+      { name: 'Sáb', plan: 100, actual: 95 },
+      { name: 'Dom', plan: 100, actual: 105 },
+    ],
+  },
+  month: {
+    all: [
+      { name: 'Sem 1', plan: 5000, actual: 4800 },
+      { name: 'Sem 2', plan: 5000, actual: 4700 },
+      { name: 'Sem 3', plan: 5000, actual: 4900 },
+      { name: 'Sem 4', plan: 5000, actual: 4800 },
+    ],
+    line1: [
+      { name: 'Sem 1', plan: 2500, actual: 2400 },
+      { name: 'Sem 2', plan: 2500, actual: 2350 },
+      { name: 'Sem 3', plan: 2500, actual: 2450 },
+      { name: 'Sem 4', plan: 2500, actual: 2400 },
+    ],
+    line2: [
+      { name: 'Sem 1', plan: 1500, actual: 1450 },
+      { name: 'Sem 2', plan: 1500, actual: 1400 },
+      { name: 'Sem 3', plan: 1500, actual: 1470 },
+      { name: 'Sem 4', plan: 1500, actual: 1450 },
+    ],
+    line3: [
+      { name: 'Sem 1', plan: 1000, actual: 950 },
+      { name: 'Sem 2', plan: 1000, actual: 920 },
+      { name: 'Sem 3', plan: 1000, actual: 980 },
+      { name: 'Sem 4', plan: 1000, actual: 950 },
+    ],
+  }
+};
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
@@ -72,6 +499,25 @@ export default function Dashboard() {
   const [timeFilter, setTimeFilter] = useState("today");
   const [lineFilter, setLineFilter] = useState("all");
   const [showTooltip, setShowTooltip] = useState(false);
+  const [productionData, setProductionData] = useState(baseProductionData.today.all);
+  const [downtimeData, setDowntimeData] = useState(baseDowntimeData.today.all);
+  const [productionTrends, setProductionTrends] = useState(baseProductionTrends.today.all);
+  const { toast } = useToast();
+  
+  useEffect(() => {
+    const newProductionData = baseProductionData[timeFilter as keyof typeof baseProductionData][lineFilter as keyof typeof baseProductionData.today];
+    const newDowntimeData = baseDowntimeData[timeFilter as keyof typeof baseDowntimeData][lineFilter as keyof typeof baseDowntimeData.today];
+    const newProductionTrends = baseProductionTrends[timeFilter as keyof typeof baseProductionTrends][lineFilter as keyof typeof baseProductionTrends.today];
+    
+    setProductionData(newProductionData);
+    setDowntimeData(newDowntimeData);
+    setProductionTrends(newProductionTrends);
+    
+    toast({
+      title: "Filtros atualizados",
+      description: `Período: ${timeFilter}, Linha: ${lineFilter}`,
+    });
+  }, [timeFilter, lineFilter, toast]);
 
   const availability = calculateAvailability(
     productionData.plannedTime,
@@ -94,22 +540,15 @@ export default function Dashboard() {
   
   const oee = calculateOEE(availability, performance, quality);
 
-  const productionTrends = [
-    { name: 'Seg', plan: 1000, actual: 950 },
-    { name: 'Ter', plan: 1000, actual: 920 },
-    { name: 'Qua', plan: 1000, actual: 980 },
-    { name: 'Qui', plan: 1000, actual: 890 },
-    { name: 'Sex', plan: 1000, actual: 940 },
-    { name: 'Sáb', plan: 500, actual: 480 },
-    { name: 'Dom', plan: 500, actual: 520 },
-  ];
-
-  const setupsCount = 3;
+  const setupsCount = timeFilter === "today" ? 3 : 
+                     timeFilter === "yesterday" ? 2 :
+                     timeFilter === "week" ? 12 :
+                     timeFilter === "month" ? 45 : 3;
 
   return (
     <AppLayout title="Dashboard - OEE">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Dashboard OEE</h1>
+        <h1 className="text-2xl font-bold">Dashboard OEE - {empresa.nome}</h1>
         <LogoDisplay altura={36} />
       </div>
       
