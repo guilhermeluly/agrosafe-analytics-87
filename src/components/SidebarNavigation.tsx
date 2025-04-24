@@ -15,7 +15,7 @@ import {
   Package,
   Smartphone,
   HelpCircle,
-  MenuIcon,
+  Menu,
   Download,
   Target,
   Globe,
@@ -219,7 +219,7 @@ export default function SidebarNavigation() {
           <LogoDisplay altura={40} />
           <SidebarTrigger asChild>
             <Button variant="ghost" size="icon" className="md:hidden text-white hover:bg-gray-800">
-              <MenuIcon className="h-5 w-5" />
+              <Menu className="h-5 w-5" />
             </Button>
           </SidebarTrigger>
         </div>
@@ -232,21 +232,25 @@ export default function SidebarNavigation() {
             {menuItems.map((item) => (
               <SidebarMenuItem key={item.path + item.label}>
                 {item.onClick ? (
+                  // For buttons with onClick handlers
                   <SidebarMenuButton 
                     isActive={isActive(item.path)}
                     tooltip={item.label}
                     onClick={item.onClick}
                     className="hover:bg-gray-800 text-white data-[active=true]:bg-gray-800"
                   >
-                    <item.icon className="mr-2 h-5 w-5" />
-                    <span>{item.label}</span>
-                    {item.isNew && (
-                      <span className="ml-2 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full">
-                        Novo
-                      </span>
-                    )}
+                    <div className="flex items-center gap-2">
+                      <item.icon className="h-5 w-5" />
+                      <span>{item.label}</span>
+                      {item.isNew && (
+                        <span className="ml-2 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full">
+                          Novo
+                        </span>
+                      )}
+                    </div>
                   </SidebarMenuButton>
                 ) : (
+                  // For navigation links
                   <SidebarMenuButton 
                     asChild
                     isActive={isActive(item.path)}
@@ -254,7 +258,7 @@ export default function SidebarNavigation() {
                     className="hover:bg-gray-800 text-white data-[active=true]:bg-gray-800"
                   >
                     <Link to={item.path} className="flex items-center gap-2">
-                      <item.icon className="mr-2 h-5 w-5" />
+                      <item.icon className="h-5 w-5" />
                       <span>{item.label}</span>
                       {item.isNew && (
                         <span className="ml-2 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full">
