@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -32,13 +31,13 @@ import LogoConfig from "./pages/master/LogoConfig";
 const queryClient = new QueryClient();
 
 const App = () => (
-  <UserProvider>
-    <EmpresaProvider>
-      <QueryClientProvider client={queryClient}>
-        <HelmetProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
+  <QueryClientProvider client={queryClient}>
+    <HelmetProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <UserProvider>
+          <EmpresaProvider>
             <BrowserRouter>
               <Routes>
                 <Route path="/login" element={<Login />} />
@@ -102,7 +101,6 @@ const App = () => (
                   } 
                 />
                 
-                {/* New master admin specific routes */}
                 <Route 
                   path="/companies" 
                   element={
@@ -178,11 +176,11 @@ const App = () => (
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
-          </TooltipProvider>
-        </HelmetProvider>
-      </QueryClientProvider>
-    </EmpresaProvider>
-  </UserProvider>
+          </EmpresaProvider>
+        </UserProvider>
+      </TooltipProvider>
+    </HelmetProvider>
+  </QueryClientProvider>
 );
 
 export default App;
