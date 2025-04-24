@@ -53,3 +53,27 @@ export interface SetupStandard {
   location: string;
   maxTimeMinutes: number;
 }
+
+// Consistent type definitions for SetupTime and StopTime
+export interface SetupTime { 
+  id: string;
+  tempo: number;
+  descricao: string;
+  horarioInicio?: string;
+  horarioFim?: string;
+}
+
+export interface StopTime { 
+  id: string;
+  tempo: number; 
+  motivo: string;
+  horarioInicio?: string;
+  horarioFim?: string;
+}
+
+export interface ScheduledBreak {
+  id: string;
+  startTime: string;
+  endTime: string;
+  description: string;
+}

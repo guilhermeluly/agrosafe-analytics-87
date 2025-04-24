@@ -5,14 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-
-interface SetupTime { 
-  id: string;
-  tempo: number;
-  descricao: string;
-  horarioInicio?: string;
-  horarioFim?: string;
-}
+import { SetupTime } from "@/types";
 
 interface SetupTimesSectionProps {
   setups: SetupTime[];
@@ -151,7 +144,7 @@ export default function SetupTimesSection({
                   </thead>
                   <tbody>
                     {setups.map((setup, idx) => (
-                      <tr key={setup.id || idx} className="border-b">
+                      <tr key={setup.id} className="border-b">
                         <td className="px-4 py-2">{setup.descricao || "Setup"}</td>
                         <td className="px-4 py-2">
                           {setup.horarioInicio && setup.horarioFim 

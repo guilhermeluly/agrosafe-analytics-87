@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import AppLayout from '../../components/AppLayout';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -44,7 +45,7 @@ export default function ResetData() {
       // Otherwise toggle just the selected option
       setSelectedOptions({
         ...selectedOptions,
-        [option]: !selectedOptions[option as keyof typeof selectedOptions],
+        [option]: !selectedOptions[option],
         // Update "all data" checkbox if all individual items are checked
         allData: option !== 'allData' 
           ? !selectedOptions[option] && 

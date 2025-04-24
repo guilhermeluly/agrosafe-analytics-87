@@ -5,14 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
-interface StopTime { 
-  id: string;
-  tempo: number; 
-  motivo: string;
-  horarioInicio?: string;
-  horarioFim?: string;
-}
+import { StopTime } from "@/types";
 
 interface StopsSectionProps {
   stops: StopTime[];
@@ -157,7 +150,7 @@ export default function StopsSection({
                   </thead>
                   <tbody>
                     {stops.map((stop, idx) => (
-                      <tr key={stop.id || idx} className="border-b">
+                      <tr key={stop.id} className="border-b">
                         <td className="px-4 py-2">{stop.motivo}</td>
                         <td className="px-4 py-2">
                           {stop.horarioInicio && stop.horarioFim 

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import AppLayout from "../components/AppLayout";
 import DataTypeSelector from "@/components/data-input/DataTypeSelector";
@@ -26,6 +27,8 @@ import LogisticsSection from "@/components/production-form/LogisticsSection";
 import OEEPreviewSection from "@/components/production-form/OEEPreviewSection";
 import RegistrySection from "@/components/production-form/RegistrySection";
 import MovimentacaoFormFields from "@/components/production-form/MovimentacaoFormFields";
+import ScheduledBreaksComponent from "@/components/production-form/ScheduledBreaksComponent";
+import { SetupTime, StopTime, ScheduledBreak } from "@/types";
 
 const stopReasons = [
   "Manutenção",
@@ -50,9 +53,6 @@ const shifts = [
   { id: "3", name: "Noite", startTime: "22:00", endTime: "06:00" }
 ];
 
-type SetupTime = { tempo: number };
-type StopTime = { tempo: number; motivo: string };
-
 export default function ProductionForm() {
   const { user } = useUser();
   const { toast } = useToast();
@@ -72,9 +72,9 @@ export default function ProductionForm() {
     setupTime: 0,
     observations: ""
   });
-  const [setups, setSetups] = useState<SetupTime[]>([{ tempo: 0 }]);
+  const [setups, setSetups] = useState<SetupTime[]>([]);
   const [stops, setStops] = useState<StopTime[]>([]);
-  const [newStop, setNewStop] = useState<StopTime>({ tempo: 0, motivo: stopReasons[0] });
+  const [scheduledBreaks, setScheduledBreaks] = useState<ScheduledBreak[]>([]);
   const [selectedLine, setSelectedLine] = useState(productionLines[0]);
   const [workingHours, setWorkingHours] = useState(8);
   const [oeePreview, setOeePreview] = useState({
@@ -129,22 +129,46 @@ export default function ProductionForm() {
     }
   }, [formData, workingHours, setups, selectedLine]);
 
-  const handleSetupChange = (idx: number, valor: string) => {
-    setSetups(prev => prev.map((s, i) => i === idx ? { tempo: Number(valor) } : s));
+  const addSetup = (setup: Omit<SetupTime, "id">) => {
+    const newId = `setup-${Date.now()}`;
+    const newSetup: SetupTime = {
+      id: newId,
+      tempo: setup.tempo,
+      descricao: setup.descricao || "",
+      horarioInicio: setup.horarioInicio,
+      horarioFim: setup.horarioFim
+    };
+    setSetups(prev => [...prev, newSetup]);
   };
-  const addSetup = () => setSetups(prev => [...prev, { tempo: 0 }]);
-  const removeSetup = (idx: number) => setSetups(prev => prev.filter((_, i) => i !== idx));
 
-  const handleStopChange = (field: "tempo" | "motivo", valor: string) => {
-    setNewStop(prev => ({ ...prev, [field]: field === "tempo" ? Number(valor) : valor }));
+  const removeSetup = (idx: number) => {
+    setSetups(prev => prev.filter((_, i) => i !== idx));
   };
-  const addStop = () => {
-    if (newStop.tempo > 0 && newStop.motivo.trim()) {
-      setStops(prev => [...prev, newStop]);
-      setNewStop({ tempo: 0, motivo: stopReasons[0] });
-    }
+
+  const addStop = (stop: Omit<StopTime, "id">) => {
+    const newId = `stop-${Date.now()}`;
+    const newStop: StopTime = {
+      id: newId,
+      tempo: stop.tempo,
+      motivo: stop.motivo,
+      horarioInicio: stop.horarioInicio,
+      horarioFim: stop.horarioFim
+    };
+    setStops(prev => [...prev, newStop]);
   };
-  const removeStop = (idx: number) => setStops(prev => prev.filter((_, i) => i !== idx));
+
+  const removeStop = (idx: number) => {
+    setStops(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  const addScheduledBreak = (breakData: Omit<ScheduledBreak, "id">) => {
+    const newId = `break-${Date.now()}`;
+    setScheduledBreaks(prev => [...prev, { ...breakData, id: newId }]);
+  };
+
+  const removeScheduledBreak = (id: string) => {
+    setScheduledBreaks(prev => prev.filter(b => b.id !== id));
+  };
 
   const validateForm = () => {
     const errors: {[key: string]: string} = {};
@@ -168,7 +192,7 @@ export default function ProductionForm() {
       });
       return;
     }
-    console.log("Production data:", formData, "Setups:", setups, "Paradas:", stops, "Carga/Descarga:", { loading: loadingTime, unloading: unloadingTime });
+    console.log("Production data:", formData, "Setups:", setups, "Paradas:", stops, "Intervalos Programados:", scheduledBreaks);
     toast({
       title: "Dados salvos",
       description: "Os dados de produção foram salvos com sucesso."
@@ -342,12 +366,10 @@ export default function ProductionForm() {
                         </div>
                       </div>
 
-                      <LogisticsSection
-                        loadingTime={loadingTime}
-                        setLoadingTime={setLoadingTime}
-                        unloadingTime={unloadingTime}
-                        setUnloadingTime={setUnloadingTime}
-                        showLogistics={true}
+                      <ScheduledBreaksComponent 
+                        breaks={scheduledBreaks}
+                        addBreak={addScheduledBreak}
+                        removeBreak={removeScheduledBreak}
                       />
 
                       {formData.actualProduction > 0 && <OEEPreviewSection oeePreview={oeePreview} />}
@@ -355,19 +377,15 @@ export default function ProductionForm() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
                         <SetupTimesSection
                           setups={setups}
-                          handleSetupChange={handleSetupChange}
                           addSetup={addSetup}
                           removeSetup={removeSetup}
                           standardSetupTime={selectedLine.standardSetupTime}
                         />
                         <StopsSection
                           stops={stops}
-                          newStop={newStop}
                           stopReasons={stopReasons}
-                          setNewStop={setNewStop}
                           addStop={addStop}
                           removeStop={removeStop}
-                          handleStopChange={handleStopChange}
                         />
                       </div>
                       
