@@ -26,6 +26,14 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
       return <Navigate to="/unauthorized" replace />;
     }
 
+    // If not master_admin, ensure they can only access their company's data
+    if (user.role !== 'master_admin' && location.pathname.includes('/company/')) {
+      const requestedCompanyId = location.pathname.split('/company/')[1]?.split('/')[0];
+      if (requestedCompanyId && requestedCompanyId !== user.companyId) {
+        return <Navigate to="/unauthorized" replace />;
+      }
+    }
+
     return <>{children}</>;
   } catch (error) {
     // If useUser fails (provider not available), redirect to login

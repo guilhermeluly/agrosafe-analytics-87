@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode } from "react";
 
 export type UserRole = "master_admin" | "admin" | "operator" | "viewer";
@@ -85,6 +84,8 @@ type UserContextType = {
   isAuthorized: (requiredRoles: UserRole[]) => boolean;
   updateUserPhoto: (photoUrl: string) => void;
   updateUserPassword: (currentPassword: string, newPassword: string) => Promise<boolean>;
+  selectedCompanyId?: string;
+  setSelectedCompanyId: (companyId: string) => void;
 };
 
 const UserContext = createContext<UserContextType | null>(null);
@@ -98,6 +99,10 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     const savedUser = localStorage.getItem('rememberedUser');
     return savedUser ? JSON.parse(savedUser) : defaultUser;
   });
+  
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string>(
+    user.role === 'master_admin' ? mockUsers[1].companyId || '' : user.companyId || ''
+  );
 
   const login = async (email: string, password: string, rememberMe: boolean = false): Promise<boolean> => {
     const foundUser = mockUsers.find(
@@ -159,8 +164,19 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     return false;
   };
 
+  const contextValue: UserContextType = {
+    user,
+    login,
+    logout,
+    isAuthorized,
+    updateUserPhoto,
+    updateUserPassword,
+    selectedCompanyId,
+    setSelectedCompanyId
+  };
+
   return (
-    <UserContext.Provider value={{ user, login, logout, isAuthorized, updateUserPhoto, updateUserPassword }}>
+    <UserContext.Provider value={contextValue}>
       {children}
     </UserContext.Provider>
   );
