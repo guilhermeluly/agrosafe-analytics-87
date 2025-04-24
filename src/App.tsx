@@ -29,6 +29,8 @@ import ChangePassword from "./pages/master/ChangePassword";
 import LogoConfig from "./pages/master/LogoConfig";
 import Cadastros from "./pages/admin/Cadastros";
 import ResetData from "./pages/master/ResetData";
+import PresentationMode from "./pages/PresentationMode";
+import GoalsSettings from "./pages/GoalsSettings";
 
 const queryClient = new QueryClient();
 
@@ -95,6 +97,24 @@ const App = () => (
                   element={
                     <ProtectedRoute requiredRoles={["master_admin", "admin"]}>
                       <Cadastros />
+                    </ProtectedRoute>
+                  } 
+                />
+                
+                <Route 
+                  path="/goals" 
+                  element={
+                    <ProtectedRoute requiredRoles={["master_admin", "admin"]}>
+                      <GoalsSettings />
+                    </ProtectedRoute>
+                  } 
+                />
+                
+                <Route 
+                  path="/presentation-mode" 
+                  element={
+                    <ProtectedRoute requiredRoles={["master_admin", "admin", "operator", "viewer"]}>
+                      <PresentationMode />
                     </ProtectedRoute>
                   } 
                 />

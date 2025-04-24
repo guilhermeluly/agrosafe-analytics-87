@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useUser } from "../context/UserContext";
@@ -41,6 +42,7 @@ import { Button } from "@/components/ui/button";
 import LogoDisplay from "./LogoDisplay";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useNavigate } from "react-router-dom";
 
 interface MenuItem {
   icon: React.ComponentType<any>;
@@ -56,20 +58,11 @@ export default function SidebarNavigation() {
   const location = useLocation();
   const { toast } = useToast();
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
   const isActive = (path: string) => location.pathname === path;
 
-  const handleExportData = () => {
-    toast({
-      title: "Exportação iniciada",
-      description: "Os dados estão sendo exportados para CSV."
-    });
-  };
-
   const handlePresentationMode = () => {
-    toast({
-      title: "Modo de Apresentação",
-      description: "Iniciando modo de apresentação dos indicadores."
-    });
+    navigate("/presentation-mode");
   };
 
   const handleSidebarTrigger = () => {
@@ -108,9 +101,8 @@ export default function SidebarNavigation() {
       {
         icon: PresentationIcon,
         label: "Modo Apresentação",
-        path: "#",
-        roles: ["master_admin", "admin", "operator", "viewer"],
-        onClick: handlePresentationMode
+        path: "/presentation-mode",
+        roles: ["master_admin", "admin", "operator", "viewer"]
       }
     ];
 
@@ -144,7 +136,12 @@ export default function SidebarNavigation() {
         label: "Exportar Dados",
         path: "#",
         roles: ["master_admin", "admin"],
-        onClick: handleExportData
+        onClick: () => {
+          toast({
+            title: "Exportação iniciada",
+            description: "Os dados estão sendo exportados para CSV."
+          });
+        }
       }
     ];
 
@@ -171,8 +168,7 @@ export default function SidebarNavigation() {
         icon: Trash2,
         label: "Reset de Dados",
         path: "/reset-data",
-        roles: ["master_admin"],
-        isNew: true
+        roles: ["master_admin"]
       },
       {
         icon: Lock,
