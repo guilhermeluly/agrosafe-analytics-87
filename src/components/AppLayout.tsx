@@ -27,7 +27,7 @@ export default function AppLayout({ children, title }: AppLayoutProps) {
   return (
     <>
       <Helmet><title>{title}</title></Helmet>
-      <SidebarProvider defaultCollapsed={false}>
+      <SidebarProvider defaultOpen={true}>
         <div className="flex min-h-screen w-full flex-col">
           <div className="flex flex-1 w-full">
             <SidebarNavigation />
