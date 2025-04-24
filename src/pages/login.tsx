@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
@@ -7,11 +8,13 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { login, user } = useUser();
   const { empresa } = useEmpresa();
@@ -23,7 +26,7 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      const success = await login(email, password);
+      const success = await login(email, password, rememberMe);
       if (success) {
         toast({
           title: "Login bem-sucedido",
@@ -58,7 +61,6 @@ export default function Login() {
   return (
     <>
       <Helmet>
-        {/* Deixar o title em branco (sem nome do sistema ou cliente) */}
         <title></title>
       </Helmet>
       <div
@@ -79,11 +81,6 @@ export default function Login() {
           </div>
           <Card className="w-full bg-transparent shadow-none border-none">
             <CardHeader className="space-y-1 text-center">
-              {/* Não exibir nome do cliente ou Indicadores */}
-              {/* <CardTitle> */}
-              {/*    {empresa.nome} - Indicadores */}
-              {/* </CardTitle> */}
-              {/* Exibir apenas o subtítulo do sistema */}
               <CardDescription className="text-lg text-neutral-600 mt-2">
                 Sistema de monitoramento de desempenho operacional
               </CardDescription>
@@ -126,6 +123,16 @@ export default function Login() {
                     className="h-11 text-lg bg-white/70"
                   />
                 </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="rememberMe"
+                    checked={rememberMe}
+                    onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+                  />
+                  <Label htmlFor="rememberMe" className="text-sm">
+                    Permanecer conectado
+                  </Label>
+                </div>
                 <Button
                   type="submit"
                   className="w-full h-11 text-lg font-semibold rounded-full bg-primary hover:bg-primary/90 shadow-md hover:scale-105 transition-transform"
@@ -135,9 +142,7 @@ export default function Login() {
                 </Button>
               </form>
             </CardContent>
-            <CardFooter className="flex flex-col">
-              {/* Removido o bloco com emails e senhas de demonstração */}
-            </CardFooter>
+            <CardFooter className="flex flex-col" />
           </Card>
           <div className="mt-10 text-center text-xs text-gray-700 pb-6">
             Desenvolvido por AgroSafe Serviços Empresariais LTDA

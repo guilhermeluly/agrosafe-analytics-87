@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode } from "react";
 
 export type UserRole = "master_admin" | "admin" | "operator" | "viewer";
@@ -59,7 +58,7 @@ const mockUsers = [
 
 type UserContextType = {
   user: UserInfo;
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (email: string, password: string, rememberMe: boolean) => Promise<boolean>;
   logout: () => void;
   isAuthorized: (requiredRoles: UserRole[]) => boolean;
   updateUserPhoto: (photoUrl: string) => void;
@@ -73,23 +72,30 @@ interface UserProviderProps {
 }
 
 export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<UserInfo>(defaultUser);
+  const [user, setUser] = useState<UserInfo>(() => {
+    const savedUser = localStorage.getItem('rememberedUser');
+    return savedUser ? JSON.parse(savedUser) : defaultUser;
+  });
 
-  const login = async (email: string, password: string): Promise<boolean> => {
-    // Mock authentication - in a real app, this would call an API
+  const login = async (email: string, password: string, rememberMe: boolean = false): Promise<boolean> => {
     const foundUser = mockUsers.find(
       (u) => u.email === email && u.password === password
     );
 
     if (foundUser) {
-      setUser({
+      const userInfo = {
         id: foundUser.id,
         name: foundUser.name,
         email: foundUser.email,
         role: foundUser.role,
         isAuthenticated: true,
         photo: foundUser.photo,
-      });
+      };
+      setUser(userInfo);
+      
+      if (rememberMe) {
+        localStorage.setItem('rememberedUser', JSON.stringify(userInfo));
+      }
       return true;
     }
     return false;
@@ -97,6 +103,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
   const logout = () => {
     setUser(defaultUser);
+    localStorage.removeItem('rememberedUser');
   };
 
   const isAuthorized = (requiredRoles: UserRole[]): boolean => {
