@@ -5,14 +5,44 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Package, Truck, Settings } from "lucide-react";
+import LoginForm from '@/components/auth/LoginForm';
+import { useAuth } from '@/contexts/AuthContext';
+import LogoutButton from '@/components/auth/LogoutButton';
+import ReceivingForm from '@/components/logistics/ReceivingForm';
+import ShippingForm from '@/components/logistics/ShippingForm';
+import LogisticsIndicators from '@/components/logistics/LogisticsIndicators';
 
 const Index = () => {
+  const { isAuthenticated, login } = useAuth();
+
+  const handleLoginSuccess = () => {
+    login();
+  };
+
+  if (!isAuthenticated) {
+    return (
+      <div className="container mx-auto py-8 px-4">
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="text-2xl">Sistema de Gestão de Produção</CardTitle>
+            <CardDescription>Faça login para acessar o sistema</CardDescription>
+          </CardHeader>
+        </Card>
+        
+        <LoginForm onLoginSuccess={handleLoginSuccess} />
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto py-8 px-4">
       <Card className="mb-8">
-        <CardHeader>
-          <CardTitle className="text-2xl">Sistema de Gestão de Produção</CardTitle>
-          <CardDescription>Selecione um módulo para começar</CardDescription>
+        <CardHeader className="flex flex-row items-center">
+          <div>
+            <CardTitle className="text-2xl">Sistema de Gestão de Produção</CardTitle>
+            <CardDescription>Selecione um módulo para começar</CardDescription>
+          </div>
+          <LogoutButton />
         </CardHeader>
       </Card>
 
@@ -55,9 +85,41 @@ const Index = () => {
             </div>
           </CardHeader>
           <CardContent>
-            <Link to="/logistics">
-              <Button className="w-full">Acessar</Button>
-            </Link>
+            <Button 
+              className="w-full" 
+              onClick={() => document.getElementById('logistics-tab')?.scrollIntoView({ behavior: 'smooth' })}
+            >
+              Acessar
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div id="logistics-tab" className="mt-10">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">Módulo de Logística</CardTitle>
+            <CardDescription>
+              Gerenciamento de operações de recebimento e expedição
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="receiving" className="w-full">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="receiving">Recebimento</TabsTrigger>
+                <TabsTrigger value="shipping">Expedição</TabsTrigger>
+                <TabsTrigger value="indicators">Indicadores</TabsTrigger>
+              </TabsList>
+              <TabsContent value="receiving">
+                <ReceivingForm />
+              </TabsContent>
+              <TabsContent value="shipping">
+                <ShippingForm />
+              </TabsContent>
+              <TabsContent value="indicators">
+                <LogisticsIndicators />
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
       </div>
