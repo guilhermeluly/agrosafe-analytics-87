@@ -220,15 +220,18 @@ export default function SidebarNavigation() {
       <SidebarHeader className="py-4 border-b bg-gray-900 text-white">
         <div className="px-4 flex items-center justify-between">
           <LogoDisplay altura={40} />
-          <SidebarTrigger asChild>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="md:hidden text-white hover:bg-gray-800"
-              onClick={handleSidebarTrigger}
-            >
-              <Menu className="h-5 w-5" />
-            </Button>
+          {/* Fix: Wrap the Button in a div for SidebarTrigger */}
+          <SidebarTrigger>
+            <div>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="md:hidden text-white hover:bg-gray-800"
+                onClick={handleSidebarTrigger}
+              >
+                <Menu className="h-5 w-5" />
+              </Button>
+            </div>
           </SidebarTrigger>
         </div>
       </SidebarHeader>
