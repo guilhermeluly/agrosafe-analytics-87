@@ -231,14 +231,13 @@ export default function SidebarNavigation() {
           <SidebarMenu>
             {menuItems.map((item) => (
               <SidebarMenuItem key={item.path + item.label}>
-                <SidebarMenuButton 
-                  asChild={!item.onClick}
-                  isActive={isActive(item.path)}
-                  tooltip={item.label}
-                  onClick={item.onClick}
-                  className="hover:bg-gray-800 text-white data-[active=true]:bg-gray-800"
-                >
-                  {item.onClick ? (
+                {item.onClick ? (
+                  <SidebarMenuButton 
+                    isActive={isActive(item.path)}
+                    tooltip={item.label}
+                    onClick={item.onClick}
+                    className="hover:bg-gray-800 text-white data-[active=true]:bg-gray-800"
+                  >
                     <div className="flex items-center py-2 cursor-pointer">
                       <item.icon className="mr-2 h-5 w-5" />
                       <span>{item.label}</span>
@@ -248,7 +247,14 @@ export default function SidebarNavigation() {
                         </span>
                       )}
                     </div>
-                  ) : (
+                  </SidebarMenuButton>
+                ) : (
+                  <SidebarMenuButton 
+                    asChild
+                    isActive={isActive(item.path)}
+                    tooltip={item.label}
+                    className="hover:bg-gray-800 text-white data-[active=true]:bg-gray-800"
+                  >
                     <Link to={item.path} className="flex items-center py-2">
                       <item.icon className="mr-2 h-5 w-5" />
                       <span>{item.label}</span>
@@ -258,8 +264,8 @@ export default function SidebarNavigation() {
                         </span>
                       )}
                     </Link>
-                  )}
-                </SidebarMenuButton>
+                  </SidebarMenuButton>
+                )}
               </SidebarMenuItem>
             ))}
           </SidebarMenu>
@@ -278,7 +284,7 @@ export default function SidebarNavigation() {
               <div className="text-xs text-gray-400 capitalize">{user.role.replace('_', ' ')}</div>
             </div>
           </div>
-          <SidebarMenuButton 
+          <Button 
             onClick={logout} 
             variant="outline" 
             size="sm" 
@@ -286,7 +292,7 @@ export default function SidebarNavigation() {
           >
             <LogOut size={16} className="mr-2" />
             Sair
-          </SidebarMenuButton>
+          </Button>
         </div>
       </SidebarFooter>
     </Sidebar>
