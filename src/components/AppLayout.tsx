@@ -6,7 +6,7 @@ import { useEmpresa } from "../context/EmpresaContext";
 import SidebarNavigation from "./SidebarNavigation";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { MenuIcon } from "lucide-react";
+import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface AppLayoutProps {
@@ -46,7 +46,7 @@ export default function AppLayout({ children, title }: AppLayoutProps) {
                       }
                     }}
                   >
-                    <MenuIcon className="h-5 w-5" />
+                    <Menu className="h-5 w-5" />
                   </Button>
                 </div>
               )}
