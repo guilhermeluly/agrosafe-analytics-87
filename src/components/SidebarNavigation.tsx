@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useUser } from "../context/UserContext";
 import { 
@@ -39,6 +39,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import LogoDisplay from "./LogoDisplay";
 import { useToast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // Define interface for menu items
 interface MenuItem {
@@ -47,13 +48,14 @@ interface MenuItem {
   path: string;
   roles: string[];
   isNew?: boolean;
-  onClick?: () => void; // Make onClick properly optional
+  onClick?: () => void;
 }
 
 export default function SidebarNavigation() {
   const { user, logout } = useUser();
   const location = useLocation();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   const isActive = (path: string) => location.pathname === path;
 
   const handleExportData = () => {
@@ -215,7 +217,7 @@ export default function SidebarNavigation() {
       <SidebarHeader className="py-4 border-b bg-gray-900 text-white">
         <div className="px-4 flex items-center justify-between">
           <LogoDisplay altura={40} />
-          <SidebarTrigger>
+          <SidebarTrigger asChild>
             <Button variant="ghost" size="icon" className="md:hidden text-white hover:bg-gray-800">
               <MenuIcon className="h-5 w-5" />
             </Button>
