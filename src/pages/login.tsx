@@ -1,15 +1,15 @@
-
 import React, { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../context/UserContext";
 import { useEmpresa } from "../context/EmpresaContext";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
+import { CompanySelector } from "@/components/CompanySelector";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -32,7 +32,7 @@ export default function Login() {
           title: "Login bem-sucedido",
           description: "Você foi autenticado com sucesso.",
         });
-        navigate("/production-form");
+        navigate("/home");
       } else {
         toast({
           variant: "destructive",
@@ -61,7 +61,7 @@ export default function Login() {
   return (
     <>
       <Helmet>
-        <title></title>
+        <title>Login - AgroSafe</title>
       </Helmet>
       <div
         className="min-h-screen flex flex-col items-center justify-center"
@@ -85,18 +85,10 @@ export default function Login() {
                 Sistema de monitoramento de desempenho operacional
               </CardDescription>
             </CardHeader>
-            {isMasterAdmin && (
-              <div className="mb-4 text-center text-amber-700 bg-amber-100 border border-amber-200 px-2 py-1 rounded text-xs">
-                Como Administrador Master, você pode editar o logo exibido nesta tela em:<br />
-                <b>Menu &gt; Master &gt; Configuração de Logo</b>
-              </div>
-            )}
             <CardContent className="pb-0">
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
-                  <Label htmlFor="email" className="ml-1">
-                    Email
-                  </Label>
+                  <Label htmlFor="email">Email</Label>
                   <Input
                     id="email"
                     type="email"
@@ -109,9 +101,7 @@ export default function Login() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="password" className="ml-1">
-                    Senha
-                  </Label>
+                  <Label htmlFor="password">Senha</Label>
                   <Input
                     id="password"
                     type="password"
@@ -133,6 +123,7 @@ export default function Login() {
                     Permanecer conectado
                   </Label>
                 </div>
+                {user.role === "master_admin" && <CompanySelector />}
                 <Button
                   type="submit"
                   className="w-full h-11 text-lg font-semibold rounded-full bg-primary hover:bg-primary/90 shadow-md hover:scale-105 transition-transform"
@@ -142,13 +133,14 @@ export default function Login() {
                 </Button>
               </form>
             </CardContent>
-            <CardFooter className="flex flex-col" />
+            <CardFooter className="flex flex-col pb-6">
+              <div className="mt-8 text-xs text-gray-700">
+                Desenvolvido por AgroSafe Serviços Empresariais LTDA
+                <br />
+                CNPJ 54.630.417/0001-67
+              </div>
+            </CardFooter>
           </Card>
-          <div className="mt-10 text-center text-xs text-gray-700 pb-6">
-            Desenvolvido por AgroSafe Serviços Empresariais LTDA
-            <br />
-            CNPJ 54.630.417/0001-67
-          </div>
         </div>
       </div>
     </>
