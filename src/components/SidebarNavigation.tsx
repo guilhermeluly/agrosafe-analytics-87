@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useUser } from "../context/UserContext";
@@ -211,19 +212,6 @@ export default function SidebarNavigation() {
   const menuItems = getMenuItems();
   const userInitials = user.name.split(' ').map(n => n[0]).join('').toUpperCase();
 
-  // Helper function to render menu item content
-  const renderMenuItemContent = (item: MenuItem) => (
-    <>
-      <item.icon className="mr-2 h-5 w-5" />
-      <span>{item.label}</span>
-      {item.isNew && (
-        <span className="ml-2 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full">
-          Novo
-        </span>
-      )}
-    </>
-  );
-
   return (
     <Sidebar>
       <SidebarHeader className="py-4 border-b bg-gray-900 text-white">
@@ -250,7 +238,13 @@ export default function SidebarNavigation() {
                     onClick={item.onClick}
                     className="hover:bg-gray-800 text-white data-[active=true]:bg-gray-800"
                   >
-                    {renderMenuItemContent(item)}
+                    <item.icon className="mr-2 h-5 w-5" />
+                    <span>{item.label}</span>
+                    {item.isNew && (
+                      <span className="ml-2 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full">
+                        Novo
+                      </span>
+                    )}
                   </SidebarMenuButton>
                 ) : (
                   <SidebarMenuButton 
@@ -259,8 +253,14 @@ export default function SidebarNavigation() {
                     tooltip={item.label}
                     className="hover:bg-gray-800 text-white data-[active=true]:bg-gray-800"
                   >
-                    <Link to={item.path}>
-                      {renderMenuItemContent(item)}
+                    <Link to={item.path} className="flex items-center gap-2">
+                      <item.icon className="mr-2 h-5 w-5" />
+                      <span>{item.label}</span>
+                      {item.isNew && (
+                        <span className="ml-2 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full">
+                          Novo
+                        </span>
+                      )}
                     </Link>
                   </SidebarMenuButton>
                 )}
