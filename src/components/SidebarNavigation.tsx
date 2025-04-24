@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useUser } from "../context/UserContext";
@@ -124,13 +123,6 @@ export default function SidebarNavigation() {
         roles: ["master_admin", "admin"]
       },
       {
-        icon: FileSpreadsheet,
-        label: "Cadastros",
-        path: "/cadastros",
-        roles: ["master_admin", "admin"],
-        isNew: true
-      },
-      {
         icon: Target,
         label: "Definir Metas",
         path: "/goals",
@@ -150,7 +142,7 @@ export default function SidebarNavigation() {
         onClick: handleExportData
       }
     ];
-    
+
     const masterAdminItems: MenuItem[] = [
       {
         icon: UserCog,

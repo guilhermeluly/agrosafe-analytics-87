@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import AppLayout from '../../components/AppLayout';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,12 +16,18 @@ const MOCK_COMPANIES = [
   { id: '3', name: 'Fábrica Gama' },
 ];
 
+interface ResetOptions {
+  productionData: boolean;
+  userData: boolean;
+  configData: boolean;
+  allData: boolean;
+}
+
 export default function ResetData() {
   const { toast } = useToast();
   const [selectedCompanyId, setSelectedCompanyId] = useState('1');
   
-  // Options for what to delete
-  const [selectedOptions, setSelectedOptions] = useState({
+  const [selectedOptions, setSelectedOptions] = useState<ResetOptions>({
     productionData: false,
     userData: false,
     configData: false,
@@ -32,50 +37,60 @@ export default function ResetData() {
   // Company info based on selected ID
   const selectedCompany = MOCK_COMPANIES.find(c => c.id === selectedCompanyId) || MOCK_COMPANIES[0];
 
-  const handleOptionChange = (option: keyof typeof selectedOptions) => {
+  const handleOptionChange = (option: keyof ResetOptions) => {
     if (option === 'allData') {
-      // If "all data" is selected, check all options
+      const newValue = !selectedOptions.allData;
       setSelectedOptions({
-        productionData: !selectedOptions.allData,
-        userData: !selectedOptions.allData,
-        configData: !selectedOptions.allData,
-        allData: !selectedOptions.allData,
+        productionData: newValue,
+        userData: newValue,
+        configData: newValue,
+        allData: newValue,
       });
     } else {
-      // Otherwise toggle just the selected option
-      setSelectedOptions({
+      const newOptions = {
         ...selectedOptions,
         [option]: !selectedOptions[option],
-        // Update "all data" checkbox if all individual items are checked
-        allData: option !== 'allData' 
-          ? !selectedOptions[option] && 
-            Object.entries(selectedOptions)
-              .filter(([key]) => key !== 'allData' && key !== option)
-              .every(([_, value]) => value)
-          : selectedOptions.allData,
-      });
+      };
+      
+      // Update allData based on other selections
+      newOptions.allData = 
+        newOptions.productionData && 
+        newOptions.userData && 
+        newOptions.configData;
+      
+      setSelectedOptions(newOptions);
     }
   };
 
-  const handleReset = () => {
-    // This would normally be an API call to reset the data
-    let resetItems = [];
-    if (selectedOptions.productionData) resetItems.push("dados de produção");
-    if (selectedOptions.userData) resetItems.push("dados de usuários");
-    if (selectedOptions.configData) resetItems.push("configurações");
-    
-    toast({
-      title: `Reset da ${selectedCompany.name} concluído`,
-      description: `Os seguintes dados foram resetados: ${resetItems.join(", ")}.`,
-    });
-    
-    // Reset selection after completing
-    setSelectedOptions({
-      productionData: false,
-      userData: false,
-      configData: false,
-      allData: false,
-    });
+  const handleReset = async () => {
+    try {
+      // This would be an actual API call in production
+      let resetItems = [];
+      if (selectedOptions.productionData) resetItems.push("dados de produção");
+      if (selectedOptions.userData) resetItems.push("dados de usuários");
+      if (selectedOptions.configData) resetItems.push("configurações");
+      
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      toast({
+        title: `Reset da ${selectedCompany.name} concluído`,
+        description: `Os seguintes dados foram resetados: ${resetItems.join(", ")}.`,
+      });
+      
+      setSelectedOptions({
+        productionData: false,
+        userData: false,
+        configData: false,
+        allData: false,
+      });
+    } catch (error) {
+      toast({
+        title: "Erro ao resetar dados",
+        description: "Ocorreu um erro ao tentar resetar os dados.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleExportData = () => {
