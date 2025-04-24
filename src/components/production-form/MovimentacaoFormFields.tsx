@@ -1,10 +1,11 @@
+
 import React, { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Save, Plus, Trash2, ArrowRight } from "lucide-react";
+import { Save, Plus, Trash2, ArrowRight, ArrowLeft } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
@@ -44,6 +45,8 @@ interface MovimentacaoFormFieldsProps {
 
 export default function MovimentacaoFormFields({ onSave }: MovimentacaoFormFieldsProps) {
   const { toast } = useToast();
+  const [selectedType, setSelectedType] = useState<"selector" | "expedicao" | "descarga">("selector");
+  
   const [expedicaoData, setExpedicaoData] = useState<MovimentacaoData>({
     date: new Date().toISOString().split('T')[0],
     shift: "Manhã",
@@ -287,13 +290,57 @@ export default function MovimentacaoFormFields({ onSave }: MovimentacaoFormField
     });
   };
 
+  // Component for selecting the type of operation
+  const TypeSelector = () => (
+    <Card className="mb-6">
+      <CardHeader className="bg-cyan-50 text-cyan-800 rounded-t-lg">
+        <CardTitle>Selecione o Tipo de Operação</CardTitle>
+        <CardDescription className="text-cyan-700">
+          Escolha entre expedição (carregamento) ou recebimento (descarregamento)
+        </CardDescription>
+      </CardHeader>
+      
+      <CardContent className="pt-6 space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Button
+            onClick={() => setSelectedType("expedicao")}
+            className="h-24 bg-green-600 hover:bg-green-700 text-white flex flex-col items-center justify-center space-y-2"
+          >
+            <span className="text-lg font-semibold">Expedição</span>
+            <span className="text-sm">(Carregamento)</span>
+            <ArrowRight className="w-6 h-6" />
+          </Button>
+          <Button
+            onClick={() => setSelectedType("descarga")}
+            className="h-24 bg-blue-600 hover:bg-blue-700 text-white flex flex-col items-center justify-center space-y-2"
+          >
+            <span className="text-lg font-semibold">Recebimento</span>
+            <span className="text-sm">(Descarregamento)</span>
+            <ArrowRight className="w-6 h-6" />
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  // Component for the Expedição (Loading) form
   const ExpedicaoForm = () => {
     const metrics = calculateMetrics(expedicaoData);
     
     return (
-      <Card className="mb-6">
-        <CardHeader className="bg-vividPurple text-white rounded-t-lg">
-          <CardTitle>Expedição</CardTitle>
+      <Card>
+        <CardHeader className="bg-green-500 text-white rounded-t-lg">
+          <CardTitle className="flex justify-between items-center">
+            <span>Expedição (Carregamento)</span>
+            <Button 
+              variant="ghost" 
+              onClick={() => setSelectedType("selector")}
+              className="text-white hover:text-green-100 flex items-center"
+            >
+              <ArrowLeft className="mr-1 h-4 w-4" />
+              Voltar
+            </Button>
+          </CardTitle>
           <CardDescription className="text-gray-100">
             Registro de carregamento de caminhões - {expedicaoData.entries.length} caminhões registrados
           </CardDescription>
@@ -496,7 +543,7 @@ export default function MovimentacaoFormFields({ onSave }: MovimentacaoFormField
             </Button>
             <Button
               onClick={finalizeExpedicao}
-              className="flex-1 bg-vividPurple hover:bg-primary/90"
+              className="flex-1 bg-green-600 hover:bg-green-700"
             >
               Finalizar Preenchimento
             </Button>
@@ -506,13 +553,24 @@ export default function MovimentacaoFormFields({ onSave }: MovimentacaoFormField
     );
   };
 
+  // Component for the Descarga (Unloading) form
   const DescargaForm = () => {
     const metrics = calculateMetrics(descargaData);
     
     return (
       <Card>
         <CardHeader className="bg-blue-600 text-white rounded-t-lg">
-          <CardTitle>Descarregamento</CardTitle>
+          <CardTitle className="flex justify-between items-center">
+            <span>Descarregamento (Recebimento)</span>
+            <Button 
+              variant="ghost" 
+              onClick={() => setSelectedType("selector")}
+              className="text-white hover:text-blue-100 flex items-center"
+            >
+              <ArrowLeft className="mr-1 h-4 w-4" />
+              Voltar
+            </Button>
+          </CardTitle>
           <CardDescription className="text-gray-100">
             Registro de descarregamento de caminhões - {descargaData.entries.length} caminhões registrados
           </CardDescription>
@@ -725,10 +783,16 @@ export default function MovimentacaoFormFields({ onSave }: MovimentacaoFormField
     );
   };
 
+  // Render the selected form based on state
   return (
     <div className="space-y-8">
-      <ExpedicaoForm />
-      <DescargaForm />
+      {selectedType === "selector" ? (
+        <TypeSelector />
+      ) : selectedType === "expedicao" ? (
+        <ExpedicaoForm />
+      ) : (
+        <DescargaForm />
+      )}
     </div>
   );
 }
