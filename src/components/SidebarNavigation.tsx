@@ -91,8 +91,7 @@ export default function SidebarNavigation() {
         icon: FileText,
         label: "Registrar Dados",
         path: "/production-form",
-        roles: ["master_admin", "admin", "operator"],
-        isNew: false
+        roles: ["master_admin", "admin", "operator"]
       },
       {
         icon: LayoutDashboard,

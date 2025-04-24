@@ -6,7 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import RegistrySection from '@/components/production-form/RegistrySection';
 import TruckTypesRegistry from '@/components/registries/TruckTypesRegistry';
 import ShiftsRegistry from '@/components/registries/ShiftsRegistry';
-import { Clock, Truck, Factory } from 'lucide-react';
+import StopReasonsRegistry from '@/components/registries/StopReasonsRegistry';
+import { Clock, Truck, Factory, Pause } from 'lucide-react';
 
 export default function Cadastros() {
   return (
@@ -15,7 +16,7 @@ export default function Cadastros() {
         <h1 className="text-2xl font-bold mb-6">Cadastros do Sistema</h1>
         
         <Tabs defaultValue="lines" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-1 md:grid-cols-3 gap-4">
+          <TabsList className="grid w-full grid-cols-1 md:grid-cols-4 gap-4">
             <TabsTrigger value="lines" className="flex items-center gap-2">
               <Factory className="h-4 w-4" />
               Linhas e Locais
@@ -27,6 +28,10 @@ export default function Cadastros() {
             <TabsTrigger value="trucks" className="flex items-center gap-2">
               <Truck className="h-4 w-4" />
               Tipos de Veículos
+            </TabsTrigger>
+            <TabsTrigger value="stopReasons" className="flex items-center gap-2">
+              <Pause className="h-4 w-4" />
+              Motivos de Parada
             </TabsTrigger>
           </TabsList>
           
@@ -65,6 +70,17 @@ export default function Cadastros() {
               </CardHeader>
               <CardContent>
                 <TruckTypesRegistry />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="stopReasons">
+            <Card>
+              <CardHeader>
+                <CardTitle>Cadastro de Motivos de Parada</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <StopReasonsRegistry />
               </CardContent>
             </Card>
           </TabsContent>

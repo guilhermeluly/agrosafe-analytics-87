@@ -32,7 +32,6 @@ export default function StopsSection({
       return;
     }
 
-    // Se horários foram fornecidos, calcular o tempo automaticamente
     if (newStop.horarioInicio && newStop.horarioFim) {
       const inicio = new Date(`2000-01-01T${newStop.horarioInicio}:00`);
       const fim = new Date(`2000-01-01T${newStop.horarioFim}:00`);
@@ -46,7 +45,6 @@ export default function StopsSection({
       addStop(newStop);
     }
     
-    // Reset form
     setNewStop({
       tempo: 0,
       motivo: stopReasons[0] || "",
@@ -59,7 +57,6 @@ export default function StopsSection({
     setNewStop(prev => ({ ...prev, [field]: value }));
   };
 
-  // Calcular tempo total de paradas
   const totalStopTime = stops.reduce((total, stop) => total + stop.tempo, 0);
 
   return (
@@ -118,8 +115,8 @@ export default function StopsSection({
                   <SelectValue placeholder="Selecione o motivo" />
                 </SelectTrigger>
                 <SelectContent>
-                  {stopReasons.map((reason, idx) => (
-                    <SelectItem key={idx} value={reason}>{reason}</SelectItem>
+                  {stopReasons.map((reason) => (
+                    <SelectItem key={reason} value={reason}>{reason}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
