@@ -123,6 +123,12 @@ export default function SidebarNavigation() {
         roles: ["master_admin", "admin"]
       },
       {
+        icon: Edit,
+        label: "Cadastros",
+        path: "/admin/cadastros",
+        roles: ["master_admin", "admin"]
+      },
+      {
         icon: Target,
         label: "Definir Metas",
         path: "/goals",

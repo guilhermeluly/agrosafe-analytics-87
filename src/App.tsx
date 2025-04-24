@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -18,8 +19,6 @@ import DatabasePage from "./pages/database";
 import { EmpresaProvider } from "./context/EmpresaContext";
 import { UserProvider } from "./context/UserContext";
 import ProtectedRoute from "./components/ProtectedRoute";
-
-// Imports para páginas existentes
 import Companies from "./pages/master/Companies";
 import Users from "./pages/master/Users";
 import Plans from "./pages/master/Plans";
@@ -28,8 +27,6 @@ import Help from "./pages/Help";
 import DnsConfig from "./pages/master/DnsConfig";
 import ChangePassword from "./pages/master/ChangePassword";
 import LogoConfig from "./pages/master/LogoConfig";
-
-// Imports para as novas páginas
 import Cadastros from "./pages/admin/Cadastros";
 import ResetData from "./pages/master/ResetData";
 
@@ -46,10 +43,8 @@ const App = () => (
                 <Route path="/login" element={<Login />} />
                 <Route path="/unauthorized" element={<Unauthorized />} />
                 
-                {/* Redirect root to production-form */}
                 <Route path="/" element={<Navigate to="/production-form" replace />} />
                 
-                {/* Home page */}
                 <Route 
                   path="/home" 
                   element={
@@ -91,6 +86,15 @@ const App = () => (
                   element={
                     <ProtectedRoute requiredRoles={["master_admin", "admin"]}>
                       <Admin />
+                    </ProtectedRoute>
+                  } 
+                />
+                
+                <Route 
+                  path="/admin/cadastros" 
+                  element={
+                    <ProtectedRoute requiredRoles={["master_admin", "admin"]}>
+                      <Cadastros />
                     </ProtectedRoute>
                   } 
                 />
