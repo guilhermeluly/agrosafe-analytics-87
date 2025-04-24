@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
@@ -10,6 +9,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -21,6 +27,19 @@ export default function Login() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  // Add new state for selected company
+  const [selectedCompany, setSelectedCompany] = useState<string>("");
+
+  const isMasterAdmin =
+    user &&
+    user.email === "Guilhermeluly@hotmail.com";
+
+  const MOCK_COMPANIES = [
+    { id: '1', name: 'Empresa Alpha' },
+    { id: '2', name: 'Indústria Beta' },
+    { id: '3', name: 'Fábrica Gama' },
+  ];
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -28,6 +47,16 @@ export default function Login() {
     try {
       const success = await login(email, password, rememberMe);
       if (success) {
+        if (isMasterAdmin && !selectedCompany) {
+          toast({
+            variant: "destructive",
+            title: "Selecione uma empresa",
+            description: "Por favor, selecione uma empresa para continuar.",
+          });
+          setIsLoading(false);
+          return;
+        }
+
         toast({
           title: "Login bem-sucedido",
           description: "Você foi autenticado com sucesso.",
@@ -51,7 +80,7 @@ export default function Login() {
     }
   };
 
-  const isMasterAdmin =
+  const isMasterAdmin2 =
     user &&
     user.role === "admin" &&
     (user.email === "Guilhermeluly@hotmail.com" || user.email === "admin@example.com");
@@ -61,7 +90,7 @@ export default function Login() {
   return (
     <>
       <Helmet>
-        <title></title>
+        <title>{empresa.nome} - Login</title>
       </Helmet>
       <div
         className="min-h-screen flex flex-col items-center justify-center"
@@ -85,7 +114,7 @@ export default function Login() {
                 Sistema de monitoramento de desempenho operacional
               </CardDescription>
             </CardHeader>
-            {isMasterAdmin && (
+            {isMasterAdmin2 && (
               <div className="mb-4 text-center text-amber-700 bg-amber-100 border border-amber-200 px-2 py-1 rounded text-xs">
                 Como Administrador Master, você pode editar o logo exibido nesta tela em:<br />
                 <b>Menu &gt; Master &gt; Configuração de Logo</b>
@@ -123,6 +152,25 @@ export default function Login() {
                     className="h-11 text-lg bg-white/70"
                   />
                 </div>
+                {isMasterAdmin && (
+                  <div className="space-y-2">
+                    <Label htmlFor="company" className="ml-1">
+                      Empresa
+                    </Label>
+                    <Select value={selectedCompany} onValueChange={setSelectedCompany}>
+                      <SelectTrigger id="company" className="bg-white/70">
+                        <SelectValue placeholder="Selecione uma empresa" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {MOCK_COMPANIES.map((company) => (
+                          <SelectItem key={company.id} value={company.id}>
+                            {company.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id="rememberMe"
