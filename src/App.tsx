@@ -15,6 +15,7 @@ import MasterAdmin from "./pages/master-admin";
 import Login from "./pages/login";
 import Unauthorized from "./pages/unauthorized";
 import ProductionForm from "./pages/production-form";
+import DatabasePage from "./pages/database";
 import { EmpresaProvider } from "./context/EmpresaContext";
 import { UserProvider } from "./context/UserContext";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -87,6 +88,15 @@ const App = () => (
                   element={
                     <ProtectedRoute requiredRoles={["master_admin", "admin"]}>
                       <Admin />
+                    </ProtectedRoute>
+                  } 
+                />
+                
+                <Route 
+                  path="/database" 
+                  element={
+                    <ProtectedRoute requiredRoles={["master_admin", "admin"]}>
+                      <DatabasePage />
                     </ProtectedRoute>
                   } 
                 />

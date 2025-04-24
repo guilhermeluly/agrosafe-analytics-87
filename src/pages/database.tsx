@@ -3,17 +3,17 @@ import React from 'react';
 import AppLayout from '@/components/AppLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useUser } from '@/context/UserContext';
-import { Database, Server, HardDrive, AlertTriangle } from 'lucide-react';
+import { Database as DatabaseIcon, Server, HardDrive, AlertTriangle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 
-const Database = () => {
+const DatabasePage = () => {
   const { user } = useUser();
   const isAdmin = user.role === 'admin' || user.role === 'master_admin';
 
   return (
-    <AppLayout>
+    <AppLayout title="Banco de Dados">
       <div className="container mx-auto py-6">
         <h1 className="text-3xl font-bold mb-6">Banco de Dados</h1>
         
@@ -46,7 +46,7 @@ const Database = () => {
                 <Card>
                   <CardHeader className="pb-2">
                     <CardTitle className="text-lg flex items-center gap-2">
-                      <Database className="h-5 w-5 text-purple-500" />
+                      <DatabaseIcon className="h-5 w-5 text-purple-500" />
                       Armazenamento
                     </CardTitle>
                   </CardHeader>
@@ -170,4 +170,4 @@ const Database = () => {
   );
 };
 
-export default Database;
+export default DatabasePage;
