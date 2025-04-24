@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, ReactNode } from "react";
 
 export type UserRole = "master_admin" | "admin" | "operator" | "viewer";
@@ -10,6 +11,9 @@ export interface UserInfo {
   isAuthenticated: boolean;
   photo?: string;
   companyId?: string;
+  companyName?: string;
+  companyDomain?: string;
+  databaseId?: string;
   planoId?: string;
 }
 
@@ -31,6 +35,10 @@ const mockUsers = [
     password: "052004236",
     role: "master_admin" as UserRole,
     photo: "/avatar-1.png",
+    companyId: "0",
+    companyName: "AgroSafe SE",
+    companyDomain: "admin.agrosafese.com.br",
+    databaseId: "db_admin_master",
   },
   {
     id: "2",
@@ -39,6 +47,10 @@ const mockUsers = [
     password: "admin123",
     role: "admin" as UserRole,
     photo: "/avatar-2.png",
+    companyId: "1",
+    companyName: "Empresa Alpha",
+    companyDomain: "alpha.agrosafese.com.br",
+    databaseId: "db_alpha_001",
   },
   {
     id: "3",
@@ -47,6 +59,10 @@ const mockUsers = [
     password: "operator123",
     role: "operator" as UserRole,
     photo: "/avatar-3.png",
+    companyId: "1",
+    companyName: "Empresa Alpha",
+    companyDomain: "alpha.agrosafese.com.br",
+    databaseId: "db_alpha_001",
   },
   {
     id: "4",
@@ -55,6 +71,10 @@ const mockUsers = [
     password: "viewer123",
     role: "viewer" as UserRole,
     photo: "/avatar-4.png",
+    companyId: "2",
+    companyName: "Indústria Beta",
+    companyDomain: "beta.agrosafese.com.br",
+    databaseId: "db_beta_002",
   },
 ];
 
@@ -92,6 +112,10 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         role: foundUser.role,
         isAuthenticated: true,
         photo: foundUser.photo,
+        companyId: foundUser.companyId,
+        companyName: foundUser.companyName,
+        companyDomain: foundUser.companyDomain,
+        databaseId: foundUser.databaseId,
         planoId: foundUser.id === "1" ? "completo" : foundUser.id === "2" ? "medio" : "basico",
       };
       setUser(userInfo);

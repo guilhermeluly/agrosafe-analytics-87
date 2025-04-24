@@ -11,6 +11,8 @@ export interface ProductionData {
   lostPackages: number;
   setupTime: number;
   observations?: string;
+  companyId?: string;
+  databaseId?: string;
 }
 
 export interface ReportSettings {
@@ -20,6 +22,7 @@ export interface ReportSettings {
   recipients: string[];
   customDates?: string[];
   filters?: { location?: string; shift?: string };
+  companyId?: string;
 }
 
 export interface User {
@@ -27,6 +30,10 @@ export interface User {
   name: string;
   email: string;
   role: 'admin'|'editor'|'viewer';
+  companyId?: string;
+  companyName?: string;
+  companyDomain?: string;
+  databaseId?: string;
 }
 
 // Nova estrutura para empresa e plano
@@ -37,6 +44,9 @@ export interface Empresa {
   logoCliente?: string;
   logoAgroSafe?: string;
   exibeLogoAgroSafe?: boolean;
+  dominio?: string;
+  databaseId?: string;
+  ativo?: boolean;
 }
 
 export interface SetupStandard {

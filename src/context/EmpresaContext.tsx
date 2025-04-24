@@ -6,32 +6,36 @@ export type EmpresaInfo = {
   id?: string;
   nome: string;
   planoId: string;
-  logo: string; // This property already exists, but was missing from type
+  logo: string;
   logoCliente?: string;
   logoAgroSafe?: string;
   exibeLogoAgroSafe?: boolean; // para plano completo controlar exibição
   unidadeCapacidade: 'unidades/h' | 'kg/h';
   dataVencimento?: string;
   dataCadastro?: string;
+  dominio?: string;
+  databaseId?: string;
   ativo?: boolean;
 };
 
 const defaultEmpresa: EmpresaInfo = {
   nome: "Andrealan AgroSafe",
   planoId: "completo",
-  logo: "/logo_app.png", // Added default logo
+  logo: "/logo_app.png",
   logoAgroSafe: "/logo_agrosafe.png",
   logoCliente: "/logo_app.png",
   exibeLogoAgroSafe: true,
   unidadeCapacidade: 'unidades/h',
   dataCadastro: new Date().toISOString().split('T')[0],
+  dominio: "admin.agrosafese.com.br",
+  databaseId: "db_admin_master",
   ativo: true
 };
 
 type EmpresaContextType = {
   empresa: EmpresaInfo;
   setEmpresa: (e: EmpresaInfo) => void;
-  updateLogo: (logoUrl: string) => void; // Ensure this function is properly defined
+  updateLogo: (logoUrl: string) => void;
 };
 
 const EmpresaContext = createContext<EmpresaContextType | null>(null);
