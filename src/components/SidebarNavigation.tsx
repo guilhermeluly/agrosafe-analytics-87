@@ -83,7 +83,7 @@ export default function SidebarNavigation() {
       },
       {
         icon: FileText,
-        label: "Inserir Dados",
+        label: "Registrar Dados",
         path: "/production-form",
         roles: ["master_admin", "admin", "operator"],
         isNew: false
@@ -276,7 +276,12 @@ export default function SidebarNavigation() {
               <div className="text-xs text-gray-400 capitalize">{user.role.replace('_', ' ')}</div>
             </div>
           </div>
-          <SidebarMenuButton onClick={logout} variant="outline" size="sm" className="border-gray-600 text-white hover:bg-gray-800">
+          <SidebarMenuButton 
+            onClick={logout} 
+            variant="outline" 
+            size="sm" 
+            className="border-gray-600 hover:bg-gray-800 text-purple-300"
+          >
             <LogOut size={16} className="mr-2" />
             Sair
           </SidebarMenuButton>

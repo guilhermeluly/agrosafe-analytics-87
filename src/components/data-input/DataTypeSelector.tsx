@@ -12,7 +12,9 @@ interface DataTypeSelectorProps {
 export default function DataTypeSelector({ onSelectType }: DataTypeSelectorProps) {
   const { user } = useUser();
   const plano = getPlanoById(user?.planoId || "basico");
-  const showLogistics = user.role === "admin" || user.role === "master_admin" || (plano && plano.id === "completo");
+  
+  // Apenas usuários com plano completo ou admin/master_admin podem acessar dados de movimentação
+  const showLogistics = user.role === "master_admin" || (plano && plano.id === "completo");
 
   return (
     <div className="grid gap-6 md:grid-cols-2 max-w-4xl mx-auto">

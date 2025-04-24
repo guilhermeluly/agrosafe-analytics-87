@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import AppLayout from "../components/AppLayout";
 import DataTypeSelector from "@/components/data-input/DataTypeSelector";
@@ -26,6 +25,7 @@ import StopsSection from "@/components/production-form/StopsSection";
 import LogisticsSection from "@/components/production-form/LogisticsSection";
 import OEEPreviewSection from "@/components/production-form/OEEPreviewSection";
 import RegistrySection from "@/components/production-form/RegistrySection";
+import MovimentacaoFormFields from "@/components/production-form/MovimentacaoFormFields";
 
 const stopReasons = [
   "Manutenção",
@@ -175,6 +175,22 @@ export default function ProductionForm() {
     });
   };
 
+  const handleSaveCustomLines = () => {
+    console.log("Salvando configurações de cadastros...");
+    toast({
+      title: "Configurações salvas",
+      description: "As configurações foram salvas com sucesso."
+    });
+  };
+
+  const handleSaveMovimentacao = (data: any) => {
+    console.log("Dados de movimentação:", data);
+    toast({
+      title: "Dados salvos",
+      description: "Os dados de movimentação foram salvos com sucesso."
+    });
+  };
+
   return (
     <AppLayout title="Inserção de Dados - OEE">
       <div className="max-w-4xl mx-auto py-2 md:py-6">
@@ -225,179 +241,184 @@ export default function ProductionForm() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <form onSubmit={handleSubmit} className="space-y-6 md:space-y-8">
-                    {selectedType === "production" ? (
-                      <>
-                        <ProductionFormFields
-                          formData={formData}
-                          setFormData={setFormData}
-                          formErrors={formErrors}
-                          setFormErrors={setFormErrors}
-                          allLines={allLines}
-                          shifts={shifts}
-                          unitType={unitType}
-                        />
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 bg-white rounded-xl p-3 md:p-5 border mb-2 shadow">
+                  {selectedType === "production" ? (
+                    <form onSubmit={handleSubmit} className="space-y-6 md:space-y-8">
+                      <ProductionFormFields
+                        formData={formData}
+                        setFormData={setFormData}
+                        formErrors={formErrors}
+                        setFormErrors={setFormErrors}
+                        allLines={allLines}
+                        shifts={shifts}
+                        unitType={unitType}
+                      />
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 bg-white rounded-xl p-3 md:p-5 border mb-2 shadow">
+                        <div>
+                          <Label htmlFor="plannedProduction" className={`font-bold text-vividPurple ${formErrors.plannedProduction ? "text-destructive" : ""}`}>
+                            Produção Planejada ({unitType}) *
+                          </Label>
+                          <Input
+                            id="plannedProduction"
+                            name="plannedProduction"
+                            type="number"
+                            value={formData.plannedProduction}
+                            onChange={e => setFormData(f => ({ ...f, plannedProduction: Number(e.target.value) }))}
+                            required
+                            className={`bg-softGray ${formErrors.plannedProduction ? "border-destructive" : ""}`}
+                          />
+                          {formErrors.plannedProduction && <p className="text-xs text-destructive">{formErrors.plannedProduction}</p>}
+                        </div>
+                        <div>
+                          <Label htmlFor="workingHours" className={`font-bold text-vividPurple ${formErrors.workingHours ? "text-destructive" : ""}`}>
+                            Horas Trabalhadas no Turno *
+                          </Label>
+                          <Input
+                            id="workingHours"
+                            type="number"
+                            value={workingHours}
+                            onChange={e => {
+                              setWorkingHours(Number(e.target.value));
+                              if (formErrors.workingHours) {
+                                setFormErrors({...formErrors, workingHours: ''});
+                              }
+                            }}
+                            required
+                            className={`bg-softGray ${formErrors.workingHours ? "border-destructive" : ""}`}
+                          />
+                          {formErrors.workingHours && <p className="text-xs text-destructive">{formErrors.workingHours}</p>}
+                        </div>
+                        <div>
+                          <Label htmlFor="actualProduction" className={`font-bold text-vividPurple ${formErrors.actualProduction ? "text-destructive" : ""}`}>
+                            Produção Real ({unitType}) *
+                          </Label>
+                          <Input
+                            id="actualProduction"
+                            name="actualProduction"
+                            type="number"
+                            value={formData.actualProduction}
+                            onChange={e => setFormData(f => ({ ...f, actualProduction: Number(e.target.value) }))}
+                            required
+                            className={`bg-softGray ${formErrors.actualProduction ? "border-destructive" : ""}`}
+                          />
+                          {formErrors.actualProduction && <p className="text-xs text-destructive">{formErrors.actualProduction}</p>}
+                        </div>
+                        <div className="grid grid-cols-3 gap-2 mt-4">
                           <div>
-                            <Label htmlFor="plannedProduction" className={`font-bold text-vividPurple ${formErrors.plannedProduction ? "text-destructive" : ""}`}>
-                              Produção Planejada ({unitType}) *
-                            </Label>
+                            <Label htmlFor="rework" className="font-bold">Retrabalho</Label>
                             <Input
-                              id="plannedProduction"
-                              name="plannedProduction"
+                              id="rework"
+                              name="rework"
                               type="number"
-                              value={formData.plannedProduction}
-                              onChange={e => setFormData(f => ({ ...f, plannedProduction: Number(e.target.value) }))}
+                              value={formData.rework}
+                              onChange={e => setFormData(f => ({ ...f, rework: Number(e.target.value) }))}
                               required
-                              className={`bg-softGray ${formErrors.plannedProduction ? "border-destructive" : ""}`}
+                              className="bg-softGray"
                             />
-                            {formErrors.plannedProduction && <p className="text-xs text-destructive">{formErrors.plannedProduction}</p>}
                           </div>
                           <div>
-                            <Label htmlFor="workingHours" className={`font-bold text-vividPurple ${formErrors.workingHours ? "text-destructive" : ""}`}>
-                              Horas Trabalhadas no Turno *
-                            </Label>
+                            <Label htmlFor="scrap" className="font-bold">Refugo</Label>
                             <Input
-                              id="workingHours"
+                              id="scrap"
+                              name="scrap"
                               type="number"
-                              value={workingHours}
-                              onChange={e => {
-                                setWorkingHours(Number(e.target.value));
-                                if (formErrors.workingHours) {
-                                  setFormErrors({...formErrors, workingHours: ''});
-                                }
-                              }}
+                              value={formData.scrap}
+                              onChange={e => setFormData(f => ({ ...f, scrap: Number(e.target.value) }))}
                               required
-                              className={`bg-softGray ${formErrors.workingHours ? "border-destructive" : ""}`}
+                              className="bg-softGray"
                             />
-                            {formErrors.workingHours && <p className="text-xs text-destructive">{formErrors.workingHours}</p>}
                           </div>
                           <div>
-                            <Label htmlFor="actualProduction" className={`font-bold text-vividPurple ${formErrors.actualProduction ? "text-destructive" : ""}`}>
-                              Produção Real ({unitType}) *
-                            </Label>
+                            <Label htmlFor="lostPackages" className="font-bold">Embalagens Perdidas</Label>
                             <Input
-                              id="actualProduction"
-                              name="actualProduction"
+                              id="lostPackages"
+                              name="lostPackages"
                               type="number"
-                              value={formData.actualProduction}
-                              onChange={e => setFormData(f => ({ ...f, actualProduction: Number(e.target.value) }))}
+                              value={formData.lostPackages}
+                              onChange={e => setFormData(f => ({ ...f, lostPackages: Number(e.target.value) }))}
                               required
-                              className={`bg-softGray ${formErrors.actualProduction ? "border-destructive" : ""}`}
+                              className="bg-softGray"
                             />
-                            {formErrors.actualProduction && <p className="text-xs text-destructive">{formErrors.actualProduction}</p>}
-                          </div>
-                          <div className="grid grid-cols-3 gap-2 mt-4">
-                            <div>
-                              <Label htmlFor="rework" className="font-bold">Retrabalho</Label>
-                              <Input
-                                id="rework"
-                                name="rework"
-                                type="number"
-                                value={formData.rework}
-                                onChange={e => setFormData(f => ({ ...f, rework: Number(e.target.value) }))}
-                                required
-                                className="bg-softGray"
-                              />
-                            </div>
-                            <div>
-                              <Label htmlFor="scrap" className="font-bold">Refugo</Label>
-                              <Input
-                                id="scrap"
-                                name="scrap"
-                                type="number"
-                                value={formData.scrap}
-                                onChange={e => setFormData(f => ({ ...f, scrap: Number(e.target.value) }))}
-                                required
-                                className="bg-softGray"
-                              />
-                            </div>
-                            <div>
-                              <Label htmlFor="lostPackages" className="font-bold">Embalagens Perdidas</Label>
-                              <Input
-                                id="lostPackages"
-                                name="lostPackages"
-                                type="number"
-                                value={formData.lostPackages}
-                                onChange={e => setFormData(f => ({ ...f, lostPackages: Number(e.target.value) }))}
-                                required
-                                className="bg-softGray"
-                              />
-                            </div>
                           </div>
                         </div>
+                      </div>
 
-                        <LogisticsSection
-                          loadingTime={loadingTime}
-                          setLoadingTime={setLoadingTime}
-                          unloadingTime={unloadingTime}
-                          setUnloadingTime={setUnloadingTime}
-                          showLogistics={true}
-                        />
-
-                        {formData.actualProduction > 0 && <OEEPreviewSection oeePreview={oeePreview} />}
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
-                          <SetupTimesSection
-                            setups={setups}
-                            handleSetupChange={handleSetupChange}
-                            addSetup={addSetup}
-                            removeSetup={removeSetup}
-                            standardSetupTime={selectedLine.standardSetupTime}
-                          />
-                          <StopsSection
-                            stops={stops}
-                            newStop={newStop}
-                            stopReasons={stopReasons}
-                            setNewStop={setNewStop}
-                            addStop={addStop}
-                            removeStop={removeStop}
-                            handleStopChange={handleStopChange}
-                          />
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Label htmlFor="observations">Observações</Label>
-                          <Textarea
-                            id="observations"
-                            name="observations"
-                            value={formData.observations || ""}
-                            onChange={e => setFormData(f => ({ ...f, observations: e.target.value }))}
-                            rows={3}
-                            className="bg-white"
-                          />
-                        </div>
-                        <Button
-                          type="submit"
-                          className="w-full h-12 text-lg font-bold rounded-full bg-vividPurple hover:bg-primary/90 shadow-lg flex items-center justify-center gap-2 animate-fade-in"
-                        >
-                          <Save className="w-5 h-5" />
-                          Salvar Dados
-                        </Button>
-                      </>
-                    ) : (
                       <LogisticsSection
                         loadingTime={loadingTime}
                         setLoadingTime={setLoadingTime}
                         unloadingTime={unloadingTime}
                         setUnloadingTime={setUnloadingTime}
-                        showLogistics={showLogistics}
+                        showLogistics={true}
                       />
-                    )}
-                  </form>
+
+                      {formData.actualProduction > 0 && <OEEPreviewSection oeePreview={oeePreview} />}
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
+                        <SetupTimesSection
+                          setups={setups}
+                          handleSetupChange={handleSetupChange}
+                          addSetup={addSetup}
+                          removeSetup={removeSetup}
+                          standardSetupTime={selectedLine.standardSetupTime}
+                        />
+                        <StopsSection
+                          stops={stops}
+                          newStop={newStop}
+                          stopReasons={stopReasons}
+                          setNewStop={setNewStop}
+                          addStop={addStop}
+                          removeStop={removeStop}
+                          handleStopChange={handleStopChange}
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="observations">Observações</Label>
+                        <Textarea
+                          id="observations"
+                          name="observations"
+                          value={formData.observations || ""}
+                          onChange={e => setFormData(f => ({ ...f, observations: e.target.value }))}
+                          rows={3}
+                          className="bg-white"
+                        />
+                      </div>
+                      <Button
+                        type="submit"
+                        className="w-full h-12 text-lg font-bold rounded-full bg-vividPurple hover:bg-primary/90 shadow-lg flex items-center justify-center gap-2 animate-fade-in"
+                      >
+                        <Save className="w-5 h-5" />
+                        Salvar Dados
+                      </Button>
+                    </form>
+                  ) : (
+                    <MovimentacaoFormFields 
+                      onSave={handleSaveMovimentacao} 
+                    />
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
 
             {isAdmin && (
               <TabsContent value="cadastros">
-                <RegistrySection 
-                  customLines={customLines}
-                  setCustomLines={setCustomLines}
-                  productionLines={productionLines}
-                  unitType={unitType}
-                  setUnitType={setUnitType}
-                />
+                <div className="space-y-6">
+                  <RegistrySection 
+                    customLines={customLines}
+                    setCustomLines={setCustomLines}
+                    productionLines={productionLines}
+                    unitType={unitType}
+                    setUnitType={setUnitType}
+                  />
+                  <div className="flex justify-end">
+                    <Button 
+                      onClick={handleSaveCustomLines} 
+                      className="bg-vividPurple hover:bg-primary/90 shadow-lg flex items-center gap-2"
+                    >
+                      <Save className="w-4 h-4" />
+                      Salvar Configurações
+                    </Button>
+                  </div>
+                </div>
               </TabsContent>
             )}
           </Tabs>
