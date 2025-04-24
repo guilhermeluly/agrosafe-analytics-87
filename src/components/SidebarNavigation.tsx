@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useUser } from "../context/UserContext";
@@ -264,9 +265,11 @@ export default function SidebarNavigation() {
                     isActive={isActive(item.path)}
                     tooltip={item.label}
                     className="hover:bg-gray-800 text-white data-[active=true]:bg-gray-800"
-                    onClick={isMobile ? handleSidebarTrigger : undefined}
                   >
-                    <Link to={item.path} className="flex items-center gap-2">
+                    <Link 
+                      to={item.path} 
+                      onClick={isMobile ? handleSidebarTrigger : undefined}
+                    >
                       <item.icon className="h-5 w-5" />
                       <span>{item.label}</span>
                       {item.isNew && (

@@ -8,7 +8,15 @@ import { Save, Plus, Trash2, ArrowRight } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
-import TruckTypeSelector from './TruckTypeSelector';
+import TruckTypeSelector, { TruckType } from './TruckTypeSelector';
+
+const defaultTruckTypes: TruckType[] = [
+  { id: '1', name: 'Carreta', capacity: 30000 },
+  { id: '2', name: 'Truck Sider', capacity: 14000 },
+  { id: '3', name: 'Truck Baú', capacity: 12000 },
+  { id: '4', name: 'VUC', capacity: 3500 },
+  { id: '5', name: '3/4', capacity: 4000 },
+];
 
 type TruckEntry = {
   id: string;
@@ -68,7 +76,8 @@ export default function MovimentacaoFormFields({ onSave }: MovimentacaoFormField
     pesoNota: 0,
     pesoBalanca: 0,
     numPessoas: 1,
-    observacoes: ""
+    observacoes: "",
+    truckType: ""
   });
 
   const calculateMetrics = (data: MovimentacaoData) => {
@@ -176,7 +185,8 @@ export default function MovimentacaoFormFields({ onSave }: MovimentacaoFormField
       pesoNota: 0,
       pesoBalanca: 0,
       numPessoas: 1,
-      observacoes: ""
+      observacoes: "",
+      truckType: ""
     });
     
     toast({
