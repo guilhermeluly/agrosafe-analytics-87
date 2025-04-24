@@ -21,7 +21,9 @@ import {
   Globe,
   PresentationIcon,
   Lock,
-  Edit
+  Edit,
+  FileSpreadsheet,
+  Trash2
 } from "lucide-react";
 import {
   Sidebar,
@@ -122,6 +124,13 @@ export default function SidebarNavigation() {
         roles: ["master_admin", "admin"]
       },
       {
+        icon: FileSpreadsheet,
+        label: "Cadastros",
+        path: "/cadastros",
+        roles: ["master_admin", "admin"],
+        isNew: true
+      },
+      {
         icon: Target,
         label: "Definir Metas",
         path: "/goals",
@@ -160,6 +169,13 @@ export default function SidebarNavigation() {
         label: "Usuários",
         path: "/users",
         roles: ["master_admin"]
+      },
+      {
+        icon: Trash2,
+        label: "Reset de Dados",
+        path: "/reset-data",
+        roles: ["master_admin"],
+        isNew: true
       },
       {
         icon: Lock,
@@ -220,7 +236,6 @@ export default function SidebarNavigation() {
       <SidebarHeader className="py-4 border-b bg-gray-900 text-white">
         <div className="px-4 flex items-center justify-between">
           <LogoDisplay altura={40} />
-          {/* Fix: Wrap the Button in a div for SidebarTrigger */}
           <SidebarTrigger>
             <div>
               <Button 

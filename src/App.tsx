@@ -20,7 +20,7 @@ import { EmpresaProvider } from "./context/EmpresaContext";
 import { UserProvider } from "./context/UserContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 
-// Imports for new pages
+// Imports para páginas existentes
 import Companies from "./pages/master/Companies";
 import Users from "./pages/master/Users";
 import Plans from "./pages/master/Plans";
@@ -29,6 +29,10 @@ import Help from "./pages/Help";
 import DnsConfig from "./pages/master/DnsConfig";
 import ChangePassword from "./pages/master/ChangePassword";
 import LogoConfig from "./pages/master/LogoConfig";
+
+// Imports para as novas páginas
+import Cadastros from "./pages/admin/Cadastros";
+import ResetData from "./pages/master/ResetData";
 
 const queryClient = new QueryClient();
 
@@ -93,6 +97,15 @@ const App = () => (
                 />
                 
                 <Route 
+                  path="/cadastros" 
+                  element={
+                    <ProtectedRoute requiredRoles={["master_admin", "admin"]}>
+                      <Cadastros />
+                    </ProtectedRoute>
+                  } 
+                />
+                
+                <Route 
                   path="/database" 
                   element={
                     <ProtectedRoute requiredRoles={["master_admin", "admin"]}>
@@ -106,6 +119,15 @@ const App = () => (
                   element={
                     <ProtectedRoute requiredRoles={["master_admin"]}>
                       <MasterAdmin />
+                    </ProtectedRoute>
+                  } 
+                />
+                
+                <Route 
+                  path="/reset-data" 
+                  element={
+                    <ProtectedRoute requiredRoles={["master_admin"]}>
+                      <ResetData />
                     </ProtectedRoute>
                   } 
                 />

@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -8,6 +9,7 @@ import { Save, Plus, Trash2, ArrowLeft } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import TruckTypeSelector, { TruckType } from './TruckTypeSelector';
+import ScheduledBreaksComponent from './ScheduledBreaksComponent';
 
 const defaultTruckTypes: TruckType[] = [
   { id: '1', name: 'Carreta', capacity: 30000 },
@@ -30,11 +32,19 @@ type VehicleEntry = {
   placa: string;
 };
 
+type ScheduledBreak = {
+  id: string;
+  startTime: string;
+  endTime: string;
+  description: string;
+};
+
 type MovimentacaoData = {
   date: string;
   shift: string;
   tempoDisponivel: number;
   entries: VehicleEntry[];
+  scheduledBreaks: ScheduledBreak[];
   status: "draft" | "completed";
 };
 
@@ -51,6 +61,7 @@ export default function MovimentacaoFormFields({ onSave }: MovimentacaoFormField
     shift: "Manhã",
     tempoDisponivel: 480,
     entries: [],
+    scheduledBreaks: [],
     status: "draft"
   });
   
@@ -59,6 +70,7 @@ export default function MovimentacaoFormFields({ onSave }: MovimentacaoFormField
     shift: "Manhã",
     tempoDisponivel: 480,
     entries: [],
+    scheduledBreaks: [],
     status: "draft"
   });
 
@@ -174,6 +186,55 @@ export default function MovimentacaoFormFields({ onSave }: MovimentacaoFormField
     });
   };
 
+  // Funções para gerenciar intervalos programados
+  const addExpedicaoBreak = (newBreak: Omit<ScheduledBreak, "id">) => {
+    const breakEntry = {
+      id: Date.now().toString(),
+      ...newBreak
+    };
+    
+    setExpedicaoData(prev => ({
+      ...prev,
+      scheduledBreaks: [...prev.scheduledBreaks, breakEntry]
+    }));
+    
+    toast({
+      title: "Intervalo adicionado",
+      description: "O intervalo programado foi adicionado com sucesso"
+    });
+  };
+
+  const removeExpedicaoBreak = (id: string) => {
+    setExpedicaoData(prev => ({
+      ...prev,
+      scheduledBreaks: prev.scheduledBreaks.filter(b => b.id !== id)
+    }));
+  };
+
+  const addDescargaBreak = (newBreak: Omit<ScheduledBreak, "id">) => {
+    const breakEntry = {
+      id: Date.now().toString(),
+      ...newBreak
+    };
+    
+    setDescargaData(prev => ({
+      ...prev,
+      scheduledBreaks: [...prev.scheduledBreaks, breakEntry]
+    }));
+    
+    toast({
+      title: "Intervalo adicionado",
+      description: "O intervalo programado foi adicionado com sucesso"
+    });
+  };
+
+  const removeDescargaBreak = (id: string) => {
+    setDescargaData(prev => ({
+      ...prev,
+      scheduledBreaks: prev.scheduledBreaks.filter(b => b.id !== id)
+    }));
+  };
+
   const TypeSelector = () => (
     <Card className="mb-6">
       <CardHeader className="bg-cyan-50 text-cyan-800 rounded-t-lg">
@@ -212,7 +273,9 @@ export default function MovimentacaoFormFields({ onSave }: MovimentacaoFormField
     newEntry: Omit<VehicleEntry, "id">,
     setNewEntry: React.Dispatch<React.SetStateAction<Omit<VehicleEntry, "id">>>,
     addEntry: () => void,
-    removeEntry: (id: string) => void
+    removeEntry: (id: string) => void,
+    addBreak: (newBreak: Omit<ScheduledBreak, "id">) => void,
+    removeBreak: (id: string) => void
   ) => {
     const isExpedicao = type === "expedicao";
     const title = isExpedicao ? "Expedição (Carregamento)" : "Recebimento (Descarregamento)";
@@ -285,6 +348,13 @@ export default function MovimentacaoFormFields({ onSave }: MovimentacaoFormField
               />
             </div>
           </div>
+          
+          {/* Componente de intervalos programados */}
+          <ScheduledBreaksComponent 
+            breaks={isExpedicao ? expedicaoData.scheduledBreaks : descargaData.scheduledBreaks}
+            addBreak={isExpedicao ? addExpedicaoBreak : addDescargaBreak}
+            removeBreak={isExpedicao ? removeExpedicaoBreak : removeDescargaBreak}
+          />
           
           {data.entries.length > 0 && (
             <div className="rounded-md border overflow-hidden">
@@ -497,7 +567,9 @@ export default function MovimentacaoFormFields({ onSave }: MovimentacaoFormField
           (id) => setExpedicaoData(prev => ({
             ...prev,
             entries: prev.entries.filter(entry => entry.id !== id)
-          }))
+          })),
+          addExpedicaoBreak,
+          removeExpedicaoBreak
         )
       ) : (
         renderEntryForm(
@@ -509,7 +581,9 @@ export default function MovimentacaoFormFields({ onSave }: MovimentacaoFormField
           (id) => setDescargaData(prev => ({
             ...prev,
             entries: prev.entries.filter(entry => entry.id !== id)
-          }))
+          })),
+          addDescargaBreak,
+          removeDescargaBreak
         )
       )}
     </div>
