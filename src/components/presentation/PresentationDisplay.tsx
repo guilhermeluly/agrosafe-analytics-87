@@ -1,8 +1,16 @@
+
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar, MapPin, Users, BarChart3, PieChart, LineChart, CircleSlash, TruckIcon, Scale } from "lucide-react";
 import { DateRange } from "react-day-picker";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { 
   ResponsiveContainer, 
   BarChart, 
@@ -32,6 +40,7 @@ interface PresentationDisplayProps {
 
 const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#0088FE', '#00C49F'];
 
+// Same mock data as before...
 const barData = [
   { name: 'Jan', meta: 65, atual: 40 },
   { name: 'Fev', meta: 65, atual: 45 },
@@ -80,6 +89,20 @@ export function PresentationDisplay({
   selectedIndicators,
   isPremium
 }: PresentationDisplayProps) {
+  const [aspectRatio, setAspectRatio] = React.useState<string>("16:9");
+
+  const getAspectRatioStyle = () => {
+    switch (aspectRatio) {
+      case "16:9":
+        return { paddingBottom: "56.25%" };
+      case "4:3":
+        return { paddingBottom: "75%" };
+      case "1:1":
+        return { paddingBottom: "100%" };
+      default:
+        return { paddingBottom: "56.25%" };
+    }
+  };
 
   const allTabs = [
     { id: "oee", label: "OEE Geral", icon: <BarChart3 className="h-4 w-4 mr-2" /> },
@@ -93,9 +116,9 @@ export function PresentationDisplay({
   ];
 
   return (
-    <div className="bg-black text-white min-h-screen p-6 landscape:flex landscape:flex-col">
+    <div className="bg-black text-white min-h-screen p-6">
       <div className="flex justify-between items-center mb-4">
-        <div>
+        <div className="flex-1">
           <h1 className="text-3xl font-bold">Dashboard de Indicadores</h1>
           <div className="flex items-center gap-2 text-gray-300 mt-2">
             <Calendar className="h-4 w-4" />
@@ -116,110 +139,50 @@ export function PresentationDisplay({
             )}
           </div>
         </div>
-        <Button 
-          variant="outline" 
-          className="border-gray-300 text-gray-300 hover:bg-gray-800"
-          onClick={onExitFullscreen}
-        >
-          Sair do Modo Apresentação
-        </Button>
+        <div className="flex items-center gap-4">
+          <Select value={aspectRatio} onValueChange={setAspectRatio}>
+            <SelectTrigger className="w-[100px] bg-gray-800 border-gray-700">
+              <SelectValue placeholder="Aspect Ratio" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="16:9">16:9</SelectItem>
+              <SelectItem value="4:3">4:3</SelectItem>
+              <SelectItem value="1:1">1:1</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button 
+            variant="outline" 
+            className="border-gray-300 text-gray-300 hover:bg-gray-800"
+            onClick={onExitFullscreen}
+          >
+            Sair do Modo Apresentação
+          </Button>
+        </div>
       </div>
 
-      <Tabs value={activeMetric} onValueChange={setActiveMetric} className="space-y-8 landscape:flex-1 landscape:flex landscape:flex-col">
-        <TabsList className="bg-gray-800 p-1 w-full md:w-fit flex justify-center">
-          {allTabs.map(tab => (
-            <TabsTrigger 
-              key={tab.id}
-              value={tab.id} 
-              className="data-[state=active]:bg-purple-600 flex items-center"
-            >
-              {tab.icon}
-              {tab.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-        
-        <div className="landscape:flex-1">
-          <TabsContent value="oee" className="h-[70vh] landscape:h-full flex items-center justify-center">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={barData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#555" />
-                <XAxis dataKey="name" stroke="#fff" />
-                <YAxis stroke="#fff" />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: '#333', border: 'none', color: '#fff' }} 
-                  labelStyle={{ color: '#fff' }}
-                />
-                <Legend />
-                <Bar name="Meta OEE (%)" dataKey="meta" fill="#8884d8" />
-                <Bar name="OEE Atual (%)" dataKey="atual" fill="#82ca9d" />
-              </BarChart>
-            </ResponsiveContainer>
-          </TabsContent>
-          
-          <TabsContent value="componentes" className="h-[70vh] landscape:h-full flex items-center justify-center">
-            <ResponsiveContainer width="100%" height="100%">
-              <RechartsLineChart data={lineData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#555" />
-                <XAxis dataKey="name" stroke="#fff" />
-                <YAxis stroke="#fff" />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: '#333', border: 'none' }} 
-                  labelStyle={{ color: '#fff' }}
-                />
-                <Legend />
-                <Line type="monotone" name="Disponibilidade (%)" dataKey="disponibilidade" stroke="#8884d8" activeDot={{ r: 8 }} />
-                <Line type="monotone" name="Desempenho (%)" dataKey="desempenho" stroke="#82ca9d" />
-                <Line type="monotone" name="Qualidade (%)" dataKey="qualidade" stroke="#ffc658" />
-                <Line type="monotone" name="OEE (%)" dataKey="oee" stroke="#ff8042" strokeWidth={2} />
-              </RechartsLineChart>
-            </ResponsiveContainer>
-          </TabsContent>
-          
-          <TabsContent value="paradas" className="h-[70vh] landscape:h-full flex items-center justify-center">
-            <ResponsiveContainer width="100%" height="100%">
-              <RechartsPieChart>
-                <Pie
-                  data={pieData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  outerRadius={200}
-                  fill="#8884d8"
-                  dataKey="value"
-                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+      <div 
+        className="relative w-full bg-black" 
+        style={getAspectRatioStyle()}
+      >
+        <div className="absolute inset-0">
+          <Tabs value={activeMetric} onValueChange={setActiveMetric} className="h-full flex flex-col">
+            <TabsList className="bg-gray-800 p-1 w-full md:w-fit flex justify-center">
+              {allTabs.map(tab => (
+                <TabsTrigger 
+                  key={tab.id}
+                  value={tab.id} 
+                  className="data-[state=active]:bg-purple-600 flex items-center"
                 >
-                  {pieData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value) => `${value} min`} />
-                <Legend />
-              </RechartsPieChart>
-            </ResponsiveContainer>
-          </TabsContent>
-          
-          <TabsContent value="rejects" className="h-[70vh] landscape:h-full flex items-center justify-center">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={rejectData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" stroke="#555" horizontal={true} />
-                <XAxis type="number" stroke="#fff" />
-                <YAxis type="category" dataKey="name" stroke="#fff" />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: '#333', border: 'none', color: '#fff' }} 
-                  labelStyle={{ color: '#fff' }}
-                />
-                <Legend />
-                <Bar name="Quantidade (unidades)" dataKey="value" fill="#ffc658" />
-              </BarChart>
-            </ResponsiveContainer>
-          </TabsContent>
-          
-          {isPremium && (
-            <>
-              <TabsContent value="movimentacao" className="h-[70vh] landscape:h-full flex items-center justify-center">
+                  {tab.icon}
+                  {tab.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+            
+            <div className="flex-1 relative">
+              <TabsContent value="oee" className="absolute inset-0">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={movimentacaoData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                  <BarChart data={barData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#555" />
                     <XAxis dataKey="name" stroke="#fff" />
                     <YAxis stroke="#fff" />
@@ -228,38 +191,118 @@ export function PresentationDisplay({
                       labelStyle={{ color: '#fff' }}
                     />
                     <Legend />
-                    <Bar name="Caminhões Entrada" dataKey="entrada" fill="#8884d8" />
-                    <Bar name="Caminhões Saída" dataKey="saida" fill="#82ca9d" />
+                    <Bar name="Meta OEE (%)" dataKey="meta" fill="#8884d8" />
+                    <Bar name="OEE Atual (%)" dataKey="atual" fill="#82ca9d" />
                   </BarChart>
                 </ResponsiveContainer>
               </TabsContent>
               
-              <TabsContent value="produtividade" className="h-[70vh] landscape:h-full flex items-center justify-center">
+              <TabsContent value="componentes" className="absolute inset-0">
                 <ResponsiveContainer width="100%" height="100%">
-                  <RechartsLineChart data={movimentacaoData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                  <RechartsLineChart data={lineData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#555" />
                     <XAxis dataKey="name" stroke="#fff" />
                     <YAxis stroke="#fff" />
+                    <Tooltip 
+                      contentStyle={{ backgroundColor: '#333', border: 'none' }} 
+                      labelStyle={{ color: '#fff' }}
+                    />
+                    <Legend />
+                    <Line type="monotone" name="Disponibilidade (%)" dataKey="disponibilidade" stroke="#8884d8" activeDot={{ r: 8 }} />
+                    <Line type="monotone" name="Desempenho (%)" dataKey="desempenho" stroke="#82ca9d" />
+                    <Line type="monotone" name="Qualidade (%)" dataKey="qualidade" stroke="#ffc658" />
+                    <Line type="monotone" name="OEE (%)" dataKey="oee" stroke="#ff8042" strokeWidth={2} />
+                  </RechartsLineChart>
+                </ResponsiveContainer>
+              </TabsContent>
+              
+              <TabsContent value="paradas" className="absolute inset-0">
+                <ResponsiveContainer width="100%" height="100%">
+                  <RechartsPieChart>
+                    <Pie
+                      data={pieData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      outerRadius="80%"
+                      fill="#8884d8"
+                      dataKey="value"
+                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                    >
+                      {pieData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value) => `${value} min`} />
+                    <Legend />
+                  </RechartsPieChart>
+                </ResponsiveContainer>
+              </TabsContent>
+              
+              <TabsContent value="rejects" className="absolute inset-0">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={rejectData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }} layout="vertical">
+                    <CartesianGrid strokeDasharray="3 3" stroke="#555" horizontal={true} />
+                    <XAxis type="number" stroke="#fff" />
+                    <YAxis type="category" dataKey="name" stroke="#fff" />
                     <Tooltip 
                       contentStyle={{ backgroundColor: '#333', border: 'none', color: '#fff' }} 
                       labelStyle={{ color: '#fff' }}
                     />
                     <Legend />
-                    <Line 
-                      type="monotone" 
-                      name="Kg/Hora/Homem" 
-                      dataKey="kgPorHoraHomem" 
-                      stroke="#ffc658" 
-                      strokeWidth={2}
-                      activeDot={{ r: 8 }} 
-                    />
-                  </RechartsLineChart>
+                    <Bar name="Quantidade (unidades)" dataKey="value" fill="#ffc658" />
+                  </BarChart>
                 </ResponsiveContainer>
               </TabsContent>
-            </>
-          )}
+              
+              {isPremium && (
+                <>
+                  <TabsContent value="movimentacao" className="absolute inset-0">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={movimentacaoData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#555" />
+                        <XAxis dataKey="name" stroke="#fff" />
+                        <YAxis stroke="#fff" />
+                        <Tooltip 
+                          contentStyle={{ backgroundColor: '#333', border: 'none', color: '#fff' }} 
+                          labelStyle={{ color: '#fff' }}
+                        />
+                        <Legend />
+                        <Bar name="Caminhões Entrada" dataKey="entrada" fill="#8884d8" />
+                        <Bar name="Caminhões Saída" dataKey="saida" fill="#82ca9d" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </TabsContent>
+                  
+                  <TabsContent value="produtividade" className="absolute inset-0">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <RechartsLineChart data={movimentacaoData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#555" />
+                        <XAxis dataKey="name" stroke="#fff" />
+                        <YAxis stroke="#fff" />
+                        <Tooltip 
+                          contentStyle={{ backgroundColor: '#333', border: 'none', color: '#fff' }} 
+                          labelStyle={{ color: '#fff' }}
+                        />
+                        <Legend />
+                        <Line 
+                          type="monotone" 
+                          name="Kg/Hora/Homem" 
+                          dataKey="kgPorHoraHomem" 
+                          stroke="#ffc658" 
+                          strokeWidth={2}
+                          activeDot={{ r: 8 }} 
+                        />
+                      </RechartsLineChart>
+                    </ResponsiveContainer>
+                  </TabsContent>
+                </>
+              )}
+            </div>
+          </Tabs>
         </div>
-      </Tabs>
+      </div>
     </div>
   );
 }
+

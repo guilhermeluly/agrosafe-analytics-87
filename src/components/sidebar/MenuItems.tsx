@@ -1,9 +1,17 @@
 
-import React from "react";
 import { Link } from "react-router-dom";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { MenuItem } from "./types";
+import { useUser } from "@/context/UserContext";
+import { getPlanoById } from "@/config/planos";
 import { SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
+import { LucideIcon } from "lucide-react";
+
+interface MenuItem {
+  title: string;
+  href: string;
+  icon: LucideIcon;
+  role: string[];
+  isPremium?: boolean;
+}
 
 interface MenuItemsProps {
   items: MenuItem[];
@@ -12,57 +20,35 @@ interface MenuItemsProps {
 }
 
 export function MenuItems({ items, isActive, onMobileClick }: MenuItemsProps) {
-  const isMobile = useIsMobile();
+  const { user } = useUser();
+  const plano = getPlanoById(user?.planoId || "basico");
 
   return (
     <>
-      {items.map((item) => (
-        <SidebarMenuItem key={item.path + item.label}>
-          {item.onClick ? (
-            <SidebarMenuButton 
-              isActive={isActive(item.path)}
-              tooltip={item.label}
-              onClick={() => {
-                item.onClick?.();
-                if (isMobile) onMobileClick?.();
-              }}
-              className="hover:bg-gray-800 text-white data-[active=true]:bg-gray-800"
+      {items.map((item) => {
+        // Skip if user doesn't have required role
+        if (!item.role.includes(user.role)) return null;
+        
+        // Skip premium features for non-premium plans
+        if (item.isPremium && plano?.id !== "completo") return null;
+
+        const active = isActive(item.href);
+
+        return (
+          <SidebarMenuItem key={item.href}>
+            <SidebarMenuButton
+              asChild
+              active={active}
+              onClick={onMobileClick}
             >
-              <div className="flex items-center gap-2">
-                <item.icon className="h-5 w-5" />
-                <span>{item.label}</span>
-                {item.isNew && (
-                  <span className="ml-2 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full">
-                    Novo
-                  </span>
-                )}
-              </div>
+              <Link to={item.href}>
+                <item.icon className="h-4 w-4" />
+                <span>{item.title}</span>
+              </Link>
             </SidebarMenuButton>
-          ) : (
-            <Link 
-              to={item.path} 
-              onClick={isMobile ? onMobileClick : undefined} 
-              className="w-full"
-            >
-              <SidebarMenuButton 
-                isActive={isActive(item.path)}
-                tooltip={item.label}
-                className="hover:bg-gray-800 text-white data-[active=true]:bg-gray-800"
-              >
-                <div className="flex items-center gap-2">
-                  <item.icon className="h-5 w-5" />
-                  <span>{item.label}</span>
-                  {item.isNew && (
-                    <span className="ml-2 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full">
-                      Novo
-                    </span>
-                  )}
-                </div>
-              </SidebarMenuButton>
-            </Link>
-          )}
-        </SidebarMenuItem>
-      ))}
+          </SidebarMenuItem>
+        );
+      })}
     </>
   );
 }
