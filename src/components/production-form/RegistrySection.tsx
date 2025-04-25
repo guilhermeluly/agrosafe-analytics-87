@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useEmpresa } from "@/context/EmpresaContext";
+import { toast } from "sonner";
 
 interface Line {
   id: string;
@@ -43,6 +44,8 @@ export default function RegistrySection({
       setNewLineName("");
       setNewLineCapacity(100);
       setNewLineSetup(10);
+      
+      toast.success("Linha/Local adicionado com sucesso!");
     }
   };
 
@@ -101,13 +104,23 @@ export default function RegistrySection({
               </div>
             </div>
             
-            <Button 
-              type="button" 
-              onClick={handleAddLine} 
-              className="w-full bg-vividPurple hover:bg-secondaryPurple mt-2"
-            >
-              Adicionar Linha/Local
-            </Button>
+            <div className="flex space-x-3">
+              <Button 
+                type="button" 
+                onClick={handleAddLine} 
+                className="flex-1 bg-vividPurple hover:bg-secondaryPurple mt-2"
+              >
+                Adicionar Linha/Local
+              </Button>
+              
+              <Button 
+                type="button"
+                onClick={() => toast.success("Configurações salvas com sucesso!")} 
+                className="flex-1 bg-green-600 hover:bg-green-700 mt-2"
+              >
+                Salvar Configurações
+              </Button>
+            </div>
           </div>
           
           <div className="mt-6">

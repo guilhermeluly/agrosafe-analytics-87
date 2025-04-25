@@ -23,7 +23,7 @@ export default function PresentationMode() {
   });
   const [selectedLine, setSelectedLine] = useState<string>('all');
   const [selectedShift, setSelectedShift] = useState<string>('all');
-  const [selectedCombinations, setSelectedCombinations] = useState<string[]>(['global']);
+  const [selectedCombinations, setSelectedCombinations] = useState<string[]>(['all-all']);
   const [selectedIndicators, setSelectedIndicators] = useState<string[]>(['oee', 'componentes']);
 
   // Get production lines and shifts from storage or state
@@ -46,7 +46,7 @@ export default function PresentationMode() {
   
   // Generate combinations based on registered lines and shifts
   const lineTurnoCombos: LineTurnoCombo[] = [
-    { id: 'global', name: 'Global (Todas as linhas e turnos)', linha: 'todas', turno: 'todos' },
+    { id: 'all-all', name: 'Global (Todas as linhas e turnos)', linha: 'todas', turno: 'todos' },
     ...productionLines.flatMap(line => 
       shifts.map(shift => ({
         id: `${line.id}-${shift.id}`,
@@ -95,7 +95,7 @@ export default function PresentationMode() {
   };
 
   const getCurrentCombination = () => {
-    if (selectedCombinations.length === 0) return lineTurnoCombos.find(c => c.id === 'global');
+    if (selectedCombinations.length === 0) return lineTurnoCombos.find(c => c.id === 'all-all');
     const combinationId = selectedCombinations[currentCombinationIndex];
     return lineTurnoCombos.find(c => c.id === combinationId);
   };

@@ -13,6 +13,19 @@ import { useEmpresa } from '@/context/EmpresaContext';
 export default function Cadastros() {
   const { empresa } = useEmpresa();
 
+  // Sample data - in a real application, these would come from your backend
+  const customLines = [];
+  const productionLines = [
+    { id: '1', name: 'Linha 1', nominalCapacity: 120, standardSetupTime: 15 },
+    { id: '2', name: 'Linha 2', nominalCapacity: 150, standardSetupTime: 20 },
+  ];
+
+  // Placeholder function - in real app, this would update your database
+  const setCustomLines = (lines) => {
+    console.log("Saving custom lines:", lines);
+    // Here you would save to your backend
+  };
+
   return (
     <AppLayout title="Cadastros - OEE Performance Hub">
       <div className="container mx-auto py-6">
@@ -45,9 +58,9 @@ export default function Cadastros() {
               </CardHeader>
               <CardContent>
                 <RegistrySection
-                  customLines={[]}
-                  setCustomLines={() => {}}
-                  productionLines={[]}
+                  customLines={customLines}
+                  setCustomLines={setCustomLines}
+                  productionLines={productionLines}
                   unitType={empresa.unidadeCapacidade}
                   setUnitType={() => {}} // This is a placeholder, actual implementation would depend on your requirements
                 />

@@ -6,10 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowLeftRight } from "lucide-react";
+import { ArrowLeftRight, PlusSquare, X } from "lucide-react";
 import { IndicatorSelector } from './IndicatorSelector';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { LineShiftFilter } from '../filters/LineShiftFilter';
+import { LineTurnoCombo } from '@/components/sidebar/types';
 
 interface PresentationConfigProps {
   dateRange: DateRange | undefined;
@@ -50,6 +51,37 @@ export function PresentationConfig({
   selectedCombinations = [],
   setSelectedCombinations = () => {}
 }: PresentationConfigProps) {
+  const [currentLine, setCurrentLine] = useState('all');
+  const [currentShift, setCurrentShift] = useState('all');
+
+  // Function to add current line-shift combination to selected combinations
+  const addCombination = () => {
+    if (currentLine && currentShift) {
+      const combinationId = `${currentLine}-${currentShift}`;
+      if (!selectedCombinations.includes(combinationId)) {
+        setSelectedCombinations([...selectedCombinations, combinationId]);
+      }
+    }
+  };
+
+  // Function to remove a combination
+  const removeCombination = (combinationId: string) => {
+    setSelectedCombinations(selectedCombinations.filter(id => id !== combinationId));
+  };
+
+  // Get line and shift names for display
+  const getLineName = (lineId: string) => {
+    if (lineId === 'all') return 'Todas as Linhas';
+    const line = allLines.find(l => l.id === lineId);
+    return line ? line.name : lineId;
+  };
+
+  const getShiftName = (shiftId: string) => {
+    if (shiftId === 'all') return 'Todos os Turnos';
+    const shift = allShifts.find(s => s.id === shiftId);
+    return shift ? shift.name : shiftId;
+  };
+
   return (
     <div className="container mx-auto py-6 px-4">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
@@ -68,15 +100,57 @@ export function PresentationConfig({
             </div>
 
             <div className="space-y-4">
-              <h3 className="text-sm font-medium">Seleção de Linha e Turno</h3>
-              <LineShiftFilter
-                selectedLine={selectedLine}
-                selectedShift={selectedShift}
-                onLineChange={onLineChange}
-                onShiftChange={onShiftChange}
-                allLines={allLines}
-                allShifts={allShifts}
-              />
+              <h3 className="text-sm font-medium">Configuração de Linhas e Turnos para Apresentação</h3>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="col-span-1 md:col-span-3">
+                  <LineShiftFilter
+                    selectedLine={currentLine}
+                    selectedShift={currentShift}
+                    onLineChange={setCurrentLine}
+                    onShiftChange={setCurrentShift}
+                    allLines={allLines}
+                    allShifts={allShifts}
+                  />
+                </div>
+                <div className="col-span-1">
+                  <Button 
+                    onClick={addCombination}
+                    className="w-full h-full bg-green-600 hover:bg-green-700"
+                    disabled={!currentLine || !currentShift}
+                  >
+                    <PlusSquare className="mr-2 h-4 w-4" />
+                    Adicionar
+                  </Button>
+                </div>
+              </div>
+
+              <div className="border rounded-md p-2">
+                <h4 className="text-sm font-medium mb-2">Combinações Selecionadas</h4>
+                {selectedCombinations.length === 0 ? (
+                  <p className="text-sm text-gray-500 italic">Nenhuma combinação selecionada. Selecione pelo menos uma combinação.</p>
+                ) : (
+                  <ScrollArea className="h-28">
+                    <div className="space-y-2">
+                      {selectedCombinations.map((combo) => {
+                        const [lineId, shiftId] = combo.split('-');
+                        return (
+                          <div key={combo} className="flex items-center justify-between bg-gray-100 p-2 rounded-md">
+                            <span className="text-sm">{getLineName(lineId)} - {getShiftName(shiftId)}</span>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={() => removeCombination(combo)}
+                              className="h-6 w-6 p-0"
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </ScrollArea>
+                )}
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -119,7 +193,7 @@ export function PresentationConfig({
         className="w-full bg-purple-600 hover:bg-purple-700"
         size="lg"
         onClick={onStartPresentation}
-        disabled={!selectedLine || !selectedShift || selectedIndicators.length === 0}
+        disabled={selectedCombinations.length === 0 || selectedIndicators.length === 0}
       >
         Iniciar Apresentação em Tela Cheia
         <ArrowLeftRight className="ml-2 h-4 w-4" />
