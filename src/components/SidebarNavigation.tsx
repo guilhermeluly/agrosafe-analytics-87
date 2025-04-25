@@ -17,6 +17,7 @@ import { useMenuItems } from "@/hooks/useMenuItems";
 import { MenuItems } from "./sidebar/MenuItems";
 import { UserProfile } from "./sidebar/UserProfile";
 import LogoDisplay from "./LogoDisplay";
+import { MenuItem } from "./sidebar/types";
 
 export default function SidebarNavigation() {
   const location = useLocation();
@@ -31,7 +32,7 @@ export default function SidebarNavigation() {
     }
   };
 
-  const menuItems = getMenuItems();
+  const menuItems = getMenuItems() as MenuItem[];
 
   return (
     <Sidebar>
@@ -68,4 +69,3 @@ export default function SidebarNavigation() {
     </Sidebar>
   );
 }
-

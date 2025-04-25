@@ -3,15 +3,7 @@ import { Link } from "react-router-dom";
 import { useUser } from "@/context/UserContext";
 import { getPlanoById } from "@/config/planos";
 import { SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
-import { LucideIcon } from "lucide-react";
-
-interface MenuItem {
-  title: string;
-  href: string;
-  icon: LucideIcon;
-  role: string[];
-  isPremium?: boolean;
-}
+import { MenuItem } from "./types";
 
 interface MenuItemsProps {
   items: MenuItem[];
@@ -27,23 +19,23 @@ export function MenuItems({ items, isActive, onMobileClick }: MenuItemsProps) {
     <>
       {items.map((item) => {
         // Skip if user doesn't have required role
-        if (!item.role.includes(user.role)) return null;
+        if (!item.roles.includes(user.role)) return null;
         
         // Skip premium features for non-premium plans
         if (item.isPremium && plano?.id !== "completo") return null;
 
-        const active = isActive(item.href);
+        const active = isActive(item.path);
 
         return (
-          <SidebarMenuItem key={item.href}>
+          <SidebarMenuItem key={item.path}>
             <SidebarMenuButton
               asChild
-              active={active}
+              isActive={active}
               onClick={onMobileClick}
             >
-              <Link to={item.href}>
+              <Link to={item.path}>
                 <item.icon className="h-4 w-4" />
-                <span>{item.title}</span>
+                <span>{item.label}</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -52,4 +44,3 @@ export function MenuItems({ items, isActive, onMobileClick }: MenuItemsProps) {
     </>
   );
 }
-
