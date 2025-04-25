@@ -10,6 +10,13 @@ import { PresentationDisplay } from "@/components/presentation/PresentationDispl
 import { usePresentationMode } from "@/hooks/usePresentationMode";
 import { LineTurnoCombo } from "@/components/sidebar/types";
 
+interface ChartDisplayOptions {
+  showValues: boolean;
+  showGrid: boolean;
+  darkMode: boolean;
+  showTrendline: boolean;
+}
+
 export default function PresentationMode() {
   const { empresa } = useEmpresa();
   const isPremium = empresa.planoId === "completo" || empresa.planoId === "medio";
@@ -25,6 +32,12 @@ export default function PresentationMode() {
   const [selectedShift, setSelectedShift] = useState<string>('all');
   const [selectedCombinations, setSelectedCombinations] = useState<string[]>(['all-all']);
   const [selectedIndicators, setSelectedIndicators] = useState<string[]>(['oee', 'componentes']);
+  const [chartOptions, setChartOptions] = useState<ChartDisplayOptions>({
+    showValues: true,
+    showGrid: true,
+    darkMode: true,
+    showTrendline: false,
+  });
 
   // Get production lines and shifts from storage or state
   // Using hardcoded data for now until we connect to the real data source
@@ -95,7 +108,7 @@ export default function PresentationMode() {
   };
 
   const getCurrentCombination = () => {
-    if (selectedCombinations.length === 0) return lineTurnoCombos.find(c => c.id === 'all-all');
+    if (!selectedCombinations || selectedCombinations.length === 0) return lineTurnoCombos.find(c => c.id === 'all-all');
     const combinationId = selectedCombinations[currentCombinationIndex];
     return lineTurnoCombos.find(c => c.id === combinationId);
   };
@@ -110,6 +123,7 @@ export default function PresentationMode() {
         setActiveMetric={setActiveMetric}
         selectedIndicators={selectedIndicators}
         isPremium={isPremium}
+        chartOptions={chartOptions}
       />
     );
   }
@@ -142,6 +156,8 @@ export default function PresentationMode() {
           selectedCombinations={selectedCombinations}
           setSelectedCombinations={setSelectedCombinations}
           onStartPresentation={toggleFullscreen}
+          chartOptions={chartOptions}
+          setChartOptions={setChartOptions}
         />
       </div>
     </AppLayout>

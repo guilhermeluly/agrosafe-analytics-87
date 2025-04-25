@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -23,9 +24,17 @@ import {
   Line,
   PieChart as RechartsPieChart,
   Pie,
-  Cell
+  Cell,
+  ReferenceLine
 } from "recharts";
 import { LineTurnoCombo } from '../sidebar/types';
+
+interface ChartDisplayOptions {
+  showValues: boolean;
+  showGrid: boolean;
+  darkMode: boolean;
+  showTrendline: boolean;
+}
 
 interface PresentationDisplayProps {
   dateRange: DateRange | undefined;
@@ -35,6 +44,7 @@ interface PresentationDisplayProps {
   setActiveMetric: (metric: string) => void;
   selectedIndicators: string[];
   isPremium: boolean;
+  chartOptions?: ChartDisplayOptions;
 }
 
 const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#0088FE', '#00C49F'];
@@ -79,6 +89,12 @@ const movimentacaoData = [
   { name: 'Sex', entrada: 16, saida: 14, kgPorHoraHomem: 260 },
 ];
 
+// Calculate average for trendline
+const calculateAverage = (data: any[], key: string): number => {
+  if (!data || !data.length) return 0;
+  return data.reduce((sum, item) => sum + (item[key] || 0), 0) / data.length;
+};
+
 export function PresentationDisplay({
   dateRange,
   currentCombination,
@@ -86,7 +102,13 @@ export function PresentationDisplay({
   activeMetric,
   setActiveMetric,
   selectedIndicators,
-  isPremium
+  isPremium,
+  chartOptions = {
+    showValues: true,
+    showGrid: true,
+    darkMode: true,
+    showTrendline: false
+  }
 }: PresentationDisplayProps) {
   const [aspectRatio, setAspectRatio] = React.useState<string>("16:9");
 
@@ -103,6 +125,14 @@ export function PresentationDisplay({
     }
   };
 
+  const bgColor = chartOptions.darkMode ? "bg-black" : "bg-white";
+  const textColor = chartOptions.darkMode ? "text-white" : "text-gray-800";
+  const chartBgColor = chartOptions.darkMode ? "#111" : "#f8f8f8";
+  const gridColor = chartOptions.darkMode ? "#333" : "#ddd";
+  const tooltipStyle = chartOptions.darkMode 
+    ? { backgroundColor: '#333', border: 'none', color: '#fff' }
+    : { backgroundColor: '#fff', border: '1px solid #ddd', color: '#333' };
+
   const allTabs = [
     { id: "oee", label: "OEE Geral", icon: <BarChart3 className="h-4 w-4 mr-2" />, source: "Dados de Produção" },
     { id: "componentes", label: "Componentes OEE", icon: <LineChart className="h-4 w-4 mr-2" />, source: "Análise de Performance" },
@@ -117,23 +147,23 @@ export function PresentationDisplay({
   const currentTab = allTabs.find(tab => tab.id === activeMetric);
 
   return (
-    <div className="bg-black text-white min-h-screen p-6">
+    <div className={`${bgColor} ${textColor} min-h-screen p-6`}>
       <div className="flex justify-between items-center mb-4">
         <div className="flex-1">
           <h1 className="text-3xl font-bold">Dashboard de Indicadores</h1>
-          <div className="flex items-center gap-2 text-gray-300 mt-2">
+          <div className={`flex items-center gap-2 ${chartOptions.darkMode ? 'text-gray-300' : 'text-gray-600'} mt-2`}>
             <Calendar className="h-4 w-4" />
             <span>
               {dateRange?.from?.toLocaleDateString()} - {dateRange?.to?.toLocaleDateString()}
             </span>
-            <div className="w-px h-4 bg-gray-600 mx-2"></div>
+            <div className={`w-px h-4 ${chartOptions.darkMode ? 'bg-gray-600' : 'bg-gray-300'} mx-2`}></div>
             <MapPin className="h-4 w-4" />
             <span>{currentCombination?.name || 'Global'}</span>
-            {currentCombination?.id === 'global' ? (
-              <div className="ml-2 px-2 py-0.5 bg-blue-800 text-xs rounded-full">Dados consolidados</div>
+            {currentCombination?.id === 'all-all' ? (
+              <div className={`ml-2 px-2 py-0.5 ${chartOptions.darkMode ? 'bg-blue-800' : 'bg-blue-100 text-blue-800'} text-xs rounded-full`}>Dados consolidados</div>
             ) : (
               <>
-                <div className="w-px h-4 bg-gray-600 mx-2"></div>
+                <div className={`w-px h-4 ${chartOptions.darkMode ? 'bg-gray-600' : 'bg-gray-300'} mx-2`}></div>
                 <Users className="h-4 w-4" />
                 <span>Turno: {currentCombination?.turno}</span>
               </>
@@ -142,7 +172,7 @@ export function PresentationDisplay({
         </div>
         <div className="flex items-center gap-4">
           <Select value={aspectRatio} onValueChange={setAspectRatio}>
-            <SelectTrigger className="w-[100px] bg-gray-800 border-gray-700">
+            <SelectTrigger className={`w-[100px] ${chartOptions.darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-300'}`}>
               <SelectValue placeholder="Aspect Ratio" />
             </SelectTrigger>
             <SelectContent>
@@ -153,7 +183,7 @@ export function PresentationDisplay({
           </Select>
           <Button 
             variant="outline" 
-            className="border-gray-300 text-gray-300 hover:bg-gray-800"
+            className={chartOptions.darkMode ? 'border-gray-300 text-gray-300 hover:bg-gray-800' : 'border-gray-600 text-gray-600 hover:bg-gray-100'}
             onClick={onExitFullscreen}
           >
             Sair do Modo Apresentação
@@ -162,17 +192,17 @@ export function PresentationDisplay({
       </div>
 
       <div 
-        className="relative w-full bg-black" 
+        className="relative w-full"
         style={getAspectRatioStyle()}
       >
         <div className="absolute inset-0">
           <Tabs value={activeMetric} onValueChange={setActiveMetric} className="h-full flex flex-col">
-            <TabsList className="bg-gray-800 p-1 w-full md:w-fit flex justify-center">
-              {allTabs.map(tab => (
+            <TabsList className={`${chartOptions.darkMode ? 'bg-gray-800' : 'bg-gray-200'} p-1 w-full md:w-fit flex justify-center`}>
+              {allTabs.filter(tab => selectedIndicators.includes(tab.id)).map(tab => (
                 <TabsTrigger 
                   key={tab.id}
                   value={tab.id} 
-                  className="data-[state=active]:bg-purple-600 flex items-center"
+                  className={`data-[state=active]:${chartOptions.darkMode ? 'bg-purple-600' : 'bg-purple-500 text-white'} flex items-center`}
                 >
                   {tab.icon}
                   {tab.label}
@@ -181,8 +211,8 @@ export function PresentationDisplay({
             </TabsList>
             
             {currentTab && (
-              <div className="bg-gray-800 bg-opacity-60 px-3 py-1 rounded-md flex items-center justify-center mt-2 text-sm">
-                <Info className="h-3 w-3 mr-1 text-blue-300" /> 
+              <div className={`${chartOptions.darkMode ? 'bg-gray-800 bg-opacity-60' : 'bg-gray-100'} px-3 py-1 rounded-md flex items-center justify-center mt-2 text-sm`}>
+                <Info className={`h-3 w-3 mr-1 ${chartOptions.darkMode ? 'text-blue-300' : 'text-blue-500'}`} /> 
                 Fonte de dados: <span className="font-semibold ml-1">{currentTab.source}</span>
               </div>
             )}
@@ -191,16 +221,26 @@ export function PresentationDisplay({
               <TabsContent value="oee" className="absolute inset-0">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={barData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#555" />
-                    <XAxis dataKey="name" stroke="#fff" />
-                    <YAxis stroke="#fff" />
+                    {chartOptions.showGrid && (
+                      <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+                    )}
+                    <XAxis dataKey="name" stroke={chartOptions.darkMode ? '#fff' : '#333'} />
+                    <YAxis stroke={chartOptions.darkMode ? '#fff' : '#333'} />
                     <Tooltip 
-                      contentStyle={{ backgroundColor: '#333', border: 'none', color: '#fff' }} 
-                      labelStyle={{ color: '#fff' }}
+                      contentStyle={tooltipStyle}
+                      labelStyle={{ color: chartOptions.darkMode ? '#fff' : '#333' }}
+                      formatter={(value) => chartOptions.showValues ? value : ''}
                     />
                     <Legend />
                     <Bar name="Meta OEE (%)" dataKey="meta" fill="#8884d8" />
                     <Bar name="OEE Atual (%)" dataKey="atual" fill="#82ca9d" />
+                    {chartOptions.showTrendline && (
+                      <ReferenceLine y={calculateAverage(barData, 'atual')} 
+                        label="Média" 
+                        stroke={chartOptions.darkMode ? "#ff7c7c" : "#ff5252"} 
+                        strokeDasharray="3 3" 
+                      />
+                    )}
                   </BarChart>
                 </ResponsiveContainer>
               </TabsContent>
@@ -208,18 +248,28 @@ export function PresentationDisplay({
               <TabsContent value="componentes" className="absolute inset-0">
                 <ResponsiveContainer width="100%" height="100%">
                   <RechartsLineChart data={lineData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#555" />
-                    <XAxis dataKey="name" stroke="#fff" />
-                    <YAxis stroke="#fff" />
+                    {chartOptions.showGrid && (
+                      <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+                    )}
+                    <XAxis dataKey="name" stroke={chartOptions.darkMode ? '#fff' : '#333'} />
+                    <YAxis stroke={chartOptions.darkMode ? '#fff' : '#333'} />
                     <Tooltip 
-                      contentStyle={{ backgroundColor: '#333', border: 'none' }} 
-                      labelStyle={{ color: '#fff' }}
+                      contentStyle={tooltipStyle}
+                      labelStyle={{ color: chartOptions.darkMode ? '#fff' : '#333' }}
+                      formatter={(value) => chartOptions.showValues ? value : ''}
                     />
                     <Legend />
                     <Line type="monotone" name="Disponibilidade (%)" dataKey="disponibilidade" stroke="#8884d8" activeDot={{ r: 8 }} />
                     <Line type="monotone" name="Desempenho (%)" dataKey="desempenho" stroke="#82ca9d" />
                     <Line type="monotone" name="Qualidade (%)" dataKey="qualidade" stroke="#ffc658" />
                     <Line type="monotone" name="OEE (%)" dataKey="oee" stroke="#ff8042" strokeWidth={2} />
+                    {chartOptions.showTrendline && (
+                      <ReferenceLine y={calculateAverage(lineData, 'oee')} 
+                        label="Média OEE" 
+                        stroke={chartOptions.darkMode ? "#ff7c7c" : "#ff5252"} 
+                        strokeDasharray="3 3" 
+                      />
+                    )}
                   </RechartsLineChart>
                 </ResponsiveContainer>
               </TabsContent>
@@ -235,13 +285,13 @@ export function PresentationDisplay({
                       outerRadius="80%"
                       fill="#8884d8"
                       dataKey="value"
-                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                      label={({ name, percent }) => chartOptions.showValues ? `${name}: ${(percent * 100).toFixed(0)}%` : name}
                     >
                       {pieData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(value) => `${value} min`} />
+                    <Tooltip formatter={(value) => `${value} min`} contentStyle={tooltipStyle} />
                     <Legend />
                   </RechartsPieChart>
                 </ResponsiveContainer>
@@ -250,15 +300,30 @@ export function PresentationDisplay({
               <TabsContent value="rejects" className="absolute inset-0">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={rejectData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }} layout="vertical">
-                    <CartesianGrid strokeDasharray="3 3" stroke="#555" horizontal={true} />
-                    <XAxis type="number" stroke="#fff" />
-                    <YAxis type="category" dataKey="name" stroke="#fff" />
+                    {chartOptions.showGrid && (
+                      <CartesianGrid strokeDasharray="3 3" stroke={gridColor} horizontal={true} />
+                    )}
+                    <XAxis type="number" stroke={chartOptions.darkMode ? '#fff' : '#333'} />
+                    <YAxis type="category" dataKey="name" stroke={chartOptions.darkMode ? '#fff' : '#333'} />
                     <Tooltip 
-                      contentStyle={{ backgroundColor: '#333', border: 'none', color: '#fff' }} 
-                      labelStyle={{ color: '#fff' }}
+                      contentStyle={tooltipStyle}
+                      labelStyle={{ color: chartOptions.darkMode ? '#fff' : '#333' }}
+                      formatter={(value) => chartOptions.showValues ? value : ''}
                     />
                     <Legend />
-                    <Bar name="Quantidade (unidades)" dataKey="value" fill="#ffc658" />
+                    <Bar name="Quantidade (unidades)" dataKey="value" fill="#ffc658">
+                      {chartOptions.showValues && rejectData.map((entry, index) => (
+                        <text
+                          key={`text-${index}`}
+                          x={entry.value + 5}
+                          y={index * 40 + 20}
+                          fill={chartOptions.darkMode ? "#fff" : "#333"}
+                          textAnchor="start"
+                        >
+                          {entry.value}
+                        </text>
+                      ))}
+                    </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </TabsContent>
@@ -268,16 +333,26 @@ export function PresentationDisplay({
                   <TabsContent value="movimentacao" className="absolute inset-0">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={movimentacaoData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#555" />
-                        <XAxis dataKey="name" stroke="#fff" />
-                        <YAxis stroke="#fff" />
+                        {chartOptions.showGrid && (
+                          <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+                        )}
+                        <XAxis dataKey="name" stroke={chartOptions.darkMode ? '#fff' : '#333'} />
+                        <YAxis stroke={chartOptions.darkMode ? '#fff' : '#333'} />
                         <Tooltip 
-                          contentStyle={{ backgroundColor: '#333', border: 'none', color: '#fff' }} 
-                          labelStyle={{ color: '#fff' }}
+                          contentStyle={tooltipStyle}
+                          labelStyle={{ color: chartOptions.darkMode ? '#fff' : '#333' }}
+                          formatter={(value) => chartOptions.showValues ? value : ''}
                         />
                         <Legend />
                         <Bar name="Caminhões Entrada" dataKey="entrada" fill="#8884d8" />
                         <Bar name="Caminhões Saída" dataKey="saida" fill="#82ca9d" />
+                        {chartOptions.showTrendline && (
+                          <ReferenceLine y={calculateAverage(movimentacaoData, 'entrada')} 
+                            label="Média Entrada" 
+                            stroke={chartOptions.darkMode ? "#ff7c7c" : "#ff5252"} 
+                            strokeDasharray="3 3" 
+                          />
+                        )}
                       </BarChart>
                     </ResponsiveContainer>
                   </TabsContent>
@@ -285,12 +360,15 @@ export function PresentationDisplay({
                   <TabsContent value="produtividade" className="absolute inset-0">
                     <ResponsiveContainer width="100%" height="100%">
                       <RechartsLineChart data={movimentacaoData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#555" />
-                        <XAxis dataKey="name" stroke="#fff" />
-                        <YAxis stroke="#fff" />
+                        {chartOptions.showGrid && (
+                          <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+                        )}
+                        <XAxis dataKey="name" stroke={chartOptions.darkMode ? '#fff' : '#333'} />
+                        <YAxis stroke={chartOptions.darkMode ? '#fff' : '#333'} />
                         <Tooltip 
-                          contentStyle={{ backgroundColor: '#333', border: 'none', color: '#fff' }} 
-                          labelStyle={{ color: '#fff' }}
+                          contentStyle={tooltipStyle}
+                          labelStyle={{ color: chartOptions.darkMode ? '#fff' : '#333' }}
+                          formatter={(value) => chartOptions.showValues ? value : ''}
                         />
                         <Legend />
                         <Line 
@@ -301,6 +379,13 @@ export function PresentationDisplay({
                           strokeWidth={2}
                           activeDot={{ r: 8 }} 
                         />
+                        {chartOptions.showTrendline && (
+                          <ReferenceLine y={calculateAverage(movimentacaoData, 'kgPorHoraHomem')} 
+                            label="Média" 
+                            stroke={chartOptions.darkMode ? "#ff7c7c" : "#ff5252"} 
+                            strokeDasharray="3 3" 
+                          />
+                        )}
                       </RechartsLineChart>
                     </ResponsiveContainer>
                   </TabsContent>

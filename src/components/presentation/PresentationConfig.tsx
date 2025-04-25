@@ -11,6 +11,14 @@ import { IndicatorSelector } from './IndicatorSelector';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { LineShiftFilter } from '../filters/LineShiftFilter';
 import { LineTurnoCombo } from '@/components/sidebar/types';
+import { Separator } from "@/components/ui/separator";
+
+interface ChartDisplayOptions {
+  showValues: boolean;
+  showGrid: boolean;
+  darkMode: boolean;
+  showTrendline: boolean;
+}
 
 interface PresentationConfigProps {
   dateRange: DateRange | undefined;
@@ -30,6 +38,8 @@ interface PresentationConfigProps {
   allShifts: { id: string; name: string }[];
   selectedCombinations?: string[];
   setSelectedCombinations?: (combinations: string[]) => void;
+  chartOptions?: ChartDisplayOptions;
+  setChartOptions?: (options: ChartDisplayOptions) => void;
 }
 
 export function PresentationConfig({
@@ -49,7 +59,14 @@ export function PresentationConfig({
   allLines,
   allShifts,
   selectedCombinations = [],
-  setSelectedCombinations = () => {}
+  setSelectedCombinations = () => {},
+  chartOptions = {
+    showValues: true,
+    showGrid: true,
+    darkMode: true,
+    showTrendline: false,
+  },
+  setChartOptions = () => {}
 }: PresentationConfigProps) {
   const [currentLine, setCurrentLine] = useState('all');
   const [currentShift, setCurrentShift] = useState('all');
@@ -82,6 +99,14 @@ export function PresentationConfig({
     return shift ? shift.name : shiftId;
   };
 
+  // Handler for chart display options
+  const handleChartOptionChange = (option: keyof ChartDisplayOptions, value: boolean) => {
+    setChartOptions({
+      ...chartOptions,
+      [option]: value
+    });
+  };
+
   return (
     <div className="container mx-auto py-6 px-4">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
@@ -90,6 +115,7 @@ export function PresentationConfig({
             <CardTitle>Configurações do Modo Apresentação</CardTitle>
           </CardHeader>
           <CardContent className="p-6 space-y-6">
+            {/* Period Selection */}
             <div className="space-y-2">
               <h3 className="text-sm font-medium">Período de Análise</h3>
               <DateRangePicker
@@ -99,6 +125,7 @@ export function PresentationConfig({
               />
             </div>
 
+            {/* Line and Shift Configuration */}
             <div className="space-y-4">
               <h3 className="text-sm font-medium">Configuração de Linhas e Turnos para Apresentação</h3>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -124,6 +151,7 @@ export function PresentationConfig({
                 </div>
               </div>
 
+              {/* Selected Combinations */}
               <div className="border rounded-md p-2">
                 <h4 className="text-sm font-medium mb-2">Combinações Selecionadas</h4>
                 {selectedCombinations.length === 0 ? (
@@ -153,6 +181,60 @@ export function PresentationConfig({
               </div>
             </div>
 
+            {/* Chart Display Options */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium">Opções de Exibição dos Gráficos</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="showValues"
+                      checked={chartOptions.showValues}
+                      onCheckedChange={(checked) => handleChartOptionChange('showValues', checked as boolean)}
+                    />
+                    <label htmlFor="showValues" className="text-sm">
+                      Exibir valores nos gráficos
+                    </label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="showGrid"
+                      checked={chartOptions.showGrid}
+                      onCheckedChange={(checked) => handleChartOptionChange('showGrid', checked as boolean)}
+                    />
+                    <label htmlFor="showGrid" className="text-sm">
+                      Exibir linhas de grade
+                    </label>
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="darkMode"
+                      checked={chartOptions.darkMode}
+                      onCheckedChange={(checked) => handleChartOptionChange('darkMode', checked as boolean)}
+                    />
+                    <label htmlFor="darkMode" className="text-sm">
+                      Usar fundo escuro
+                    </label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="showTrendline"
+                      checked={chartOptions.showTrendline}
+                      onCheckedChange={(checked) => handleChartOptionChange('showTrendline', checked as boolean)}
+                    />
+                    <label htmlFor="showTrendline" className="text-sm">
+                      Exibir linha de tendência
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Rotation Settings */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <h3 className="text-sm font-medium">Intervalo de Rotação (segundos)</h3>
@@ -168,17 +250,16 @@ export function PresentationConfig({
                   </SelectContent>
                 </Select>
               </div>
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="autoRotate"
-                checked={autoRotate}
-                onCheckedChange={(checked) => setAutoRotate(checked as boolean)}
-              />
-              <label htmlFor="autoRotate" className="text-sm font-medium">
-                Rotação automática de indicadores
-              </label>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="autoRotate"
+                  checked={autoRotate}
+                  onCheckedChange={(checked) => setAutoRotate(checked as boolean)}
+                />
+                <label htmlFor="autoRotate" className="text-sm font-medium">
+                  Rotação automática de indicadores
+                </label>
+              </div>
             </div>
           </CardContent>
         </Card>

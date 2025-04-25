@@ -1,267 +1,246 @@
-import React, { useState } from 'react';
-import AppLayout from '../../components/AppLayout';
+
+import React, { useState } from "react";
+import AppLayout from "@/components/AppLayout";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertTriangle, Trash2, DatabaseBackup } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { CompanySelector } from "@/components/CompanySelector";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Database, Trash2, Users, Settings, FileText, Download } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
-// Mock data for companies
-const MOCK_COMPANIES = [
-  { id: '1', name: 'Empresa Alpha' },
-  { id: '2', name: 'Indústria Beta' },
-  { id: '3', name: 'Fábrica Gama' },
+// Sample company data for demo
+const companies = [
+  { id: "empresa-1", name: "Empresa 1" },
+  { id: "empresa-2", name: "Empresa 2" },
+  { id: "empresa-3", name: "Empresa 3" }
 ];
-
-interface ResetOptions {
-  productionData: boolean;
-  userData: boolean;
-  configData: boolean;
-  allData: boolean;
-}
 
 export default function ResetData() {
   const { toast } = useToast();
-  const [selectedCompanyId, setSelectedCompanyId] = useState('1');
-  
-  const [selectedOptions, setSelectedOptions] = useState<ResetOptions>({
-    productionData: false,
-    userData: false,
-    configData: false,
-    allData: false,
-  });
+  const [selectedCompany, setSelectedCompany] = useState<string>("all");
+  const [resetProduction, setResetProduction] = useState(true);
+  const [resetStops, setResetStops] = useState(true);
+  const [resetLogistics, setResetLogistics] = useState(true);
+  const [resetConfigs, setResetConfigs] = useState(false);
+  const [resetUsers, setResetUsers] = useState(false);
+  const [confirmationText, setConfirmationText] = useState("");
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [resetType, setResetType] = useState<"company" | "all" | "">("");
 
-  // Company info based on selected ID
-  const selectedCompany = MOCK_COMPANIES.find(c => c.id === selectedCompanyId) || MOCK_COMPANIES[0];
-
-  const handleOptionChange = (option: keyof ResetOptions) => {
-    if (option === 'allData') {
-      const newValue = !selectedOptions.allData;
-      setSelectedOptions({
-        productionData: newValue,
-        userData: newValue,
-        configData: newValue,
-        allData: newValue,
-      });
-    } else {
-      const newOptions = {
-        ...selectedOptions,
-        [option]: !selectedOptions[option],
-      };
-      
-      // Update allData based on other selections
-      newOptions.allData = 
-        newOptions.productionData && 
-        newOptions.userData && 
-        newOptions.configData;
-      
-      setSelectedOptions(newOptions);
-    }
+  const handleResetData = (type: "company" | "all") => {
+    setResetType(type);
+    setConfirmDialogOpen(true);
   };
 
-  const handleReset = async () => {
-    try {
-      // This would be an actual API call in production
-      let resetItems = [];
-      if (selectedOptions.productionData) resetItems.push("dados de produção");
-      if (selectedOptions.userData) resetItems.push("dados de usuários");
-      if (selectedOptions.configData) resetItems.push("configurações");
-      
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
+  const executeReset = () => {
+    if (confirmationText !== "CONFIRMAR") {
       toast({
-        title: `Reset da ${selectedCompany.name} concluído`,
-        description: `Os seguintes dados foram resetados: ${resetItems.join(", ")}.`,
+        title: "Confirmação necessária",
+        description: "Por favor digite CONFIRMAR para prosseguir com o reset de dados.",
+        variant: "destructive"
       });
-      
-      setSelectedOptions({
-        productionData: false,
-        userData: false,
-        configData: false,
-        allData: false,
-      });
-    } catch (error) {
-      toast({
-        title: "Erro ao resetar dados",
-        description: "Ocorreu um erro ao tentar resetar os dados.",
-        variant: "destructive",
-      });
+      return;
     }
-  };
 
-  const handleExportData = () => {
+    // Perform the reset operation
     toast({
-      title: "Exportação iniciada",
-      description: `Os dados da empresa ${selectedCompany.name} estão sendo exportados para CSV.`
+      title: "Reset iniciado",
+      description: resetType === "all" 
+        ? "Todos os dados do sistema estão sendo resetados." 
+        : `Os dados da empresa ${selectedCompany === "all" ? "todas" : companies.find(c => c.id === selectedCompany)?.name} estão sendo resetados.`,
     });
+
+    // Reset the dialog state
+    setConfirmationText("");
+    setConfirmDialogOpen(false);
   };
 
   return (
     <AppLayout title="Reset de Dados">
-      <div className="space-y-6">
-        <h1 className="text-2xl font-bold">Reset de Dados por Empresa</h1>
+      <div className="container mx-auto py-8">
+        <h1 className="text-2xl font-bold mb-6">Gerenciamento de Reset de Dados</h1>
         
-        <CompanySelector />
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid gap-6 md:grid-cols-2">
+          {/* Reset data for a specific company */}
           <Card className="shadow-md">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Trash2 className="h-5 w-5 text-red-500" />
-                Reset de Dados
+              <CardTitle className="flex items-center">
+                <Trash2 className="mr-2 h-5 w-5 text-red-500" />
+                Reset por Empresa
               </CardTitle>
               <CardDescription>
-                Selecione quais dados deseja limpar para a empresa {selectedCompany.name}
+                Limpe os dados de produção, paradas e logística de uma empresa específica.
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    id="option-production" 
-                    checked={selectedOptions.productionData}
-                    onCheckedChange={() => handleOptionChange('productionData')}
-                  />
-                  <div className="grid gap-1.5">
-                    <Label htmlFor="option-production" className="flex items-center gap-2">
-                      <FileText className="h-4 w-4" />
-                      Dados de Produção
-                    </Label>
-                    <p className="text-sm text-muted-foreground">
-                      Remove todos os registros de produção e movimentação
-                    </p>
-                  </div>
+                <div className="space-y-2">
+                  <Label>Selecione a Empresa</Label>
+                  <Select value={selectedCompany} onValueChange={setSelectedCompany}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Selecione uma empresa" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todas as Empresas</SelectItem>
+                      {companies.map((company) => (
+                        <SelectItem key={company.id} value={company.id}>
+                          {company.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-                
-                <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    id="option-users" 
-                    checked={selectedOptions.userData}
-                    onCheckedChange={() => handleOptionChange('userData')}
-                  />
-                  <div className="grid gap-1.5">
-                    <Label htmlFor="option-users" className="flex items-center gap-2">
-                      <Users className="h-4 w-4" />
-                      Usuários
-                    </Label>
-                    <p className="text-sm text-muted-foreground">
-                      Remove todos os usuários, exceto o administrador principal
-                    </p>
+
+                <div className="space-y-4 pt-2">
+                  <h3 className="font-medium">Opções de Reset:</h3>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="resetProduction">Dados de Produção</Label>
+                    <Switch
+                      id="resetProduction"
+                      checked={resetProduction}
+                      onCheckedChange={setResetProduction}
+                    />
                   </div>
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    id="option-config" 
-                    checked={selectedOptions.configData}
-                    onCheckedChange={() => handleOptionChange('configData')}
-                  />
-                  <div className="grid gap-1.5">
-                    <Label htmlFor="option-config" className="flex items-center gap-2">
-                      <Settings className="h-4 w-4" />
-                      Configurações
-                    </Label>
-                    <p className="text-sm text-muted-foreground">
-                      Remove configurações de linhas, turnos, veículos e motivos de parada
-                    </p>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="resetStops">Registros de Paradas</Label>
+                    <Switch
+                      id="resetStops"
+                      checked={resetStops}
+                      onCheckedChange={setResetStops}
+                    />
                   </div>
-                </div>
-                
-                <div className="flex items-center space-x-2 pt-2 border-t">
-                  <Checkbox 
-                    id="option-all" 
-                    checked={selectedOptions.allData}
-                    onCheckedChange={() => handleOptionChange('allData')}
-                  />
-                  <div className="grid gap-1.5">
-                    <Label htmlFor="option-all" className="font-medium flex items-center gap-2">
-                      <Database className="h-4 w-4" />
-                      Todos os dados
-                    </Label>
-                    <p className="text-sm text-muted-foreground">
-                      Limpa completamente todos os dados da empresa
-                    </p>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="resetLogistics">Dados de Logística</Label>
+                    <Switch
+                      id="resetLogistics"
+                      checked={resetLogistics}
+                      onCheckedChange={setResetLogistics}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="resetConfigs">Configurações da Empresa</Label>
+                    <Switch
+                      id="resetConfigs"
+                      checked={resetConfigs}
+                      onCheckedChange={setResetConfigs}
+                    />
                   </div>
                 </div>
               </div>
             </CardContent>
-            <CardFooter className="flex justify-between">
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button 
-                    variant="destructive" 
-                    disabled={!Object.values(selectedOptions).some(Boolean)}
-                  >
-                    Resetar Dados
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Esta ação não pode ser revertida</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Você está prestes a realizar o reset dos dados da empresa <strong>{selectedCompany.name}</strong>.
-                      Esta ação não pode ser desfeita. Tem certeza que deseja continuar?
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleReset} className="bg-red-600 hover:bg-red-700">
-                      Sim, resetar dados
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-              
-              <Button variant="outline" onClick={handleExportData} className="flex items-center gap-2">
-                <Download className="h-4 w-4" />
-                Exportar Dados Antes
+            <CardFooter>
+              <Button 
+                onClick={() => handleResetData("company")} 
+                variant="destructive" 
+                className="w-full"
+                disabled={!selectedCompany || (!resetProduction && !resetStops && !resetLogistics && !resetConfigs)}
+              >
+                Resetar Dados da Empresa
               </Button>
             </CardFooter>
           </Card>
 
-          <Card>
+          {/* Reset all data */}
+          <Card className="shadow-md">
             <CardHeader>
-              <CardTitle>Informações da Empresa</CardTitle>
+              <CardTitle className="flex items-center">
+                <DatabaseBackup className="mr-2 h-5 w-5 text-red-500" />
+                Reset Completo do Sistema
+              </CardTitle>
               <CardDescription>
-                Detalhes sobre a empresa selecionada
+                Atenção: esta opção irá resetar todos os dados do sistema.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <dl className="space-y-4">
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">Nome da Empresa</dt>
-                  <dd className="mt-1 text-sm text-gray-900">{selectedCompany.name}</dd>
+              <div className="space-y-4">
+                <div className="p-3 bg-red-100 text-red-700 rounded-md flex items-start">
+                  <AlertTriangle className="h-5 w-5 mr-2 shrink-0 mt-0.5" />
+                  <p className="text-sm">
+                    Esta operação é irreversível e irá remover todos os dados do sistema, incluindo empresas, usuários, 
+                    configurações e dados de produção. Use com extrema cautela.
+                  </p>
                 </div>
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">ID da Empresa</dt>
-                  <dd className="mt-1 text-sm text-gray-900">{selectedCompany.id}</dd>
+
+                <div className="space-y-4 pt-2">
+                  <h3 className="font-medium">Opções de Reset:</h3>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="resetProductionAll">Dados de Produção (Todas as Empresas)</Label>
+                    <Switch
+                      id="resetProductionAll"
+                      checked={resetProduction}
+                      onCheckedChange={setResetProduction}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="resetUsers">Usuários e Permissões</Label>
+                    <Switch
+                      id="resetUsers"
+                      checked={resetUsers}
+                      onCheckedChange={setResetUsers}
+                    />
+                  </div>
                 </div>
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">Banco de Dados</dt>
-                  <dd className="mt-1 text-sm text-gray-900">db_{selectedCompany.id}_prod</dd>
-                </div>
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">Status</dt>
-                  <dd className="mt-1">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      Ativo
-                    </span>
-                  </dd>
-                </div>
-              </dl>
+              </div>
             </CardContent>
             <CardFooter>
-              <p className="text-sm text-muted-foreground">
-                Último backup: Hoje às 06:00
-              </p>
+              <Button onClick={() => handleResetData("all")} variant="destructive" className="w-full">
+                Resetar Todo o Sistema
+              </Button>
             </CardFooter>
           </Card>
         </div>
       </div>
+      
+      {/* Confirmation Dialog */}
+      <Dialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-red-600 flex items-center">
+              <AlertTriangle className="h-5 w-5 mr-2" /> Confirmar Reset de Dados
+            </DialogTitle>
+            <DialogDescription>
+              {resetType === "all" ? (
+                <p>Você está prestes a resetar TODOS os dados do sistema. Esta ação é irreversível.</p>
+              ) : (
+                <p>Você está prestes a resetar os dados {selectedCompany === "all" ? "de todas as empresas" : `da empresa selecionada (${companies.find(c => c.id === selectedCompany)?.name})`}.</p>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="p-3 bg-red-100 text-red-700 rounded-md">
+              <p className="text-sm font-medium">
+                Para confirmar, digite "CONFIRMAR" abaixo:
+              </p>
+            </div>
+            <Input
+              value={confirmationText}
+              onChange={(e) => setConfirmationText(e.target.value)}
+              placeholder="CONFIRMAR"
+              className="border-red-300"
+            />
+          </div>
+          
+          <DialogFooter className="sm:justify-between">
+            <Button 
+              variant="outline" 
+              onClick={() => setConfirmDialogOpen(false)}
+            >
+              Cancelar
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={executeReset}
+              disabled={confirmationText !== "CONFIRMAR"}
+            >
+              Confirmar Reset
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 }

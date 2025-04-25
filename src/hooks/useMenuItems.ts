@@ -17,7 +17,8 @@ import {
   Lock,
   Edit,
   FileSpreadsheet,
-  Trash2
+  Trash2,
+  FileUp
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -46,6 +47,18 @@ export function useMenuItems() {
         label: "Registrar Dados",
         path: "/production-form",
         roles: ["master_admin", "admin", "operator"]
+      },
+      {
+        icon: FileUp,
+        label: "Importar CSV",
+        path: "/import-csv",
+        roles: ["master_admin", "admin", "operator"],
+        onClick: () => {
+          toast({
+            title: "Importação de CSV",
+            description: "Funcionalidade de importação ainda em desenvolvimento."
+          });
+        }
       },
       {
         icon: LayoutDashboard,
@@ -173,7 +186,10 @@ export function useMenuItems() {
       menuItems = [...menuItems, ...adminItems, ...masterAdminItems];
     }
     
-    return menuItems.filter(item => user && user.role && item.roles && item.roles.includes(user.role));
+    // Ensure roles are defined and filter based on user role
+    return menuItems.filter(item => {
+      return user && user.role && item.roles && item.roles.includes(user.role);
+    });
   };
 
   return { getMenuItems };
