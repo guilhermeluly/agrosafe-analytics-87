@@ -19,6 +19,13 @@ export default function Help() {
     });
   };
 
+  const assuntos = [
+    "Dúvida",
+    "Problema Técnico",
+    "Sugestão",
+    "Outro"
+  ];
+
   return (
     <AppLayout title="Suporte Técnico">
       <div className="container mx-auto py-6">
@@ -44,7 +51,16 @@ export default function Help() {
               
               <div className="space-y-2">
                 <Label htmlFor="subject">Assunto</Label>
-                <Input id="subject" placeholder="Digite o assunto da sua solicitação" required />
+                <select 
+                  id="subject" 
+                  className="w-full h-10 px-3 rounded-md border border-input bg-background"
+                  required
+                >
+                  <option value="">Selecione o assunto</option>
+                  {assuntos.map((assunto) => (
+                    <option key={assunto} value={assunto}>{assunto}</option>
+                  ))}
+                </select>
               </div>
 
               <div className="space-y-2">

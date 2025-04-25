@@ -1,8 +1,7 @@
 
 import { 
   LayoutDashboard, Settings, FileText, Database, 
-  Users, BuildingIcon, HardDrive, HelpCircle, Eye,
-  BarChart2, Server
+  Users, HelpCircle, Eye, BarChart2
 } from "lucide-react";
 import { useUser } from "@/context/UserContext";
 
@@ -89,7 +88,6 @@ export function useMenuItems() {
       }
     ];
 
-    // Filter items based on user role
     return menuItems.filter(item => item.roles.includes(user.role));
   };
 
