@@ -17,12 +17,16 @@ interface RegistrySectionProps {
   customLines: Line[];
   setCustomLines: (lines: Line[]) => void;
   productionLines: Line[];
+  unitType: 'kg/h' | 'unidades/h'; // Added correct type
+  setUnitType: (type: 'kg/h' | 'unidades/h') => void; // Updated type for setUnitType
 }
 
 export default function RegistrySection({
   customLines,
   setCustomLines,
   productionLines,
+  unitType,
+  setUnitType
 }: RegistrySectionProps) {
   const [newLineName, setNewLineName] = useState("");
   const [newLineCapacity, setNewLineCapacity] = useState<number>(100);

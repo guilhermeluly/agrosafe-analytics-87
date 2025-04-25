@@ -8,8 +8,11 @@ import TruckTypesRegistry from '@/components/registries/TruckTypesRegistry';
 import ShiftsRegistry from '@/components/registries/ShiftsRegistry';
 import StopReasonsRegistry from '@/components/registries/StopReasonsRegistry';
 import { Clock, Truck, Factory, Pause } from 'lucide-react';
+import { useEmpresa } from '@/context/EmpresaContext';
 
 export default function Cadastros() {
+  const { empresa } = useEmpresa();
+
   return (
     <AppLayout title="Cadastros - OEE Performance Hub">
       <div className="container mx-auto py-6">
@@ -45,8 +48,8 @@ export default function Cadastros() {
                   customLines={[]}
                   setCustomLines={() => {}}
                   productionLines={[]}
-                  unitType="unidades"
-                  setUnitType={() => {}}
+                  unitType={empresa.unidadeCapacidade}
+                  setUnitType={() => {}} // This is a placeholder, actual implementation would depend on your requirements
                 />
               </CardContent>
             </Card>
