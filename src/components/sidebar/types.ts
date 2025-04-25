@@ -1,14 +1,19 @@
-
 import { LucideIcon } from "lucide-react";
 
 export interface MenuItem {
   icon: LucideIcon;
   label: string;
   path: string;
+  title?: string;
   roles: string[];
   isNew?: boolean;
   isPremium?: boolean;
   onClick?: () => void;
+  submenu?: {
+    title: string;
+    href: string;
+    roles: string[];
+  }[];
 }
 
 export interface LineTurnoCombo {
