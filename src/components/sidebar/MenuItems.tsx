@@ -4,6 +4,7 @@ import { useUser } from "@/context/UserContext";
 import { getPlanoById } from "@/config/planos";
 import { SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
 import { MenuItem } from "./types";
+import { useEmpresa } from "@/context/EmpresaContext";
 
 interface MenuItemsProps {
   items: MenuItem[];
@@ -13,7 +14,9 @@ interface MenuItemsProps {
 
 export function MenuItems({ items, isActive, onMobileClick }: MenuItemsProps) {
   const { user } = useUser();
-  const plano = getPlanoById(user?.planoId || "basico");
+  // Get empresa info to determine plan
+  const { empresa } = useEmpresa();
+  const plano = getPlanoById(empresa?.planoId || "basico");
 
   return (
     <>

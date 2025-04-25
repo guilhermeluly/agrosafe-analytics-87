@@ -4,6 +4,7 @@ import { useUser, UserRole } from '../context/UserContext';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Label } from './ui/label';
 import { Shield } from 'lucide-react';
+import { toast } from './ui/use-toast';
 
 export function RoleSwitcher() {
   const { user, switchUserRole } = useUser();
@@ -20,6 +21,14 @@ export function RoleSwitcher() {
     { value: 'viewer', label: 'Visualizador' }
   ];
 
+  const handleRoleSwitch = (value: string) => {
+    switchUserRole(value as UserRole);
+    toast({
+      title: "Nível de acesso alterado",
+      description: `Agora você está visualizando como: ${roles.find(r => r.value === value)?.label}`
+    });
+  };
+
   return (
     <div className="mb-2 p-2 bg-gray-800 rounded-md border border-gray-700">
       <Label htmlFor="role-select" className="text-xs text-gray-300 mb-1 flex items-center gap-1">
@@ -28,7 +37,7 @@ export function RoleSwitcher() {
       </Label>
       <Select
         value={user.role}
-        onValueChange={(value) => switchUserRole(value as UserRole)}
+        onValueChange={handleRoleSwitch}
       >
         <SelectTrigger id="role-select" className="h-7 text-xs text-gray-200 bg-gray-700 hover:bg-gray-600">
           <SelectValue placeholder="Selecione um nível" />

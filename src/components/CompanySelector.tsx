@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useUser } from '../context/UserContext';
 import { useEmpresa } from '../context/EmpresaContext';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
@@ -23,10 +23,11 @@ export function CompanySelector() {
     return null;
   }
 
-  const companyOptions = MOCK_COMPANIES.map(company => ({
+  // Ensure we have a valid array of options
+  const companyOptions = MOCK_COMPANIES ? MOCK_COMPANIES.map(company => ({
     value: company.id,
     label: company.name
-  }));
+  })) : [];
 
   const handleCompanySelect = (value: string) => {
     try {
