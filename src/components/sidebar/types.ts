@@ -7,6 +7,6 @@ export interface MenuItem {
   path: string;
   roles: string[];
   isNew?: boolean;
+  isPremium?: boolean;
   onClick?: () => void;
 }
-
