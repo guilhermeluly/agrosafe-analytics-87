@@ -2,7 +2,9 @@ export interface MenuItem {
   icon: any;
   label: string;
   path: string;
+  title?: string;
   roles: string[];
+  isNew?: boolean;
   isPremium?: boolean;
   onClick?: () => void;
   submenu?: {
@@ -28,3 +30,4 @@ export interface StopTime {
   horarioInicio: string;
   horarioFim: string;
 }
+

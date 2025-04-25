@@ -7,11 +7,9 @@ import {
   SidebarMenuItem, 
   SidebarGroup, 
   SidebarGroupLabel,
-  SidebarMenu,
-  SidebarCollapsible,
-  SidebarCollapsibleTrigger,
-  SidebarCollapsibleContent
+  SidebarMenu
 } from "@/components/ui/sidebar";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { MenuItem } from "./types";
 import { useEmpresa } from "@/context/EmpresaContext";
 import { ChevronDown } from "lucide-react";
@@ -59,22 +57,22 @@ export function MenuItems({ items, isActive, onMobileClick }: MenuItemsProps) {
           if (!hasAccessToAnySubmenuItem) return null;
           
           return (
-            <SidebarCollapsible
+            <Collapsible
               key={item.path}
               open={openSubmenus[item.title] || false}
               onOpenChange={() => toggleSubmenu(item.title)}
             >
               <SidebarMenuItem>
-                <SidebarCollapsibleTrigger className="flex items-center justify-between w-full">
+                <CollapsibleTrigger className="flex items-center justify-between w-full px-2 py-2 text-sm rounded-md hover:bg-sidebar-accent">
                   <div className="flex items-center">
                     {item.icon && <item.icon className="h-4 w-4 mr-2" />}
                     <span>{item.title}</span>
                   </div>
                   <ChevronDown className="h-4 w-4" />
-                </SidebarCollapsibleTrigger>
+                </CollapsibleTrigger>
               </SidebarMenuItem>
               
-              <SidebarCollapsibleContent>
+              <CollapsibleContent>
                 <div className="pl-6 space-y-1">
                   {item.submenu.map((subItem) => {
                     if (!subItem.roles || !user?.role || !subItem.roles.includes(user.role)) return null;
@@ -96,8 +94,8 @@ export function MenuItems({ items, isActive, onMobileClick }: MenuItemsProps) {
                     );
                   })}
                 </div>
-              </SidebarCollapsibleContent>
-            </SidebarCollapsible>
+              </CollapsibleContent>
+            </Collapsible>
           );
         }
 
