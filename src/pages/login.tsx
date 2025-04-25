@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
@@ -69,16 +70,15 @@ export default function Login() {
       >
         <div className="w-full max-w-md shadow-xl rounded-2xl bg-white/80 backdrop-blur-lg border-t-8 border-primary/50 animate-fade-in">
           <div className="flex flex-col items-center pt-10">
-            {empresa.logo && (
-              <img
-                src={empresa.logo}
-                alt="Logo do sistema"
-                className="max-h-20 object-contain mb-3 drop-shadow-lg hover:scale-105 transition-transform"
-                style={{ maxWidth: "60%" }}
-                draggable={false}
-              />
-            )}
+            <img
+              src="/lovable-uploads/ef5c658b-29fd-4215-a4b7-6d8ad2e47b7d.png"
+              alt="Logo do sistema"
+              className="max-h-20 object-contain mb-3 drop-shadow-lg hover:scale-105 transition-transform"
+              style={{ maxWidth: "60%" }}
+              draggable={false}
+            />
           </div>
+          
           <Card className="w-full bg-transparent shadow-none border-none">
             <CardHeader className="space-y-1 text-center">
               <CardDescription className="text-lg text-neutral-600 mt-2">
