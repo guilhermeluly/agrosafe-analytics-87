@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode } from "react";
 
 export type UserRole = "master_admin" | "admin" | "operator" | "viewer";
@@ -12,7 +11,7 @@ interface UserContextType {
     companyId: string;
     isAuthenticated: boolean;
     photo: string;
-    originalRole?: UserRole; // Adicionado para guardar o papel original
+    originalRole?: UserRole;
   };
   login: (email: string, password: string, rememberMe?: boolean) => Promise<boolean>;
   logout: () => void;
@@ -21,7 +20,7 @@ interface UserContextType {
   updateUserPassword: (currentPassword: string, newPassword: string) => Promise<boolean>;
   selectedCompanyId: string | null;
   setSelectedCompanyId: (id: string | null) => void;
-  switchUserRole: (role: UserRole) => void; // Nova função para trocar papel
+  switchUserRole: (role: UserRole) => void;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -52,15 +51,13 @@ export const UserProvider = ({ children }: UserProviderProps) => {
 
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
 
-  // Simula login com usuários mockados
   const login = async (email: string, password: string, rememberMe?: boolean): Promise<boolean> => {
-    // Dados mockados para testes
     const mockUsers = [
       {
         id: "1",
-        name: "Admin Master",
-        email: "master@example.com",
-        password: "123456",
+        name: "Guilherme Admin",
+        email: "Guilhermeluly@hotmail.com",
+        password: "052004236",
         role: "master_admin" as UserRole,
         companyId: "all",
         photo: "/avatar.png"
@@ -106,7 +103,6 @@ export const UserProvider = ({ children }: UserProviderProps) => {
         originalRole: userWithoutPassword.role
       });
       
-      // Se for master_admin, seleciona a primeira empresa por padrão
       if (foundUser.role === "master_admin") {
         setSelectedCompanyId("company1");
       }
@@ -140,12 +136,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     setUser({ ...user, photo: photoUrl });
   };
 
-  // Nova função para alterar a senha do usuário
   const updateUserPassword = async (currentPassword: string, newPassword: string): Promise<boolean> => {
-    // Em um sistema real, aqui teria uma chamada para a API para alterar a senha
-    // Para demonstração, vamos apenas simular uma verificação do password atual
-    
-    // Dados mockados para testes
     const mockUsers = [
       {
         id: "1",
@@ -169,26 +160,22 @@ export const UserProvider = ({ children }: UserProviderProps) => {
       }
     ];
     
-    // Verificar se a senha atual está correta
     const foundUser = mockUsers.find(u => u.email === user.email && u.password === currentPassword);
     
     if (foundUser) {
-      // Em um sistema real, aqui atualizaria a senha no banco de dados
-      // Para demonstração, apenas retornamos sucesso
       return true;
     }
     
     return false;
   };
 
-  // Nova função para trocar o papel do usuário
   const switchUserRole = (role: UserRole) => {
     const originalRole = user.originalRole || user.role;
     
     setUser({
       ...user,
       role,
-      originalRole  // Mantém o papel original para poder voltar depois
+      originalRole
     });
   };
 
