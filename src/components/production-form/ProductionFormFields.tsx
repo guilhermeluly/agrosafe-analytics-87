@@ -102,7 +102,7 @@ const ProductionFormFields: React.FC<ProductionFormFieldsProps> = ({
         {formErrors.location && <p className="text-xs text-destructive">{formErrors.location}</p>}
       </div>
 
-      {/* Save button - Changed to blue color as requested */}
+      {/* Save button - Changed to blue color */}
       <Button 
         type="submit" 
         className="bg-blue-600 hover:bg-blue-700 text-white"

@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { DateRange } from "react-day-picker";
 import AppLayout from "@/components/AppLayout";
 import { useEmpresa } from "@/context/EmpresaContext";
@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { PresentationConfig } from "@/components/presentation/PresentationConfig";
 import { PresentationDisplay } from "@/components/presentation/PresentationDisplay";
 import { usePresentationMode } from "@/hooks/usePresentationMode";
-import { LOCAL_COMBINATIONS } from "@/utils/combinations";
+import { LineTurnoCombo } from "@/components/sidebar/types";
 
 export default function PresentationMode() {
   const { empresa } = useEmpresa();
@@ -23,6 +23,33 @@ export default function PresentationMode() {
   });
   const [selectedCombinations, setSelectedCombinations] = useState<string[]>(['global']);
   const [selectedIndicators, setSelectedIndicators] = useState<string[]>(['oee', 'componentes']);
+
+  // Get production lines and shifts from storage or state
+  // Using hardcoded data for now until we connect to the real data source
+  const productionLines = [
+    { id: 'linha-1', name: 'Linha 1', nominalCapacity: 120, standardSetupTime: 15 },
+    { id: 'linha-2', name: 'Linha 2', nominalCapacity: 150, standardSetupTime: 20 },
+    { id: 'linha-3', name: 'Linha 3', nominalCapacity: 180, standardSetupTime: 25 },
+  ];
+  
+  const shifts = [
+    { id: '1', name: 'Manhã', startTime: '06:00', endTime: '14:00' },
+    { id: '2', name: 'Tarde', startTime: '14:00', endTime: '22:00' },
+    { id: '3', name: 'Noite', startTime: '22:00', endTime: '06:00' },
+  ];
+  
+  // Generate combinations based on registered lines and shifts
+  const lineTurnoCombos: LineTurnoCombo[] = [
+    { id: 'global', name: 'Global (Todas as linhas e turnos)', linha: 'todas', turno: 'todos' },
+    ...productionLines.flatMap(line => 
+      shifts.map(shift => ({
+        id: `${line.id}-${shift.id}`,
+        name: `${line.name} - ${shift.name}`,
+        linha: line.id,
+        turno: shift.id
+      }))
+    )
+  ];
 
   const { activeMetric, setActiveMetric, currentCombinationIndex } = usePresentationMode({
     fullscreen,
@@ -62,9 +89,9 @@ export default function PresentationMode() {
   };
 
   const getCurrentCombination = () => {
-    if (selectedCombinations.length === 0) return LOCAL_COMBINATIONS.find(c => c.id === 'global');
+    if (selectedCombinations.length === 0) return lineTurnoCombos.find(c => c.id === 'global');
     const combinationId = selectedCombinations[currentCombinationIndex];
-    return LOCAL_COMBINATIONS.find(c => c.id === combinationId);
+    return lineTurnoCombos.find(c => c.id === combinationId);
   };
 
   if (fullscreen) {

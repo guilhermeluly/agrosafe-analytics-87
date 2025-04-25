@@ -31,7 +31,7 @@ export function CompanySelector() {
       // Update empresa context with the selected company data
       const selectedCompany = MOCK_COMPANIES.find(c => c.id === value);
       if (selectedCompany) {
-        const updatedEmpresa: EmpresaInfo = {
+        setEmpresa({
           id: selectedCompany.id,
           nome: selectedCompany.name,
           planoId: selectedCompany.planoId,
@@ -40,8 +40,7 @@ export function CompanySelector() {
           logoCliente: "/logo_app.png",
           exibeLogoAgroSafe: true,
           unidadeCapacidade: 'unidades/h'
-        };
-        setEmpresa(updatedEmpresa);
+        });
       }
     }
   };

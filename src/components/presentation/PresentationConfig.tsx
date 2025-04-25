@@ -8,8 +8,6 @@ import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeftRight, Globe } from "lucide-react";
 import { IndicatorSelector } from './IndicatorSelector';
-import { LOCAL_COMBINATIONS } from '@/utils/combinations';
-import { LineTurnoCombo } from '@/components/sidebar/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface PresentationConfigProps {
@@ -39,8 +37,34 @@ export function PresentationConfig({
   setSelectedCombinations,
   onStartPresentation
 }: PresentationConfigProps) {
+  // Get production lines and shifts from the ShiftsRegistry component data
+  // Using hardcoded data for now until we connect to the real data source
+  const productionLines = [
+    { id: 'linha-1', name: 'Linha 1', nominalCapacity: 120, standardSetupTime: 15 },
+    { id: 'linha-2', name: 'Linha 2', nominalCapacity: 150, standardSetupTime: 20 },
+    { id: 'linha-3', name: 'Linha 3', nominalCapacity: 180, standardSetupTime: 25 },
+  ];
   
-  // Fixed this function to return a string array explicitly
+  const shifts = [
+    { id: '1', name: 'Manhã', startTime: '06:00', endTime: '14:00' },
+    { id: '2', name: 'Tarde', startTime: '14:00', endTime: '22:00' },
+    { id: '3', name: 'Noite', startTime: '22:00', endTime: '06:00' },
+  ];
+  
+  // Generate combinations based on registered lines and shifts
+  const lineTurnoCombos = [
+    { id: 'global', name: 'Global (Todas as linhas e turnos)', linha: 'todas', turno: 'todos' },
+    ...productionLines.flatMap(line => 
+      shifts.map(shift => ({
+        id: `${line.id}-${shift.id}`,
+        name: `${line.name} - ${shift.name}`,
+        linha: line.id,
+        turno: shift.id
+      }))
+    )
+  ];
+  
+  // Handle toggling combinations
   const handleCombinationToggle = (id: string) => {
     const currentCombinations = Array.isArray(selectedCombinations) ? selectedCombinations : [];
     
@@ -91,7 +115,7 @@ export function PresentationConfig({
                 
                 <ScrollArea className="h-32 pr-4">
                   <div className="space-y-2">
-                    {LOCAL_COMBINATIONS.filter(combo => combo.id !== 'global').map((combo) => (
+                    {lineTurnoCombos.filter(combo => combo.id !== 'global').map((combo) => (
                       <div key={combo.id} className="flex items-center space-x-2">
                         <Checkbox 
                           id={`combo-${combo.id}`} 
