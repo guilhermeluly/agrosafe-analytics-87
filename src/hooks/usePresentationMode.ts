@@ -18,39 +18,44 @@ export function usePresentationMode({
   selectedCombinations,
   selectedIndicators
 }: UsePresentationModeProps) {
-  const [activeMetric, setActiveMetric] = useState(selectedIndicators[0] || "oee");
+  // Ensure we have valid arrays, defaulting to empty arrays if undefined
+  const safeCombinations = Array.isArray(selectedCombinations) ? selectedCombinations : [];
+  const safeIndicators = Array.isArray(selectedIndicators) ? selectedIndicators : [];
+  
+  // Initialize activeMetric with the first indicator or fallback to "oee"
+  const [activeMetric, setActiveMetric] = useState(safeIndicators[0] || "oee");
   const [currentCombinationIndex, setCurrentCombinationIndex] = useState(0);
 
   // Reset active metric if the selected indicators change
   useEffect(() => {
-    if (selectedIndicators.length > 0 && !selectedIndicators.includes(activeMetric)) {
-      setActiveMetric(selectedIndicators[0]);
+    if (safeIndicators.length > 0 && !safeIndicators.includes(activeMetric)) {
+      setActiveMetric(safeIndicators[0]);
     }
-  }, [selectedIndicators, activeMetric]);
+  }, [safeIndicators, activeMetric]);
 
   useEffect(() => {
-    if (fullscreen && autoRotate && selectedIndicators.length > 1) {
+    if (fullscreen && autoRotate && safeIndicators.length > 1) {
       const timer = setInterval(() => {
         setActiveMetric(prevMetric => {
-          const currentIndex = selectedIndicators.indexOf(prevMetric);
-          const nextIndex = (currentIndex + 1) % selectedIndicators.length;
-          return selectedIndicators[nextIndex];
+          const currentIndex = safeIndicators.indexOf(prevMetric);
+          const nextIndex = (currentIndex + 1) % safeIndicators.length;
+          return safeIndicators[nextIndex];
         });
       }, rotationInterval * 1000);
       
       return () => clearInterval(timer);
     }
-  }, [fullscreen, autoRotate, rotationInterval, selectedIndicators]);
+  }, [fullscreen, autoRotate, rotationInterval, safeIndicators]);
   
   useEffect(() => {
-    if (fullscreen && autoRotate && selectedCombinations.length > 1) {
+    if (fullscreen && autoRotate && safeCombinations.length > 1) {
       const combinationTimer = setInterval(() => {
-        setCurrentCombinationIndex(prevIndex => (prevIndex + 1) % selectedCombinations.length);
+        setCurrentCombinationIndex(prevIndex => (prevIndex + 1) % safeCombinations.length);
       }, rotationInterval * 2000); // Change combinations less frequently than metrics
       
       return () => clearInterval(combinationTimer);
     }
-  }, [fullscreen, autoRotate, rotationInterval, selectedCombinations]);
+  }, [fullscreen, autoRotate, rotationInterval, safeCombinations]);
 
   return {
     activeMetric,

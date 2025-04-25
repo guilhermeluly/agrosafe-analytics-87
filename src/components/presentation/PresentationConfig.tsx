@@ -40,14 +40,17 @@ export function PresentationConfig({
   onStartPresentation
 }: PresentationConfigProps) {
   
+  // Fixed this function to return a string array explicitly
   const handleCombinationToggle = (id: string) => {
-    setSelectedCombinations(prev => {
-      if (prev.includes(id)) {
-        return prev.filter(c => c !== id);
-      } else {
-        return [...prev, id];
-      }
-    });
+    if (selectedCombinations.includes(id)) {
+      // If already selected, remove it
+      const newCombinations = selectedCombinations.filter(c => c !== id);
+      setSelectedCombinations(newCombinations);
+    } else {
+      // If not selected, add it
+      const newCombinations = [...selectedCombinations, id];
+      setSelectedCombinations(newCombinations);
+    }
   };
   
   const isGlobalSelected = selectedCombinations.includes('global');

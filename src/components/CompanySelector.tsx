@@ -12,7 +12,7 @@ export function CompanySelector() {
     return null;
   }
 
-  // Format company options for the combobox
+  // Format company options for the combobox - ensure this is never undefined
   const companyOptions = [
     { value: 'company1', label: 'Company 1' },
     { value: 'company2', label: 'Company 2' },
@@ -27,8 +27,8 @@ export function CompanySelector() {
       </Label>
       <Combobox
         options={companyOptions}
-        value={selectedCompanyId}
-        onSelect={setSelectedCompanyId}
+        value={selectedCompanyId || ''}
+        onSelect={(value) => setSelectedCompanyId(value)}
         placeholder="Selecione uma empresa"
         className="h-7 text-xs text-gray-200 bg-gray-700 hover:bg-gray-600"
       />

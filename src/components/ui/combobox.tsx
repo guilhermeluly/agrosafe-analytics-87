@@ -43,13 +43,17 @@ export function Combobox({
 
   // Find the selected option's label or use the value as the label if it's a custom value
   const displayValue = React.useMemo(() => {
+    // Ensure we have a valid value and valid options
+    if (!value || !options || options.length === 0) {
+      return placeholder;
+    }
     const selectedOption = options.find((option) => option.value === value)
     return selectedOption ? selectedOption.label : (value || placeholder)
   }, [value, options, placeholder])
 
   // Handle input change for custom value support
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(e.target.value)
+  const handleInputChange = (value: string) => {
+    setInputValue(value)
   }
 
   // Allow entering custom values if enabled
@@ -60,6 +64,9 @@ export function Combobox({
       setOpen(false)
     }
   }
+
+  // Ensure options is always an array
+  const safeOptions = Array.isArray(options) ? options : [];
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -80,7 +87,7 @@ export function Combobox({
           <CommandInput 
             placeholder={placeholder} 
             value={inputValue}
-            onValueChange={setInputValue}
+            onValueChange={handleInputChange}
           />
           <CommandEmpty>
             {allowCustomValue ? (
@@ -95,7 +102,7 @@ export function Combobox({
             )}
           </CommandEmpty>
           <CommandGroup>
-            {options.map((option) => (
+            {safeOptions.map((option) => (
               <CommandItem
                 key={option.value}
                 value={option.value}
