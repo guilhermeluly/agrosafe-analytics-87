@@ -4,24 +4,40 @@ import { useUser } from '../context/UserContext';
 import { Combobox } from './ui/combobox';
 import { Label } from './ui/label';
 import { Building2 } from 'lucide-react';
+import { useEmpresa } from '../context/EmpresaContext';
+
+const MOCK_COMPANIES = [
+  { id: 'company1', name: 'Indústria ABC', planoId: 'completo' },
+  { id: 'company2', name: 'Fábrica XYZ', planoId: 'medio' },
+  { id: 'company3', name: 'Empresa 123', planoId: 'basico' },
+];
 
 export function CompanySelector() {
   const { user, selectedCompanyId, setSelectedCompanyId } = useUser();
+  const { setEmpresa } = useEmpresa();
 
   if (user.role !== 'master_admin') {
     return null;
   }
 
-  // Format company options for the combobox - ensure this is never undefined
-  const companyOptions = [
-    { value: 'company1', label: 'Company 1' },
-    { value: 'company2', label: 'Company 2' },
-    // In a real implementation, this would come from API
-  ];
+  const companyOptions = MOCK_COMPANIES.map(company => ({
+    value: company.id,
+    label: company.name
+  }));
 
   const handleCompanySelect = (value: string) => {
     if (setSelectedCompanyId && typeof setSelectedCompanyId === 'function') {
       setSelectedCompanyId(value);
+      // Update empresa context with the selected company data
+      const selectedCompany = MOCK_COMPANIES.find(c => c.id === value);
+      if (selectedCompany) {
+        setEmpresa(prev => ({
+          ...prev,
+          id: selectedCompany.id,
+          nome: selectedCompany.name,
+          planoId: selectedCompany.planoId
+        }));
+      }
     }
   };
 
