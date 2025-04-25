@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useEmpresa } from "@/context/EmpresaContext";
 
 interface Line {
   id: string;
@@ -12,26 +13,21 @@ interface Line {
   standardSetupTime: number;
 }
 
-type UnitType = "unidades" | "kg";
-
 interface RegistrySectionProps {
   customLines: Line[];
   setCustomLines: (lines: Line[]) => void;
   productionLines: Line[];
-  unitType: UnitType;
-  setUnitType: (type: UnitType) => void;
 }
 
 export default function RegistrySection({
   customLines,
   setCustomLines,
   productionLines,
-  unitType,
-  setUnitType
 }: RegistrySectionProps) {
   const [newLineName, setNewLineName] = useState("");
   const [newLineCapacity, setNewLineCapacity] = useState<number>(100);
   const [newLineSetup, setNewLineSetup] = useState<number>(10);
+  const { empresa } = useEmpresa();
   
   const handleAddLine = () => {
     if (newLineName.trim() && newLineCapacity > 0) {
@@ -76,14 +72,7 @@ export default function RegistrySection({
                     value={newLineCapacity}
                     onChange={e => setNewLineCapacity(Number(e.target.value))}
                   />
-                  <select
-                    value={unitType}
-                    onChange={e => setUnitType(e.target.value as UnitType)}
-                    className="w-24 h-10 rounded-md border border-gray-300 bg-white px-2"
-                  >
-                    <option value="unidades">un/h</option>
-                    <option value="kg">kg/h</option>
-                  </select>
+                  <span className="text-sm">{empresa.unidadeCapacidade}</span>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
                   Capacidade de produção por hora
@@ -132,7 +121,7 @@ export default function RegistrySection({
                   {[...productionLines, ...customLines].map(line => (
                     <tr key={line.id} className="border-b border-gray-200 last:border-0">
                       <td className="py-2">{line.name}</td>
-                      <td className="py-2">{line.nominalCapacity} {unitType}/h</td>
+                      <td className="py-2">{line.nominalCapacity} {empresa.unidadeCapacidade}</td>
                       <td className="py-2">{line.standardSetupTime} min</td>
                     </tr>
                   ))}

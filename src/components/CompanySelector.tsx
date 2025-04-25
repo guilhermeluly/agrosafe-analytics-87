@@ -37,7 +37,7 @@ export function CompanySelector() {
         logoAgroSafe: "/logo_agrosafe.png",
         logoCliente: "/logo_app.png",
         exibeLogoAgroSafe: true,
-        unidadeCapacidade: 'unidades/h'
+        unidadeCapacidade: 'unidades/h' as const // Fixed type
       };
       setEmpresa(empresaInfo);
     }

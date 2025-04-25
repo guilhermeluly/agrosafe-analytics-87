@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import AppLayout from "../components/AppLayout";
 import { useEmpresa } from "../context/EmpresaContext";
@@ -11,7 +10,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 
-// Mock data structures
 interface Line {
   id: string;
   name: string;
@@ -26,7 +24,6 @@ interface Shift {
   endTime: string;
 }
 
-// Simple mock of the database function
 const resetCompany = (companyId: string) => {
   console.log(`Reset company with ID: ${companyId}`);
   // In a real implementation, this would reset the company data
@@ -37,7 +34,6 @@ export default function Admin() {
   const { empresa, setEmpresa } = useEmpresa();
   const { toast } = useToast();
   
-  // Mock data state - in a real app these would be stored in a database
   const [lines, setLines] = useState<Line[]>([
     { id: "1", name: "Linha 1", nominalCapacity: 100, standardSetupTime: 15 },
     { id: "2", name: "Linha 2", nominalCapacity: 150, standardSetupTime: 20 },
@@ -50,7 +46,6 @@ export default function Admin() {
     { id: "3", name: "Noite", startTime: "22:00", endTime: "06:00" }
   ]);
   
-  // New line/shift form state
   const [newLine, setNewLine] = useState<Omit<Line, "id">>({ 
     name: "", nominalCapacity: 0, standardSetupTime: 0 
   });
@@ -145,6 +140,18 @@ export default function Admin() {
                   {PLANOS.map(p =>
                     <option key={p.id} value={p.id}>{p.nome}</option>
                   )}
+                </select>
+              </div>
+              
+              <div className="mb-6">
+                <label className="block font-semibold mb-2">Unidade de Capacidade:</label>
+                <select 
+                  value={empresa.unidadeCapacidade} 
+                  onChange={e => setEmpresa({ ...empresa, unidadeCapacidade: e.target.value as "unidades/h" | "kg/h" })} 
+                  className="w-full border p-2 rounded"
+                >
+                  <option value="unidades/h">Unidades por hora (un/h)</option>
+                  <option value="kg/h">Quilogramas por hora (kg/h)</option>
                 </select>
               </div>
               
