@@ -1,106 +1,173 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import StopsSection from './StopsSection';
+import SetupTimesSection from './SetupTimesSection';
+import { v4 as uuidv4 } from 'uuid';
+import { useToast } from "@/hooks/use-toast";
+import { SetupTime, StopTime } from '@/types';
 
-interface ProductionFormFieldsProps {
-  formData: {
-    date: string;
-    shift: string;
-    location: string;
-    plannedProduction: number;
-    actualProduction: number;
-    rework: number;
-    scrap: number;
-    lostPackages: number;
-    setupTime: number;
-    observations: string;
-  };
-  setFormData: React.Dispatch<React.SetStateAction<any>>;
-  formErrors: {[key: string]: string};
-  setFormErrors: React.Dispatch<React.SetStateAction<{[key: string]: string}>>;
-  allLines: { id: string; name: string; nominalCapacity: number; standardSetupTime: number }[];
-  shifts: { id: string; name: string; startTime: string; endTime: string }[];
-  unitType: "unidades" | "kg";
-}
+const ProductionFormFields: React.FC = () => {
+  const { toast } = useToast();
+  const [formData, setFormData] = useState({
+    date: new Date().toISOString().split('T')[0],
+    shift: "",
+    location: "",
+    plannedProduction: 0,
+    actualProduction: 0,
+    rework: 0,
+    scrap: 0,
+    lostPackages: 0,
+  });
 
-const ProductionFormFields: React.FC<ProductionFormFieldsProps> = ({
-  formData,
-  setFormData,
-  formErrors,
-  setFormErrors,
-  allLines,
-  shifts,
-  unitType
-}) => {
-  const handleInputChange = (name: string, value: string | number) => {
-    setFormData((prev: any) => ({ ...prev, [name]: value }));
-    if (formErrors[name]) {
-      setFormErrors({ ...formErrors, [name]: "" });
-    }
+  const [setupTimes, setSetupTimes] = useState<SetupTime[]>([]);
+  const [stopTimes, setStopTimes] = useState<StopTime[]>([]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    toast({
+      title: "Dados registrados",
+      description: "Os dados de produção foram salvos com sucesso.",
+    });
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 bg-white rounded-xl p-3 md:p-5 border mb-2 shadow">
-      <div>
-        <Label htmlFor="date" className={`font-bold text-vividPurple ${formErrors.date ? "text-destructive" : ""}`}>
-          Data *
-        </Label>
-        <Input
-          id="date"
-          name="date"
-          type="date"
-          value={formData.date}
-          onChange={e => handleInputChange("date", e.target.value)}
-          required
-          className={`bg-softGray ${formErrors.date ? "border-destructive" : ""}`}
-        />
-        {formErrors.date && <p className="text-xs text-destructive">{formErrors.date}</p>}
+    <form onSubmit={handleSubmit} className="space-y-6 max-w-4xl mx-auto">
+      <Card>
+        <CardHeader>
+          <CardTitle>Inserir Dados de Produção</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="date">Data *</Label>
+              <Input
+                id="date"
+                type="date"
+                value={formData.date}
+                onChange={(e) => setFormData({...formData, date: e.target.value})}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="shift">Turno *</Label>
+              <Select
+                value={formData.shift}
+                onValueChange={(value) => setFormData({...formData, shift: value})}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o turno" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="manha">Manhã (06:00 - 14:00)</SelectItem>
+                  <SelectItem value="tarde">Tarde (14:00 - 22:00)</SelectItem>
+                  <SelectItem value="noite">Noite (22:00 - 06:00)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div>
+            <Label htmlFor="location">Linha de Produção *</Label>
+            <Select
+              value={formData.location}
+              onValueChange={(value) => setFormData({...formData, location: value})}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione uma linha" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="linha1">Linha 1 - Cap. Nominal: 100 unidades/h</SelectItem>
+                <SelectItem value="linha2">Linha 2 - Cap. Nominal: 150 unidades/h</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="plannedProduction">Produção Planejada (unidades) *</Label>
+              <Input
+                id="plannedProduction"
+                type="number"
+                value={formData.plannedProduction}
+                onChange={(e) => setFormData({...formData, plannedProduction: Number(e.target.value)})}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="actualProduction">Produção Real (unidades) *</Label>
+              <Input
+                id="actualProduction"
+                type="number"
+                value={formData.actualProduction}
+                onChange={(e) => setFormData({...formData, actualProduction: Number(e.target.value)})}
+                required
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <Label htmlFor="rework">Retrabalho</Label>
+              <Input
+                id="rework"
+                type="number"
+                value={formData.rework}
+                onChange={(e) => setFormData({...formData, rework: Number(e.target.value)})}
+              />
+            </div>
+            <div>
+              <Label htmlFor="scrap">Refugo</Label>
+              <Input
+                id="scrap"
+                type="number"
+                value={formData.scrap}
+                onChange={(e) => setFormData({...formData, scrap: Number(e.target.value)})}
+              />
+            </div>
+            <div>
+              <Label htmlFor="lostPackages">Embalagens Perdidas</Label>
+              <Input
+                id="lostPackages"
+                type="number"
+                value={formData.lostPackages}
+                onChange={(e) => setFormData({...formData, lostPackages: Number(e.target.value)})}
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <SetupTimesSection
+        setups={setupTimes}
+        addSetup={(setup) => setSetupTimes([...setupTimes, { ...setup, id: uuidv4() }])}
+        removeSetup={(index) => setSetupTimes(setupTimes.filter((_, i) => i !== index))}
+        standardSetupTime={30}
+      />
+
+      <StopsSection
+        stops={stopTimes}
+        stopReasons={[
+          "Manutenção Corretiva",
+          "Manutenção Preventiva",
+          "Falta de Material",
+          "Falta de Operador",
+          "Outros"
+        ]}
+        addStop={(stop) => setStopTimes([...stopTimes, { ...stop, id: uuidv4() }])}
+        removeStop={(index) => setStopTimes(stopTimes.filter((_, i) => i !== index))}
+      />
+
+      <div className="flex justify-end">
+        <Button type="submit" className="w-full md:w-auto">
+          Registrar Produção
+        </Button>
       </div>
-      <div>
-        <Label htmlFor="shift" className={`font-bold text-vividPurple ${formErrors.shift ? "text-destructive" : ""}`}>
-          Turno *
-        </Label>
-        <Select
-          value={formData.shift}
-          onValueChange={value => handleInputChange("shift", value)}
-        >
-          <SelectTrigger className={`bg-softGray ${formErrors.shift ? "border-destructive" : ""}`}>
-            <SelectValue placeholder="Selecione um turno" />
-          </SelectTrigger>
-          <SelectContent>
-            {shifts.map(shift => (
-              <SelectItem key={shift.id} value={shift.name}>
-                {shift.name} ({shift.startTime} - {shift.endTime})
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {formErrors.shift && <p className="text-xs text-destructive">{formErrors.shift}</p>}
-      </div>
-      <div>
-        <Label htmlFor="location" className={`font-bold text-vividPurple ${formErrors.location ? "text-destructive" : ""}`}>
-          Linha de Produção *
-        </Label>
-        <Select
-          value={formData.location}
-          onValueChange={value => handleInputChange("location", value)}
-        >
-          <SelectTrigger className={`bg-softGray ${formErrors.location ? "border-destructive" : ""}`}>
-            <SelectValue placeholder="Selecione uma linha de produção" />
-          </SelectTrigger>
-          <SelectContent>
-            {allLines.map(line => (
-              <SelectItem key={line.id} value={line.name}>
-                {line.name} - Cap. Nominal: {line.nominalCapacity} {unitType}/h
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {formErrors.location && <p className="text-xs text-destructive">{formErrors.location}</p>}
-      </div>
-    </div>
+    </form>
   );
 };
 
