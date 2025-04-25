@@ -2,7 +2,6 @@
 import React from 'react';
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface ProductionFormFieldsProps {
@@ -101,14 +100,6 @@ const ProductionFormFields: React.FC<ProductionFormFieldsProps> = ({
         </Select>
         {formErrors.location && <p className="text-xs text-destructive">{formErrors.location}</p>}
       </div>
-
-      {/* Save button - Changed to blue color */}
-      <Button 
-        type="submit" 
-        className="bg-blue-600 hover:bg-blue-700 text-white"
-      >
-        Salvar Dados
-      </Button>
     </div>
   );
 };

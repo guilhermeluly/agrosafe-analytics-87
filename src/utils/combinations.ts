@@ -1,15 +1,36 @@
 
 import { LineTurnoCombo } from "@/components/sidebar/types";
 
-export const LOCAL_COMBINATIONS: LineTurnoCombo[] = [
-  { id: 'linha1-turno1', name: 'Linha 1 - Turno 1', linha: 'linha-1', turno: 'manhã' },
-  { id: 'linha1-turno2', name: 'Linha 1 - Turno 2', linha: 'linha-1', turno: 'tarde' },
-  { id: 'linha1-turno3', name: 'Linha 1 - Turno 3', linha: 'linha-1', turno: 'noite' },
-  { id: 'linha2-turno1', name: 'Linha 2 - Turno 1', linha: 'linha-2', turno: 'manhã' },
-  { id: 'linha2-turno2', name: 'Linha 2 - Turno 2', linha: 'linha-2', turno: 'tarde' },
-  { id: 'linha2-turno3', name: 'Linha 2 - Turno 3', linha: 'linha-2', turno: 'noite' },
-  { id: 'linha3-turno1', name: 'Linha 3 - Turno 1', linha: 'linha-3', turno: 'manhã' },
-  { id: 'linha3-turno2', name: 'Linha 3 - Turno 2', linha: 'linha-3', turno: 'tarde' },
-  { id: 'linha3-turno3', name: 'Linha 3 - Turno 3', linha: 'linha-3', turno: 'noite' },
-  { id: 'global', name: 'Global (Todas as linhas e turnos)', linha: 'todas', turno: 'todos' },
+// This should be replaced with actual data from your backend
+const productionLines = [
+  { id: 'linha-1', name: 'Linha 1' },
+  { id: 'linha-2', name: 'Linha 2' },
+  { id: 'linha-3', name: 'Linha 3' },
 ];
+
+const shifts = [
+  { id: 'manha', name: 'Manhã' },
+  { id: 'tarde', name: 'Tarde' },
+  { id: 'noite', name: 'Noite' },
+];
+
+export const generateCombinations = (): LineTurnoCombo[] => {
+  const combinations: LineTurnoCombo[] = [
+    { id: 'global', name: 'Global (Todas as linhas e turnos)', linha: 'todas', turno: 'todos' }
+  ];
+
+  productionLines.forEach(line => {
+    shifts.forEach(shift => {
+      combinations.push({
+        id: `${line.id}-${shift.id}`,
+        name: `${line.name} - ${shift.name}`,
+        linha: line.id,
+        turno: shift.id
+      });
+    });
+  });
+
+  return combinations;
+};
+
+export const LOCAL_COMBINATIONS = generateCombinations();

@@ -4,7 +4,7 @@ import { useUser } from '../context/UserContext';
 import { Combobox } from './ui/combobox';
 import { Label } from './ui/label';
 import { Building2 } from 'lucide-react';
-import { useEmpresa, EmpresaInfo } from '../context/EmpresaContext';
+import { useEmpresa } from '../context/EmpresaContext';
 
 const MOCK_COMPANIES = [
   { id: 'company1', name: 'Indústria ABC', planoId: 'completo' },
@@ -26,22 +26,20 @@ export function CompanySelector() {
   }));
 
   const handleCompanySelect = (value: string) => {
-    if (setSelectedCompanyId && typeof setSelectedCompanyId === 'function') {
-      setSelectedCompanyId(value);
-      // Update empresa context with the selected company data
-      const selectedCompany = MOCK_COMPANIES.find(c => c.id === value);
-      if (selectedCompany) {
-        setEmpresa({
-          id: selectedCompany.id,
-          nome: selectedCompany.name,
-          planoId: selectedCompany.planoId,
-          logo: "/logo_app.png",
-          logoAgroSafe: "/logo_agrosafe.png",
-          logoCliente: "/logo_app.png",
-          exibeLogoAgroSafe: true,
-          unidadeCapacidade: 'unidades/h'
-        });
-      }
+    setSelectedCompanyId(value);
+    const selectedCompany = MOCK_COMPANIES.find(c => c.id === value);
+    if (selectedCompany) {
+      const empresaInfo = {
+        id: selectedCompany.id,
+        nome: selectedCompany.name,
+        planoId: selectedCompany.planoId,
+        logo: "/logo_app.png",
+        logoAgroSafe: "/logo_agrosafe.png",
+        logoCliente: "/logo_app.png",
+        exibeLogoAgroSafe: true,
+        unidadeCapacidade: 'unidades/h'
+      };
+      setEmpresa(empresaInfo);
     }
   };
 
