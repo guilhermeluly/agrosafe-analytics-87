@@ -21,9 +21,12 @@ interface Props {
   onIndicatorToggle: (id: string) => void;
 }
 
-export function IndicatorSelector({ selectedIndicators, onIndicatorToggle }: Props) {
+export function IndicatorSelector({ selectedIndicators = [], onIndicatorToggle }: Props) {
   const { empresa } = useEmpresa();
   const isPremium = empresa.planoId === "completo" || empresa.planoId === "medio";
+
+  // Ensure selectedIndicators is always an array
+  const safeSelectedIndicators = Array.isArray(selectedIndicators) ? selectedIndicators : [];
 
   return (
     <Card>
@@ -39,7 +42,7 @@ export function IndicatorSelector({ selectedIndicators, onIndicatorToggle }: Pro
               <div key={indicator.id} className="flex items-start space-x-2">
                 <Checkbox 
                   id={`indicator-${indicator.id}`}
-                  checked={selectedIndicators.includes(indicator.id)}
+                  checked={safeSelectedIndicators.includes(indicator.id)}
                   onCheckedChange={() => !isDisabled && onIndicatorToggle(indicator.id)}
                   disabled={isDisabled}
                 />

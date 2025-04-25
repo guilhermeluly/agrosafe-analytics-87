@@ -35,25 +35,27 @@ export function PresentationConfig({
   setAutoRotate,
   selectedIndicators,
   onIndicatorToggle,
-  selectedCombinations,
+  selectedCombinations = [],  // Default to empty array
   setSelectedCombinations,
   onStartPresentation
 }: PresentationConfigProps) {
   
   // Fixed this function to return a string array explicitly
   const handleCombinationToggle = (id: string) => {
-    if (selectedCombinations.includes(id)) {
+    const currentCombinations = Array.isArray(selectedCombinations) ? selectedCombinations : [];
+    
+    if (currentCombinations.includes(id)) {
       // If already selected, remove it
-      const newCombinations = selectedCombinations.filter(c => c !== id);
+      const newCombinations = currentCombinations.filter(c => c !== id);
       setSelectedCombinations(newCombinations);
     } else {
       // If not selected, add it
-      const newCombinations = [...selectedCombinations, id];
+      const newCombinations = [...currentCombinations, id];
       setSelectedCombinations(newCombinations);
     }
   };
   
-  const isGlobalSelected = selectedCombinations.includes('global');
+  const isGlobalSelected = Array.isArray(selectedCombinations) && selectedCombinations.includes('global');
 
   return (
     <div className="container mx-auto py-6 px-4">
@@ -93,7 +95,7 @@ export function PresentationConfig({
                       <div key={combo.id} className="flex items-center space-x-2">
                         <Checkbox 
                           id={`combo-${combo.id}`} 
-                          checked={selectedCombinations.includes(combo.id)}
+                          checked={Array.isArray(selectedCombinations) && selectedCombinations.includes(combo.id)}
                           onCheckedChange={() => handleCombinationToggle(combo.id)}
                           disabled={isGlobalSelected}
                         />
@@ -141,7 +143,7 @@ export function PresentationConfig({
         </Card>
 
         <IndicatorSelector
-          selectedIndicators={selectedIndicators}
+          selectedIndicators={selectedIndicators || []}
           onIndicatorToggle={onIndicatorToggle}
         />
       </div>
@@ -150,7 +152,7 @@ export function PresentationConfig({
         className="w-full bg-purple-600 hover:bg-purple-700"
         size="lg"
         onClick={onStartPresentation}
-        disabled={selectedCombinations.length === 0 || selectedIndicators.length === 0}
+        disabled={(selectedCombinations || []).length === 0 || (selectedIndicators || []).length === 0}
       >
         Iniciar Apresentação em Tela Cheia
         <ArrowLeftRight className="ml-2 h-4 w-4" />
