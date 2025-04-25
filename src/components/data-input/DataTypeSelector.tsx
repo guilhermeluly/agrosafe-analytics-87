@@ -6,45 +6,23 @@ import { useUser } from "@/context/UserContext";
 import { getPlanoById } from "@/config/planos";
 
 interface DataTypeSelectorProps {
-  onSelectType: (type: "production" | "logistics") => void;
+  value: "normal" | "historical";
+  onChange: (type: "normal" | "historical") => void;
 }
 
-export default function DataTypeSelector({ onSelectType }: DataTypeSelectorProps) {
-  const { user } = useUser();
-  const plano = getPlanoById(user?.planoId || "basico");
-  
-  // Apenas usuários com plano completo ou admin/master_admin podem acessar dados de movimentação
-  const showLogistics = user.role === "master_admin" || (plano && plano.id === "completo");
-
+const DataTypeSelector = ({ value, onChange }: DataTypeSelectorProps) => {
   return (
-    <div className="grid gap-6 md:grid-cols-2 max-w-4xl mx-auto">
-      <Card
-        className="cursor-pointer hover:shadow-lg transition-shadow bg-white hover:scale-105"
-        onClick={() => onSelectType("production")}
+    <div className="flex items-center space-x-2">
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value as "normal" | "historical")}
+        className="border rounded px-2 py-1 text-sm bg-white dark:bg-gray-800"
       >
-        <CardContent className="flex flex-col items-center justify-center p-6">
-          <FileText className="h-12 w-12 text-primary mb-4" />
-          <h3 className="text-xl font-bold mb-2">Dados de Produção</h3>
-          <p className="text-center text-muted-foreground">
-            Registre informações sobre produção, setup, paradas e OEE
-          </p>
-        </CardContent>
-      </Card>
-
-      {showLogistics && (
-        <Card
-          className="cursor-pointer hover:shadow-lg transition-shadow bg-white hover:scale-105"
-          onClick={() => onSelectType("logistics")}
-        >
-          <CardContent className="flex flex-col items-center justify-center p-6">
-            <Truck className="h-12 w-12 text-primary mb-4" />
-            <h3 className="text-xl font-bold mb-2">Dados de Movimentação</h3>
-            <p className="text-center text-muted-foreground">
-              Registre informações sobre expedição e recebimento
-            </p>
-          </CardContent>
-        </Card>
-      )}
+        <option value="normal">Dados Atuais</option>
+        <option value="historical">Dados Históricos</option>
+      </select>
     </div>
   );
-}
+};
+
+export default DataTypeSelector;

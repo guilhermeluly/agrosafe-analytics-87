@@ -3,11 +3,11 @@ import React, { useState } from 'react';
 import AppLayout from '../components/AppLayout';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ProductionFormFields } from "@/components/production-form/ProductionFormFields";
-import { StopsSection } from "@/components/production-form/StopsSection";
-import { SetupTimesSection } from "@/components/production-form/SetupTimesSection";
-import { LogisticsFormContainer } from "@/components/production-form/LogisticsFormContainer";
-import { DataTypeSelector } from "@/components/data-input/DataTypeSelector";
+import ProductionFormFields from "@/components/production-form/ProductionFormFields";
+import StopsSection from "@/components/production-form/StopsSection";
+import SetupTimesSection from "@/components/production-form/SetupTimesSection";
+import LogisticsFormContainer from "@/components/production-form/LogisticsFormContainer";
+import DataTypeSelector from "@/components/data-input/DataTypeSelector";
 import { Button } from "@/components/ui/button";
 import { ImportCSV } from "@/components/ImportCSV";
 
