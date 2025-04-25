@@ -1,39 +1,72 @@
 
 import React from "react";
-import { LogOut } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useUser } from "@/context/UserContext";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { LogOut, UserCog } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { RoleSwitcher } from "../RoleSwitcher";
 import { CompanySelector } from "../CompanySelector";
 
 export function UserProfile() {
   const { user, logout } = useUser();
-  const userInitials = user.name.split(' ').map(n => n[0]).join('').toUpperCase();
+  const navigate = useNavigate();
+  
+  if (!user.isAuthenticated) {
+    return null;
+  }
+
+  const userInitials = user.name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex items-center space-x-3 mb-2">
-        <Avatar>
-          <AvatarImage src={user.photo} alt={user.name} />
-          <AvatarFallback>{userInitials}</AvatarFallback>
-        </Avatar>
-        <div>
-          <div className="font-medium text-white">{user.name}</div>
-          <div className="text-xs text-gray-400 capitalize">{user.role.replace('_', ' ')}</div>
+    <div className="space-y-3">
+      {/* Admin Master - Controles de alternância */}
+      {user.role === 'master_admin' && (
+        <>
+          <RoleSwitcher />
+          <CompanySelector />
+        </>
+      )}
+      
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Avatar>
+            <AvatarImage src={user.photo || undefined} alt={user.name} />
+            <AvatarFallback className="bg-gray-700">{userInitials}</AvatarFallback>
+          </Avatar>
+          <div className="space-y-0.5">
+            <div className="text-sm font-medium text-gray-200">{user.name}</div>
+            <div className="text-xs text-gray-400">{user.email}</div>
+          </div>
+        </div>
+        <div className="flex gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-gray-400 hover:text-white hover:bg-gray-700"
+            onClick={() => navigate("/change-password")}
+          >
+            <UserCog className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-gray-400 hover:text-white hover:bg-red-900"
+            onClick={handleLogout}
+          >
+            <LogOut className="h-4 w-4" />
+          </Button>
         </div>
       </div>
-      
-      {user.role === "master_admin" && <CompanySelector />}
-      
-      <Button 
-        onClick={logout} 
-        variant="outline" 
-        size="sm" 
-        className="border-gray-600 hover:bg-gray-800 text-gray-300"
-      >
-        <LogOut size={16} className="mr-2" />
-        Sair
-      </Button>
     </div>
   );
 }

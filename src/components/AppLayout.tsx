@@ -8,6 +8,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { RoleNotification } from "./RoleNotification";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -50,6 +51,10 @@ export default function AppLayout({ children, title }: AppLayoutProps) {
                   </Button>
                 </div>
               )}
+              
+              {/* Notificação de mudança de papel */}
+              <RoleNotification />
+              
               {children}
             </main>
           </div>
