@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { 
   BarChart3, 
   PieChart, 
@@ -17,7 +18,10 @@ import {
   MapPin,
   Layers,
   CircleSlash,
-  Settings
+  Settings,
+  Users,
+  TruckIcon,
+  Scale
 } from "lucide-react";
 import { 
   ResponsiveContainer, 
@@ -71,11 +75,25 @@ const rejectData = [
 ];
 
 const movimentacaoData = [
-  { name: 'Seg', entrada: 15, saida: 12 },
-  { name: 'Ter', entrada: 18, saida: 15 },
-  { name: 'Qua', entrada: 14, saida: 16 },
-  { name: 'Qui', entrada: 20, saida: 18 },
-  { name: 'Sex', entrada: 16, saida: 14 },
+  { name: 'Seg', entrada: 15, saida: 12, kgPorHoraHomem: 250 },
+  { name: 'Ter', entrada: 18, saida: 15, kgPorHoraHomem: 270 },
+  { name: 'Qua', entrada: 14, saida: 16, kgPorHoraHomem: 240 },
+  { name: 'Qui', entrada: 20, saida: 18, kgPorHoraHomem: 290 },
+  { name: 'Sex', entrada: 16, saida: 14, kgPorHoraHomem: 260 },
+];
+
+// Mock local/shift combinations
+const LOCAL_COMBINATIONS = [
+  { id: 'linha1-turno1', name: 'Linha 1 - Turno 1', linha: 'linha-1', turno: 'manhã' },
+  { id: 'linha1-turno2', name: 'Linha 1 - Turno 2', linha: 'linha-1', turno: 'tarde' },
+  { id: 'linha1-turno3', name: 'Linha 1 - Turno 3', linha: 'linha-1', turno: 'noite' },
+  { id: 'linha2-turno1', name: 'Linha 2 - Turno 1', linha: 'linha-2', turno: 'manhã' },
+  { id: 'linha2-turno2', name: 'Linha 2 - Turno 2', linha: 'linha-2', turno: 'tarde' },
+  { id: 'linha2-turno3', name: 'Linha 2 - Turno 3', linha: 'linha-2', turno: 'noite' },
+  { id: 'linha3-turno1', name: 'Linha 3 - Turno 1', linha: 'linha-3', turno: 'manhã' },
+  { id: 'linha3-turno2', name: 'Linha 3 - Turno 2', linha: 'linha-3', turno: 'tarde' },
+  { id: 'linha3-turno3', name: 'Linha 3 - Turno 3', linha: 'linha-3', turno: 'noite' },
+  { id: 'global', name: 'Global (Todas as linhas e turnos)', linha: 'todas', turno: 'todos' },
 ];
 
 export default function PresentationMode() {
@@ -86,17 +104,20 @@ export default function PresentationMode() {
   const [activeMetric, setActiveMetric] = useState("oee");
   const [autoRotate, setAutoRotate] = useState(true);
   const [rotationInterval, setRotationInterval] = useState(15); // seconds
-  const [dateRange, setDateRange] = useState({ from: new Date(), to: new Date() });
+  const [dateRange, setDateRange] = useState<{ from: Date; to: Date }>({ from: new Date(), to: new Date() });
   const [dataScope, setDataScope] = useState("global");
-  const [location, setLocation] = useState("todos");
-  const [shift, setShift] = useState("todos");
+  const [selectedCombinations, setSelectedCombinations] = useState<string[]>(['global']);
+  const [currentCombinationIndex, setCurrentCombinationIndex] = useState(0);
   
   const allTabs = [
     { id: "oee", label: "OEE Geral", icon: <BarChart3 className="h-4 w-4 mr-2" /> },
     { id: "componentes", label: "Componentes OEE", icon: <LineChart className="h-4 w-4 mr-2" /> },
     { id: "paradas", label: "Análise de Paradas", icon: <PieChart className="h-4 w-4 mr-2" /> },
     { id: "rejects", label: "Rejeitos e Reprocesso", icon: <CircleSlash className="h-4 w-4 mr-2" /> },
-    ...(isPremium ? [{ id: "movimentacao", label: "Movimentação", icon: <Layers className="h-4 w-4 mr-2" /> }] : [])
+    ...(isPremium ? [
+      { id: "movimentacao", label: "Caminhões", icon: <TruckIcon className="h-4 w-4 mr-2" /> },
+      { id: "produtividade", label: "Kg/Hora/Homem", icon: <Scale className="h-4 w-4 mr-2" /> }
+    ] : [])
   ];
   
   const toggleFullscreen = () => {
@@ -120,7 +141,7 @@ export default function PresentationMode() {
     window.history.back();
   };
   
-  // Auto rotation functionality
+  // Auto rotation functionality for tabs
   useEffect(() => {
     if (fullscreen && autoRotate) {
       const timer = setInterval(() => {
@@ -135,23 +156,60 @@ export default function PresentationMode() {
     }
   }, [fullscreen, autoRotate, rotationInterval, allTabs]);
   
-  const getScopeLabel = useCallback(() => {
-    let scopeText = "Global";
-    
-    if (dataScope === "local") {
-      scopeText = `Local: ${location === "todos" ? "Todos" : location}`;
+  // Auto rotation functionality for combinations
+  useEffect(() => {
+    if (fullscreen && autoRotate && selectedCombinations.length > 1) {
+      const combinationTimer = setInterval(() => {
+        setCurrentCombinationIndex(prevIndex => (prevIndex + 1) % selectedCombinations.length);
+      }, rotationInterval * 2000); // Rotate combinations at a slower rate
+      
+      return () => clearInterval(combinationTimer);
     }
+  }, [fullscreen, autoRotate, rotationInterval, selectedCombinations]);
+  
+  const getCurrentCombination = useCallback(() => {
+    if (selectedCombinations.length === 0) return LOCAL_COMBINATIONS.find(c => c.id === 'global');
     
-    if (dataScope === "turno") {
-      scopeText = `Turno: ${shift === "todos" ? "Todos" : shift}`;
+    const combinationId = selectedCombinations[currentCombinationIndex];
+    return LOCAL_COMBINATIONS.find(c => c.id === combinationId) || LOCAL_COMBINATIONS.find(c => c.id === 'global');
+  }, [selectedCombinations, currentCombinationIndex]);
+  
+  const currentCombination = getCurrentCombination();
+
+  const handleDateRangeChange = (range: DateRange | undefined) => {
+    if (range?.from) {
+      setDateRange({ 
+        from: range.from, 
+        to: range.to || range.from 
+      });
     }
-    
-    return scopeText;
-  }, [dataScope, location, shift]);
+  };
+
+  const handleCombinationToggle = (id: string) => {
+    setSelectedCombinations(prev => {
+      if (id === 'global') {
+        // If selecting global, unselect everything else
+        return ['global'];
+      }
+      
+      // If global is already selected and selecting something else, remove global
+      const newSelection = prev.includes('global') && id !== 'global' 
+        ? prev.filter(i => i !== 'global') 
+        : [...prev];
+      
+      if (newSelection.includes(id)) {
+        // Remove if already selected
+        return newSelection.filter(i => i !== id);
+      } else {
+        // Add if not selected
+        return [...newSelection, id];
+      }
+    });
+  };
 
   if (fullscreen) {
     return (
-      <div className="bg-black text-white min-h-screen p-6">
+      <div className="bg-black text-white min-h-screen p-6 landscape:flex landscape:flex-col">
         <div className="flex justify-between items-center mb-4">
           <div>
             <h1 className="text-3xl font-bold">Dashboard de Indicadores</h1>
@@ -162,7 +220,16 @@ export default function PresentationMode() {
               </span>
               <div className="w-px h-4 bg-gray-600 mx-2"></div>
               <MapPin className="h-4 w-4" />
-              <span>{getScopeLabel()}</span>
+              <span>{currentCombination?.name || 'Global'}</span>
+              {currentCombination?.id === 'global' ? (
+                <div className="ml-2 px-2 py-0.5 bg-blue-800 text-xs rounded-full">Dados consolidados</div>
+              ) : (
+                <>
+                  <div className="w-px h-4 bg-gray-600 mx-2"></div>
+                  <Users className="h-4 w-4" />
+                  <span>Turno: {currentCombination?.turno}</span>
+                </>
+              )}
             </div>
           </div>
           <Button 
@@ -174,7 +241,7 @@ export default function PresentationMode() {
           </Button>
         </div>
         
-        <Tabs defaultValue="oee" className="space-y-8" value={activeMetric} onValueChange={setActiveMetric}>
+        <Tabs defaultValue="oee" className="space-y-8 landscape:flex-1 landscape:flex landscape:flex-col" value={activeMetric} onValueChange={setActiveMetric}>
           <TabsList className="bg-gray-800 p-1 w-full md:w-fit flex justify-center">
             {allTabs.map(tab => (
               <TabsTrigger 
@@ -188,85 +255,10 @@ export default function PresentationMode() {
             ))}
           </TabsList>
           
-          <TabsContent value="oee" className="h-[70vh] flex items-center justify-center">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={barData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#555" />
-                <XAxis dataKey="name" stroke="#fff" />
-                <YAxis stroke="#fff" />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: '#333', border: 'none', color: '#fff' }} 
-                  labelStyle={{ color: '#fff' }}
-                />
-                <Legend />
-                <Bar name="Meta OEE (%)" dataKey="meta" fill="#8884d8" />
-                <Bar name="OEE Atual (%)" dataKey="atual" fill="#82ca9d" />
-              </BarChart>
-            </ResponsiveContainer>
-          </TabsContent>
-          
-          <TabsContent value="componentes" className="h-[70vh] flex items-center justify-center">
-            <ResponsiveContainer width="100%" height="100%">
-              <RechartsLineChart data={lineData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#555" />
-                <XAxis dataKey="name" stroke="#fff" />
-                <YAxis stroke="#fff" />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: '#333', border: 'none' }} 
-                  labelStyle={{ color: '#fff' }}
-                />
-                <Legend />
-                <Line type="monotone" name="Disponibilidade (%)" dataKey="disponibilidade" stroke="#8884d8" activeDot={{ r: 8 }} />
-                <Line type="monotone" name="Desempenho (%)" dataKey="desempenho" stroke="#82ca9d" />
-                <Line type="monotone" name="Qualidade (%)" dataKey="qualidade" stroke="#ffc658" />
-                <Line type="monotone" name="OEE (%)" dataKey="oee" stroke="#ff8042" strokeWidth={2} />
-              </RechartsLineChart>
-            </ResponsiveContainer>
-          </TabsContent>
-          
-          <TabsContent value="paradas" className="h-[70vh] flex items-center justify-center">
-            <ResponsiveContainer width="100%" height="100%">
-              <RechartsPieChart>
-                <Pie
-                  data={pieData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  outerRadius={200}
-                  fill="#8884d8"
-                  dataKey="value"
-                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                >
-                  {pieData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value) => `${value} min`} />
-                <Legend />
-              </RechartsPieChart>
-            </ResponsiveContainer>
-          </TabsContent>
-          
-          <TabsContent value="rejects" className="h-[70vh] flex items-center justify-center">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={rejectData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" stroke="#555" horizontal={true} />
-                <XAxis type="number" stroke="#fff" />
-                <YAxis type="category" dataKey="name" stroke="#fff" />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: '#333', border: 'none', color: '#fff' }} 
-                  labelStyle={{ color: '#fff' }}
-                />
-                <Legend />
-                <Bar name="Quantidade (unidades)" dataKey="value" fill="#ffc658" />
-              </BarChart>
-            </ResponsiveContainer>
-          </TabsContent>
-          
-          {isPremium && (
-            <TabsContent value="movimentacao" className="h-[70vh] flex items-center justify-center">
+          <div className="landscape:flex-1">
+            <TabsContent value="oee" className="h-[70vh] landscape:h-full flex items-center justify-center">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={movimentacaoData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                <BarChart data={barData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#555" />
                   <XAxis dataKey="name" stroke="#fff" />
                   <YAxis stroke="#fff" />
@@ -275,17 +267,122 @@ export default function PresentationMode() {
                     labelStyle={{ color: '#fff' }}
                   />
                   <Legend />
-                  <Bar name="Entradas (cargas)" dataKey="entrada" fill="#8884d8" />
-                  <Bar name="Saídas (cargas)" dataKey="saida" fill="#82ca9d" />
+                  <Bar name="Meta OEE (%)" dataKey="meta" fill="#8884d8" />
+                  <Bar name="OEE Atual (%)" dataKey="atual" fill="#82ca9d" />
                 </BarChart>
               </ResponsiveContainer>
             </TabsContent>
-          )}
+            
+            <TabsContent value="componentes" className="h-[70vh] landscape:h-full flex items-center justify-center">
+              <ResponsiveContainer width="100%" height="100%">
+                <RechartsLineChart data={lineData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#555" />
+                  <XAxis dataKey="name" stroke="#fff" />
+                  <YAxis stroke="#fff" />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#333', border: 'none' }} 
+                    labelStyle={{ color: '#fff' }}
+                  />
+                  <Legend />
+                  <Line type="monotone" name="Disponibilidade (%)" dataKey="disponibilidade" stroke="#8884d8" activeDot={{ r: 8 }} />
+                  <Line type="monotone" name="Desempenho (%)" dataKey="desempenho" stroke="#82ca9d" />
+                  <Line type="monotone" name="Qualidade (%)" dataKey="qualidade" stroke="#ffc658" />
+                  <Line type="monotone" name="OEE (%)" dataKey="oee" stroke="#ff8042" strokeWidth={2} />
+                </RechartsLineChart>
+              </ResponsiveContainer>
+            </TabsContent>
+            
+            <TabsContent value="paradas" className="h-[70vh] landscape:h-full flex items-center justify-center">
+              <ResponsiveContainer width="100%" height="100%">
+                <RechartsPieChart>
+                  <Pie
+                    data={pieData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    outerRadius={200}
+                    fill="#8884d8"
+                    dataKey="value"
+                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                  >
+                    {pieData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value) => `${value} min`} />
+                  <Legend />
+                </RechartsPieChart>
+              </ResponsiveContainer>
+            </TabsContent>
+            
+            <TabsContent value="rejects" className="h-[70vh] landscape:h-full flex items-center justify-center">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={rejectData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }} layout="vertical">
+                  <CartesianGrid strokeDasharray="3 3" stroke="#555" horizontal={true} />
+                  <XAxis type="number" stroke="#fff" />
+                  <YAxis type="category" dataKey="name" stroke="#fff" />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#333', border: 'none', color: '#fff' }} 
+                    labelStyle={{ color: '#fff' }}
+                  />
+                  <Legend />
+                  <Bar name="Quantidade (unidades)" dataKey="value" fill="#ffc658" />
+                </BarChart>
+              </ResponsiveContainer>
+            </TabsContent>
+            
+            {isPremium && (
+              <>
+                <TabsContent value="movimentacao" className="h-[70vh] landscape:h-full flex items-center justify-center">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={movimentacaoData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#555" />
+                      <XAxis dataKey="name" stroke="#fff" />
+                      <YAxis stroke="#fff" />
+                      <Tooltip 
+                        contentStyle={{ backgroundColor: '#333', border: 'none', color: '#fff' }} 
+                        labelStyle={{ color: '#fff' }}
+                      />
+                      <Legend />
+                      <Bar name="Caminhões Entrada" dataKey="entrada" fill="#8884d8" />
+                      <Bar name="Caminhões Saída" dataKey="saida" fill="#82ca9d" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </TabsContent>
+                
+                <TabsContent value="produtividade" className="h-[70vh] landscape:h-full flex items-center justify-center">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <RechartsLineChart data={movimentacaoData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#555" />
+                      <XAxis dataKey="name" stroke="#fff" />
+                      <YAxis stroke="#fff" />
+                      <Tooltip 
+                        contentStyle={{ backgroundColor: '#333', border: 'none', color: '#fff' }} 
+                        labelStyle={{ color: '#fff' }}
+                      />
+                      <Legend />
+                      <Line 
+                        type="monotone" 
+                        name="Kg/Hora/Homem" 
+                        dataKey="kgPorHoraHomem" 
+                        stroke="#ffc658" 
+                        strokeWidth={2}
+                        activeDot={{ r: 8 }} 
+                      />
+                    </RechartsLineChart>
+                  </ResponsiveContainer>
+                </TabsContent>
+              </>
+            )}
+          </div>
         </Tabs>
         
         <div className="absolute bottom-6 left-6 text-sm text-gray-400 flex items-center">
           <Clock className="h-3 w-3 mr-1" /> 
-          Modo de Apresentação - Indicador {allTabs.find(t => t.id === activeMetric)?.label} - {getScopeLabel()}
+          Modo de Apresentação - {allTabs.find(t => t.id === activeMetric)?.label} - {currentCombination?.name || 'Global'}
+          {selectedCombinations.length > 1 && (
+            <span className="ml-2">({currentCombinationIndex + 1}/{selectedCombinations.length})</span>
+          )}
         </div>
       </div>
     );
@@ -312,61 +409,40 @@ export default function PresentationMode() {
                 <DateRangePicker
                   className="w-full"
                   value={dateRange}
-                  onChange={setDateRange}
+                  onChange={handleDateRangeChange}
                 />
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <h3 className="text-sm font-medium">Escopo de Dados</h3>
-                  <Select value={dataScope} onValueChange={setDataScope}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione o escopo" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="global">Global</SelectItem>
-                      <SelectItem value="local">Por Local</SelectItem>
-                      <SelectItem value="turno">Por Turno</SelectItem>
-                    </SelectContent>
-                  </Select>
+              <div className="space-y-4">
+                <h3 className="text-sm font-medium">Escopo de Dados - Combinações de Linha e Turno</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                  {LOCAL_COMBINATIONS.map(combination => (
+                    <div key={combination.id} className="flex items-center space-x-2">
+                      <Checkbox 
+                        id={`combine-${combination.id}`}
+                        checked={selectedCombinations.includes(combination.id)}
+                        onCheckedChange={() => handleCombinationToggle(combination.id)}
+                      />
+                      <label 
+                        htmlFor={`combine-${combination.id}`}
+                        className="text-sm cursor-pointer"
+                      >
+                        {combination.name}
+                      </label>
+                    </div>
+                  ))}
                 </div>
-                
-                {dataScope === "local" && (
-                  <div className="space-y-2">
-                    <h3 className="text-sm font-medium">Local</h3>
-                    <Select value={location} onValueChange={setLocation}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione o local" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="todos">Todos</SelectItem>
-                        <SelectItem value="linha-1">Linha 1</SelectItem>
-                        <SelectItem value="linha-2">Linha 2</SelectItem>
-                        <SelectItem value="linha-3">Linha 3</SelectItem>
-                      </SelectContent>
-                    </Select>
+
+                {selectedCombinations.length === 0 && (
+                  <div className="text-sm text-red-500">
+                    Selecione pelo menos uma combinação.
                   </div>
                 )}
-                
-                {dataScope === "turno" && (
-                  <div className="space-y-2">
-                    <h3 className="text-sm font-medium">Turno</h3>
-                    <Select value={shift} onValueChange={setShift}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione o turno" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="todos">Todos</SelectItem>
-                        <SelectItem value="manhã">Manhã</SelectItem>
-                        <SelectItem value="tarde">Tarde</SelectItem>
-                        <SelectItem value="noite">Noite</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-                
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <h3 className="text-sm font-medium">Intervalo de Rotação (segundos)</h3>
+                  <h3 className="text-sm font-medium">Intervalo de Rotação de Indicadores (segundos)</h3>
                   <Select value={rotationInterval.toString()} onValueChange={value => setRotationInterval(Number(value))}>
                     <SelectTrigger>
                       <SelectValue placeholder="Tempo de rotação" />
@@ -379,18 +455,31 @@ export default function PresentationMode() {
                     </SelectContent>
                   </Select>
                 </div>
+                
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium">Tempo de Exibição por Combinação (segundos)</h3>
+                  <Select value={(rotationInterval * 2).toString()} onValueChange={value => setRotationInterval(Number(value) / 2)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Tempo por combinação" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="20">20 segundos</SelectItem>
+                      <SelectItem value="30">30 segundos</SelectItem>
+                      <SelectItem value="60">1 minuto</SelectItem>
+                      <SelectItem value="120">2 minutos</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
               
               <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
+                <Checkbox
                   id="autoRotate"
                   checked={autoRotate}
-                  onChange={(e) => setAutoRotate(e.target.checked)}
-                  className="rounded border-gray-300 text-purple-600 focus:border-purple-300 focus:ring focus:ring-offset-0 focus:ring-purple-200 focus:ring-opacity-50"
+                  onCheckedChange={(checked) => setAutoRotate(checked as boolean)}
                 />
                 <label htmlFor="autoRotate" className="text-sm font-medium">
-                  Rotação automática de indicadores
+                  Rotação automática de indicadores e combinações
                 </label>
               </div>
             </CardContent>
@@ -425,6 +514,7 @@ export default function PresentationMode() {
           className="w-full bg-purple-600 hover:bg-purple-700"
           size="lg"
           onClick={toggleFullscreen}
+          disabled={selectedCombinations.length === 0}
         >
           Iniciar Apresentação em Tela Cheia
           <ArrowLeftRight className="ml-2 h-4 w-4" />

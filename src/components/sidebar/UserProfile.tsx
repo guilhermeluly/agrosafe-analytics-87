@@ -4,6 +4,7 @@ import { LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useUser } from "@/context/UserContext";
+import { CompanySelector } from "../CompanySelector";
 
 export function UserProfile() {
   const { user, logout } = useUser();
@@ -21,6 +22,9 @@ export function UserProfile() {
           <div className="text-xs text-gray-400 capitalize">{user.role.replace('_', ' ')}</div>
         </div>
       </div>
+      
+      {user.role === "master_admin" && <CompanySelector />}
+      
       <Button 
         onClick={logout} 
         variant="outline" 

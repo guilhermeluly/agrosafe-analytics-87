@@ -10,3 +10,10 @@ export interface MenuItem {
   isPremium?: boolean;
   onClick?: () => void;
 }
+
+export interface LineTurnoCombo {
+  id: string;
+  name: string;
+  linha: string;
+  turno: string;
+}
