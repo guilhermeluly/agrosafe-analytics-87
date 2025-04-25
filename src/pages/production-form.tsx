@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import AppLayout from "../components/AppLayout";
 import DataTypeSelector from "@/components/data-input/DataTypeSelector";
@@ -242,12 +241,6 @@ export default function ProductionForm() {
                   <FileText size={16} />
                   <span>Inserir Dados</span>
                 </TabsTrigger>
-                {isAdmin && (
-                  <TabsTrigger value="cadastros" className="flex items-center gap-2">
-                    <Settings size={16} />
-                    <span>Cadastros</span>
-                  </TabsTrigger>
-                )}
               </TabsList>
             </div>
 
@@ -402,7 +395,7 @@ export default function ProductionForm() {
                       </div>
                       <Button
                         type="submit"
-                        className="w-full h-12 text-lg font-bold rounded-full bg-vividPurple hover:bg-primary/90 shadow-lg flex items-center justify-center gap-2 animate-fade-in"
+                        className="w-full h-12 text-lg font-bold rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg flex items-center justify-center gap-2 animate-fade-in"
                       >
                         <Save className="w-5 h-5" />
                         Salvar Dados
@@ -416,29 +409,6 @@ export default function ProductionForm() {
                 </CardContent>
               </Card>
             </TabsContent>
-
-            {isAdmin && (
-              <TabsContent value="cadastros">
-                <div className="space-y-6">
-                  <RegistrySection 
-                    customLines={customLines}
-                    setCustomLines={setCustomLines}
-                    productionLines={productionLines}
-                    unitType={unitType}
-                    setUnitType={setUnitType}
-                  />
-                  <div className="flex justify-end">
-                    <Button 
-                      onClick={handleSaveCustomLines} 
-                      className="bg-vividPurple hover:bg-primary/90 shadow-lg flex items-center gap-2"
-                    >
-                      <Save className="w-4 h-4" />
-                      Salvar Configurações
-                    </Button>
-                  </div>
-                </div>
-              </TabsContent>
-            )}
           </Tabs>
         )}
       </div>

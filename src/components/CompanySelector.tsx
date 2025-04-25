@@ -4,7 +4,7 @@ import { useUser } from '../context/UserContext';
 import { Combobox } from './ui/combobox';
 import { Label } from './ui/label';
 import { Building2 } from 'lucide-react';
-import { useEmpresa } from '../context/EmpresaContext';
+import { useEmpresa, EmpresaInfo } from '../context/EmpresaContext';
 
 const MOCK_COMPANIES = [
   { id: 'company1', name: 'Indústria ABC', planoId: 'completo' },
@@ -31,12 +31,17 @@ export function CompanySelector() {
       // Update empresa context with the selected company data
       const selectedCompany = MOCK_COMPANIES.find(c => c.id === value);
       if (selectedCompany) {
-        setEmpresa(prev => ({
-          ...prev,
+        const updatedEmpresa: EmpresaInfo = {
           id: selectedCompany.id,
           nome: selectedCompany.name,
-          planoId: selectedCompany.planoId
-        }));
+          planoId: selectedCompany.planoId,
+          logo: "/logo_app.png",
+          logoAgroSafe: "/logo_agrosafe.png",
+          logoCliente: "/logo_app.png",
+          exibeLogoAgroSafe: true,
+          unidadeCapacidade: 'unidades/h'
+        };
+        setEmpresa(updatedEmpresa);
       }
     }
   };
