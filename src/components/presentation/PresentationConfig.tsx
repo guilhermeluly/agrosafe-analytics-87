@@ -6,9 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowLeftRight, Globe } from "lucide-react";
+import { ArrowLeftRight } from "lucide-react";
 import { IndicatorSelector } from './IndicatorSelector';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { LineShiftFilter } from '../filters/LineShiftFilter';
 
 interface PresentationConfigProps {
   dateRange: DateRange | undefined;
@@ -19,9 +20,13 @@ interface PresentationConfigProps {
   setAutoRotate: (autoRotate: boolean) => void;
   selectedIndicators: string[];
   onIndicatorToggle: (id: string) => void;
-  selectedCombinations: string[];
-  setSelectedCombinations: (combinations: string[]) => void;
   onStartPresentation: () => void;
+  selectedLine: string;
+  selectedShift: string;
+  onLineChange: (line: string) => void;
+  onShiftChange: (shift: string) => void;
+  allLines: { id: string; name: string }[];
+  allShifts: { id: string; name: string }[];
 }
 
 export function PresentationConfig({
@@ -33,54 +38,14 @@ export function PresentationConfig({
   setAutoRotate,
   selectedIndicators,
   onIndicatorToggle,
-  selectedCombinations = [],  // Default to empty array
-  setSelectedCombinations,
-  onStartPresentation
+  onStartPresentation,
+  selectedLine,
+  selectedShift,
+  onLineChange,
+  onShiftChange,
+  allLines,
+  allShifts
 }: PresentationConfigProps) {
-  // Get production lines and shifts from the ShiftsRegistry component data
-  // Using hardcoded data for now until we connect to the real data source
-  const productionLines = [
-    { id: 'linha-1', name: 'Linha 1', nominalCapacity: 120, standardSetupTime: 15 },
-    { id: 'linha-2', name: 'Linha 2', nominalCapacity: 150, standardSetupTime: 20 },
-    { id: 'linha-3', name: 'Linha 3', nominalCapacity: 180, standardSetupTime: 25 },
-  ];
-  
-  const shifts = [
-    { id: '1', name: 'Manhã', startTime: '06:00', endTime: '14:00' },
-    { id: '2', name: 'Tarde', startTime: '14:00', endTime: '22:00' },
-    { id: '3', name: 'Noite', startTime: '22:00', endTime: '06:00' },
-  ];
-  
-  // Generate combinations based on registered lines and shifts
-  const lineTurnoCombos = [
-    { id: 'global', name: 'Global (Todas as linhas e turnos)', linha: 'todas', turno: 'todos' },
-    ...productionLines.flatMap(line => 
-      shifts.map(shift => ({
-        id: `${line.id}-${shift.id}`,
-        name: `${line.name} - ${shift.name}`,
-        linha: line.id,
-        turno: shift.id
-      }))
-    )
-  ];
-  
-  // Handle toggling combinations
-  const handleCombinationToggle = (id: string) => {
-    const currentCombinations = Array.isArray(selectedCombinations) ? selectedCombinations : [];
-    
-    if (currentCombinations.includes(id)) {
-      // If already selected, remove it
-      const newCombinations = currentCombinations.filter(c => c !== id);
-      setSelectedCombinations(newCombinations);
-    } else {
-      // If not selected, add it
-      const newCombinations = [...currentCombinations, id];
-      setSelectedCombinations(newCombinations);
-    }
-  };
-  
-  const isGlobalSelected = Array.isArray(selectedCombinations) && selectedCombinations.includes('global');
-
   return (
     <div className="container mx-auto py-6 px-4">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
@@ -99,41 +64,15 @@ export function PresentationConfig({
             </div>
 
             <div className="space-y-4">
-              <h3 className="text-sm font-medium">Combinações de Linha e Turno</h3>
-              <div className="border rounded-md p-3 bg-gray-50">
-                <div className="flex items-center space-x-2 mb-3">
-                  <Checkbox 
-                    id="global" 
-                    checked={isGlobalSelected}
-                    onCheckedChange={() => handleCombinationToggle('global')}
-                  />
-                  <label htmlFor="global" className="text-sm font-medium flex items-center gap-1">
-                    <Globe className="h-4 w-4" />
-                    Global (Todas as linhas e turnos)
-                  </label>
-                </div>
-                
-                <ScrollArea className="h-32 pr-4">
-                  <div className="space-y-2">
-                    {lineTurnoCombos.filter(combo => combo.id !== 'global').map((combo) => (
-                      <div key={combo.id} className="flex items-center space-x-2">
-                        <Checkbox 
-                          id={`combo-${combo.id}`} 
-                          checked={Array.isArray(selectedCombinations) && selectedCombinations.includes(combo.id)}
-                          onCheckedChange={() => handleCombinationToggle(combo.id)}
-                          disabled={isGlobalSelected}
-                        />
-                        <label 
-                          htmlFor={`combo-${combo.id}`} 
-                          className={`text-sm ${isGlobalSelected ? "text-gray-400" : "text-gray-700"}`}
-                        >
-                          {combo.name}
-                        </label>
-                      </div>
-                    ))}
-                  </div>
-                </ScrollArea>
-              </div>
+              <h3 className="text-sm font-medium">Seleção de Linha e Turno</h3>
+              <LineShiftFilter
+                selectedLine={selectedLine}
+                selectedShift={selectedShift}
+                onLineChange={onLineChange}
+                onShiftChange={onShiftChange}
+                allLines={allLines}
+                allShifts={allShifts}
+              />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -160,14 +99,14 @@ export function PresentationConfig({
                 onCheckedChange={(checked) => setAutoRotate(checked as boolean)}
               />
               <label htmlFor="autoRotate" className="text-sm font-medium">
-                Rotação automática de indicadores e combinações
+                Rotação automática de indicadores
               </label>
             </div>
           </CardContent>
         </Card>
 
         <IndicatorSelector
-          selectedIndicators={selectedIndicators || []}
+          selectedIndicators={selectedIndicators}
           onIndicatorToggle={onIndicatorToggle}
         />
       </div>
@@ -176,7 +115,7 @@ export function PresentationConfig({
         className="w-full bg-purple-600 hover:bg-purple-700"
         size="lg"
         onClick={onStartPresentation}
-        disabled={(selectedCombinations || []).length === 0 || (selectedIndicators || []).length === 0}
+        disabled={!selectedLine || !selectedShift || selectedIndicators.length === 0}
       >
         Iniciar Apresentação em Tela Cheia
         <ArrowLeftRight className="ml-2 h-4 w-4" />
