@@ -9,8 +9,9 @@ import { toast } from './ui/use-toast';
 export function RoleSwitcher() {
   const { user, switchUserRole } = useUser();
 
-  // Só mostrar para admin master
-  if (user.role !== 'master_admin') {
+  // Always show if user has an original role (meaning they switched roles)
+  // or if they are master_admin
+  if (user.role !== 'master_admin' && !user.originalRole) {
     return null;
   }
 

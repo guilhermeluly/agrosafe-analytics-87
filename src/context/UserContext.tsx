@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode } from "react";
+import { PLANOS } from "@/config/planos";
+import { toast } from "@/components/ui/use-toast";
 
 export type UserRole = "master_admin" | "admin" | "operator" | "viewer";
 
@@ -21,6 +23,7 @@ interface UserContextType {
   selectedCompanyId: string | null;
   setSelectedCompanyId: (id: string | null) => void;
   switchUserRole: (role: UserRole) => void;
+  switchPlan: (planId: string) => void;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -179,6 +182,18 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     });
   };
 
+  const switchPlan = (planId: string) => {
+    setSelectedCompanyId(prevId => {
+      if (prevId) {
+        toast({
+          title: "Plano alterado",
+          description: `O plano foi alterado para: ${PLANOS.find(p => p.id === planId)?.nome}`
+        });
+      }
+      return prevId;
+    });
+  };
+
   return (
     <UserContext.Provider
       value={{
@@ -190,7 +205,8 @@ export const UserProvider = ({ children }: UserProviderProps) => {
         updateUserPassword,
         selectedCompanyId,
         setSelectedCompanyId,
-        switchUserRole
+        switchUserRole,
+        switchPlan
       }}
     >
       {children}

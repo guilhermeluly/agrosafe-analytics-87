@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useUser } from "@/context/UserContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -7,6 +6,7 @@ import { LogOut, UserCog } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { RoleSwitcher } from "../RoleSwitcher";
 import { CompanySelector } from "../CompanySelector";
+import { PlanSwitcher } from "../PlanSwitcher";
 
 export function UserProfile() {
   const { user, logout } = useUser();
@@ -28,13 +28,19 @@ export function UserProfile() {
   };
 
   return (
-    <div className="space-y-3">
-      {/* Admin Master - Controles de alternância */}
+    <div className="space-y-2">
+      {/* Admin Master - Controles de alternância com espaçamento reduzido */}
       {user.role === 'master_admin' && (
-        <>
+        <div className="space-y-1">
           <RoleSwitcher />
+          <PlanSwitcher />
           <CompanySelector />
-        </>
+        </div>
+      )}
+      
+      {/* Show RoleSwitcher for users who have switched roles */}
+      {user.role !== 'master_admin' && user.originalRole && (
+        <RoleSwitcher />
       )}
       
       <div className="flex items-center justify-between">

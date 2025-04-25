@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
@@ -73,8 +72,8 @@ export default function Login() {
             <img
               src="/lovable-uploads/ef5c658b-29fd-4215-a4b7-6d8ad2e47b7d.png"
               alt="Logo do sistema"
-              className="max-h-20 object-contain mb-3 drop-shadow-lg hover:scale-105 transition-transform"
-              style={{ maxWidth: "60%" }}
+              className="max-h-24 object-contain mb-3 drop-shadow-lg hover:scale-105 transition-transform"
+              style={{ maxWidth: "70%" }}
               draggable={false}
             />
           </div>
