@@ -1,4 +1,3 @@
-
 import { LucideIcon } from "lucide-react";
 
 export interface MenuItem {
@@ -16,4 +15,24 @@ export interface LineTurnoCombo {
   name: string;
   linha: string;
   turno: string;
+}
+
+export interface PresentationIndicator {
+  id: string;
+  label: string;
+  category: 'oee' | 'productivity' | 'logistics';
+  isPremium?: boolean;
+}
+
+export interface LoadHandlingTime {
+  loading: number;     // Time spent loading in minutes
+  unloading: number;   // Time spent unloading in minutes
+  shiftDuration: number; // Total shift duration in minutes
+  operatorCount: number; // Number of operators involved
+}
+
+export interface SetupMetrics {
+  averageSetupTime: number;    // Average setup time in minutes
+  totalSetups: number;         // Total number of setups
+  setupTimePerLine: Record<string, number>; // Setup time by line
 }

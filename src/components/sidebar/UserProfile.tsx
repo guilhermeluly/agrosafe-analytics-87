@@ -29,7 +29,7 @@ export function UserProfile() {
         onClick={logout} 
         variant="outline" 
         size="sm" 
-        className="border-gray-600 hover:bg-gray-800 text-purple-300"
+        className="border-gray-600 hover:bg-gray-800 text-gray-300"
       >
         <LogOut size={16} className="mr-2" />
         Sair
@@ -37,4 +37,3 @@ export function UserProfile() {
     </div>
   );
 }
-
