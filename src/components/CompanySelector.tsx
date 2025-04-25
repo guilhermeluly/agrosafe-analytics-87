@@ -22,7 +22,7 @@ export function CompanySelector() {
         value={selectedCompanyId}
         onValueChange={setSelectedCompanyId}
       >
-        <SelectTrigger id="company-select" className="w-full h-8 text-sm">
+        <SelectTrigger id="company-select" className="w-full h-7 text-xs text-gray-200 bg-gray-700 hover:bg-gray-600">
           <SelectValue placeholder="Selecione uma empresa" />
         </SelectTrigger>
         <SelectContent>
