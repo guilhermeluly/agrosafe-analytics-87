@@ -30,7 +30,7 @@ interface ComboboxProps {
 }
 
 export function Combobox({
-  options,
+  options = [], // Provide default empty array
   value,
   onSelect,
   placeholder = "Selecione uma opção...",
@@ -41,15 +41,18 @@ export function Combobox({
   const [open, setOpen] = React.useState(false)
   const [inputValue, setInputValue] = React.useState("")
 
+  // Ensure options is always an array
+  const safeOptions = Array.isArray(options) ? options : [];
+
   // Find the selected option's label or use the value as the label if it's a custom value
   const displayValue = React.useMemo(() => {
     // Ensure we have a valid value and valid options
-    if (!value || !options || options.length === 0) {
+    if (!value) {
       return placeholder;
     }
-    const selectedOption = options.find((option) => option.value === value)
+    const selectedOption = safeOptions.find((option) => option.value === value)
     return selectedOption ? selectedOption.label : (value || placeholder)
-  }, [value, options, placeholder])
+  }, [value, safeOptions, placeholder])
 
   // Handle input change for custom value support
   const handleInputChange = (value: string) => {
@@ -64,9 +67,6 @@ export function Combobox({
       setOpen(false)
     }
   }
-
-  // Ensure options is always an array
-  const safeOptions = Array.isArray(options) ? options : [];
 
   return (
     <Popover open={open} onOpenChange={setOpen}>

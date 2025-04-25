@@ -19,6 +19,12 @@ export function CompanySelector() {
     // In a real implementation, this would come from API
   ];
 
+  const handleCompanySelect = (value: string) => {
+    if (setSelectedCompanyId && typeof setSelectedCompanyId === 'function') {
+      setSelectedCompanyId(value);
+    }
+  };
+
   return (
     <div className="mb-2 p-2 bg-gray-800 rounded-md border border-gray-700">
       <Label htmlFor="company-select" className="text-xs text-gray-300 mb-1 flex items-center gap-1">
@@ -28,7 +34,7 @@ export function CompanySelector() {
       <Combobox
         options={companyOptions}
         value={selectedCompanyId || ''}
-        onSelect={(value) => setSelectedCompanyId(value)}
+        onSelect={handleCompanySelect}
         placeholder="Selecione uma empresa"
         className="h-7 text-xs text-gray-200 bg-gray-700 hover:bg-gray-600"
       />

@@ -15,15 +15,15 @@ export function usePresentationMode({
   fullscreen, 
   autoRotate, 
   rotationInterval, 
-  selectedCombinations,
-  selectedIndicators
+  selectedCombinations = [], // Default to empty array
+  selectedIndicators = []   // Default to empty array
 }: UsePresentationModeProps) {
   // Ensure we have valid arrays, defaulting to empty arrays if undefined
   const safeCombinations = Array.isArray(selectedCombinations) ? selectedCombinations : [];
   const safeIndicators = Array.isArray(selectedIndicators) ? selectedIndicators : [];
   
   // Initialize activeMetric with the first indicator or fallback to "oee"
-  const [activeMetric, setActiveMetric] = useState(safeIndicators[0] || "oee");
+  const [activeMetric, setActiveMetric] = useState(safeIndicators.length > 0 ? safeIndicators[0] : "oee");
   const [currentCombinationIndex, setCurrentCombinationIndex] = useState(0);
 
   // Reset active metric if the selected indicators change
