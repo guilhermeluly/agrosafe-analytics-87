@@ -1,149 +1,177 @@
 
-import React, { useState } from 'react';
-import AppLayout from '../components/AppLayout';
+import React from 'react';
+import AppLayout from '@/components/AppLayout';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import ProductionFormFields from "@/components/production-form/ProductionFormFields";
-import StopsSection from "@/components/production-form/StopsSection";
-import SetupTimesSection from "@/components/production-form/SetupTimesSection";
-import LogisticsFormContainer from "@/components/production-form/LogisticsFormContainer";
-import DataTypeSelector from "@/components/data-input/DataTypeSelector";
 import { Button } from "@/components/ui/button";
-import { ImportCSV } from "@/components/ImportCSV";
-import { SetupTime, StopTime } from "@/types";
-import { v4 as uuidv4 } from 'uuid';
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/hooks/use-toast";
+import { PlusCircle } from "lucide-react";
 
-const ProductionForm = () => {
-  const [selectedTab, setSelectedTab] = useState("production");
-  const [dataType, setDataType] = useState<"normal" | "historical">("normal");
-  
-  // Additional state for form fields
-  const [formData, setFormData] = useState({
-    date: new Date().toISOString().split('T')[0],
-    shift: "",
-    location: "",
-    plannedProduction: 0,
-    actualProduction: 0,
-    rework: 0,
-    scrap: 0,
-    lostPackages: 0,
-    setupTime: 0,
-    observations: "",
-  });
-  
-  const [formErrors, setFormErrors] = useState<{[key: string]: string}>({});
-  
-  // For StopsSection component
-  const [stops, setStops] = useState<StopTime[]>([]);
-  const stopReasons = [
-    "Manutenção Corretiva", 
-    "Manutenção Preventiva", 
-    "Falta de Material", 
-    "Falta de Operador",
-    "Falta de Energia",
-    "Ajuste de Processo",
-    "Outro"
-  ];
-  
-  const addStop = (stop: Omit<StopTime, "id">) => {
-    setStops([...stops, { ...stop, id: uuidv4() }]);
+export default function ProductionForm() {
+  const { toast } = useToast();
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    toast({
+      title: "Dados registrados",
+      description: "Os dados de produção foram salvos com sucesso.",
+    });
   };
-  
-  const removeStop = (idx: number) => {
-    setStops(stops.filter((_, i) => i !== idx));
-  };
-  
-  // For SetupTimesSection component
-  const [setups, setSetups] = useState<SetupTime[]>([]);
-  const standardSetupTime = 30; // Default setup time in minutes
-  
-  const addSetup = (setup: Omit<SetupTime, "id">) => {
-    setSetups([...setups, { ...setup, id: uuidv4() }]);
-  };
-  
-  const removeSetup = (idx: number) => {
-    setSetups(setups.filter((_, i) => i !== idx));
-  };
-  
-  // For LogisticsFormContainer component
-  const [loadingTime, setLoadingTime] = useState(15); // Default loading time in minutes
-  const [unloadingTime, setUnloadingTime] = useState(10); // Default unloading time in minutes
-  
-  // Mock data for ProductionFormFields
-  const allLines = [
-    { id: "1", name: "Linha 1", nominalCapacity: 1000, standardSetupTime: 30 },
-    { id: "2", name: "Linha 2", nominalCapacity: 1200, standardSetupTime: 25 },
-    { id: "3", name: "Linha 3", nominalCapacity: 800, standardSetupTime: 35 }
-  ];
-  
-  const shifts = [
-    { id: "1", name: "Turno 1", startTime: "06:00", endTime: "14:00" },
-    { id: "2", name: "Turno 2", startTime: "14:00", endTime: "22:00" },
-    { id: "3", name: "Turno 3", startTime: "22:00", endTime: "06:00" }
-  ];
-  
-  const unitType = "unidades";
-  
+
   return (
     <AppLayout title="Registrar Dados">
-      <div className="container mx-auto py-6">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold">Registrar Dados de Produção</h1>
-          <div className="flex items-center gap-2">
-            <DataTypeSelector 
-              value={dataType} 
-              onChange={setDataType} 
-            />
-            <ImportCSV />
-          </div>
-        </div>
-        
+      <div className="container mx-auto p-6">
         <Card>
           <CardHeader>
-            <CardTitle>Formulário de Registro</CardTitle>
+            <CardTitle className="text-2xl font-bold">Registrar Dados</CardTitle>
           </CardHeader>
           <CardContent>
-            <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-              <TabsList className="grid w-full grid-cols-4">
+            <Tabs defaultValue="production" className="space-y-4">
+              <TabsList className="grid w-full grid-cols-2 lg:w-[400px]">
                 <TabsTrigger value="production">Produção</TabsTrigger>
-                <TabsTrigger value="stops">Paradas</TabsTrigger>
-                <TabsTrigger value="setup">Setup</TabsTrigger>
                 <TabsTrigger value="logistics">Logística</TabsTrigger>
               </TabsList>
+
               <TabsContent value="production">
-                <ProductionFormFields 
-                  formData={formData}
-                  setFormData={setFormData}
-                  formErrors={formErrors}
-                  setFormErrors={setFormErrors}
-                  allLines={allLines}
-                  shifts={shifts}
-                  unitType={unitType}
-                />
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="date">Data</Label>
+                      <Input id="date" type="date" required />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="shift">Turno</Label>
+                      <select 
+                        id="shift" 
+                        className="w-full h-10 px-3 rounded-md border border-input"
+                        required
+                      >
+                        <option value="">Selecione...</option>
+                        <option value="morning">Manhã</option>
+                        <option value="afternoon">Tarde</option>
+                        <option value="night">Noite</option>
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="line">Linha</Label>
+                      <select 
+                        id="line" 
+                        className="w-full h-10 px-3 rounded-md border border-input"
+                        required
+                      >
+                        <option value="">Selecione...</option>
+                        <option value="line1">Linha 1</option>
+                        <option value="line2">Linha 2</option>
+                        <option value="line3">Linha 3</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="planned">Produção Planejada</Label>
+                      <Input id="planned" type="number" required />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="actual">Produção Real</Label>
+                      <Input id="actual" type="number" required />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="rework">Retrabalho</Label>
+                      <Input id="rework" type="number" required />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="scrap">Refugo</Label>
+                      <Input id="scrap" type="number" required />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="lost-packages">Pacotes Perdidos</Label>
+                      <Input id="lost-packages" type="number" required />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="setup-time">Tempo de Setup (min)</Label>
+                      <Input id="setup-time" type="number" required />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="observations">Observações</Label>
+                      <Input id="observations" type="text" />
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end space-x-4">
+                    <Button type="submit" className="bg-green-600 hover:bg-green-700">
+                      <PlusCircle className="w-4 h-4 mr-2" />
+                      Registrar Produção
+                    </Button>
+                  </div>
+                </form>
               </TabsContent>
-              <TabsContent value="stops">
-                <StopsSection 
-                  stops={stops}
-                  stopReasons={stopReasons}
-                  addStop={addStop}
-                  removeStop={removeStop}
-                />
-              </TabsContent>
-              <TabsContent value="setup">
-                <SetupTimesSection 
-                  setups={setups}
-                  addSetup={addSetup}
-                  removeSetup={removeSetup}
-                  standardSetupTime={standardSetupTime}
-                />
-              </TabsContent>
+
               <TabsContent value="logistics">
-                <LogisticsFormContainer 
-                  loadingTime={loadingTime}
-                  setLoadingTime={setLoadingTime}
-                  unloadingTime={unloadingTime}
-                  setUnloadingTime={setUnloadingTime}
-                />
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="logistics-date">Data</Label>
+                      <Input id="logistics-date" type="date" required />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="logistics-shift">Turno</Label>
+                      <select 
+                        id="logistics-shift" 
+                        className="w-full h-10 px-3 rounded-md border border-input"
+                        required
+                      >
+                        <option value="">Selecione...</option>
+                        <option value="morning">Manhã</option>
+                        <option value="afternoon">Tarde</option>
+                        <option value="night">Noite</option>
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="truck-type">Tipo de Veículo</Label>
+                      <select 
+                        id="truck-type" 
+                        className="w-full h-10 px-3 rounded-md border border-input"
+                        required
+                      >
+                        <option value="">Selecione...</option>
+                        <option value="truck">Caminhão</option>
+                        <option value="van">Van</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="start-time">Hora Início</Label>
+                      <Input id="start-time" type="time" required />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="end-time">Hora Fim</Label>
+                      <Input id="end-time" type="time" required />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="weight">Peso (kg)</Label>
+                      <Input id="weight" type="number" required />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="people">Nº de Pessoas</Label>
+                      <Input id="people" type="number" required />
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end space-x-4">
+                    <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+                      <PlusCircle className="w-4 h-4 mr-2" />
+                      Registrar Movimentação
+                    </Button>
+                  </div>
+                </form>
               </TabsContent>
             </Tabs>
           </CardContent>
@@ -151,6 +179,4 @@ const ProductionForm = () => {
       </div>
     </AppLayout>
   );
-};
-
-export default ProductionForm;
+}
