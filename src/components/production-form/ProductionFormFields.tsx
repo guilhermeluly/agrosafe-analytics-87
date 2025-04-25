@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -6,10 +5,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import StopsSection from './StopsSection';
-import SetupTimesSection from './SetupTimesSection';
+import SetupTimesSectionComponent from './SetupTimesSection';
 import { v4 as uuidv4 } from 'uuid';
 import { useToast } from "@/hooks/use-toast";
 import { SetupTime, StopTime } from '@/types';
+import UnscheduledBreaksSection from './UnscheduledBreaksSection';
+import UnscheduledStopsSection from './UnscheduledStopsSection';
 
 const ProductionFormFields: React.FC = () => {
   const { toast } = useToast();
@@ -34,6 +35,9 @@ const ProductionFormFields: React.FC = () => {
       description: "Os dados de produção foram salvos com sucesso.",
     });
   };
+
+  const [unscheduledBreaks, setUnscheduledBreaks] = useState<{ startTime: string; endTime: string; description: string }[]>([]);
+  const [unscheduledStops, setUnscheduledStops] = useState<{ startTime: string; endTime: string; description: string }[]>([]);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-4xl mx-auto">
@@ -142,24 +146,23 @@ const ProductionFormFields: React.FC = () => {
         </CardContent>
       </Card>
 
-      <SetupTimesSection
+      <UnscheduledBreaksSection 
+        breaks={unscheduledBreaks}
+        onAdd={(newBreak) => setUnscheduledBreaks([...unscheduledBreaks, newBreak])}
+        onRemove={(index) => setUnscheduledBreaks(unscheduledBreaks.filter((_, i) => i !== index))}
+      />
+
+      <UnscheduledStopsSection 
+        stops={unscheduledStops}
+        onAdd={(newStop) => setUnscheduledStops([...unscheduledStops, newStop])}
+        onRemove={(index) => setUnscheduledStops(unscheduledStops.filter((_, i) => i !== index))}
+      />
+
+      <SetupTimesSectionComponent 
         setups={setupTimes}
         addSetup={(setup) => setSetupTimes([...setupTimes, { ...setup, id: uuidv4() }])}
         removeSetup={(index) => setSetupTimes(setupTimes.filter((_, i) => i !== index))}
         standardSetupTime={30}
-      />
-
-      <StopsSection
-        stops={stopTimes}
-        stopReasons={[
-          "Manutenção Corretiva",
-          "Manutenção Preventiva",
-          "Falta de Material",
-          "Falta de Operador",
-          "Outros"
-        ]}
-        addStop={(stop) => setStopTimes([...stopTimes, { ...stop, id: uuidv4() }])}
-        removeStop={(index) => setStopTimes(stopTimes.filter((_, i) => i !== index))}
       />
 
       <div className="flex justify-end">

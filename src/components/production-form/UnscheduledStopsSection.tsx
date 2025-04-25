@@ -6,87 +6,87 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Plus } from "lucide-react";
 
-interface Setup {
+interface Stop {
   startTime: string;
   endTime: string;
   description: string;
 }
 
-interface SetupTimesSectionProps {
-  setups: Setup[];
-  onAdd: (newSetup: Setup) => void;
+interface UnscheduledStopsSectionProps {
+  stops: Stop[];
+  onAdd: (newStop: Stop) => void;
   onRemove: (index: number) => void;
 }
 
-export default function SetupTimesSection({
-  setups,
+export default function UnscheduledStopsSection({
+  stops,
   onAdd,
   onRemove
-}: SetupTimesSectionProps) {
-  const [newSetup, setNewSetup] = useState<Setup>({
+}: UnscheduledStopsSectionProps) {
+  const [newStop, setNewStop] = useState<Stop>({
     startTime: '',
     endTime: '',
     description: ''
   });
 
   const handleAdd = () => {
-    if (!newSetup.startTime || !newSetup.endTime || !newSetup.description) return;
-    onAdd(newSetup);
-    setNewSetup({ startTime: '', endTime: '', description: '' });
+    if (!newStop.startTime || !newStop.endTime || !newStop.description) return;
+    onAdd(newStop);
+    setNewStop({ startTime: '', endTime: '', description: '' });
   };
 
   return (
-    <Card className="bg-purple-50 border-l-4 border-purple-500">
+    <Card className="bg-red-50 border-l-4 border-red-500">
       <CardHeader className="pb-2">
-        <CardTitle className="text-base">Tempos de Setup</CardTitle>
+        <CardTitle className="text-base">Paradas Não Programadas</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
           <div className="grid grid-cols-4 gap-4">
             <div>
-              <Label htmlFor="setup-start">Início</Label>
+              <Label htmlFor="stop-start">Início</Label>
               <Input
-                id="setup-start"
+                id="stop-start"
                 type="time"
-                value={newSetup.startTime}
-                onChange={(e) => setNewSetup({ ...newSetup, startTime: e.target.value })}
+                value={newStop.startTime}
+                onChange={(e) => setNewStop({ ...newStop, startTime: e.target.value })}
                 className="bg-white"
               />
             </div>
             <div>
-              <Label htmlFor="setup-end">Fim</Label>
+              <Label htmlFor="stop-end">Fim</Label>
               <Input
-                id="setup-end"
+                id="stop-end"
                 type="time"
-                value={newSetup.endTime}
-                onChange={(e) => setNewSetup({ ...newSetup, endTime: e.target.value })}
+                value={newStop.endTime}
+                onChange={(e) => setNewStop({ ...newStop, endTime: e.target.value })}
                 className="bg-white"
               />
             </div>
             <div className="col-span-2">
-              <Label htmlFor="setup-desc">Descrição</Label>
+              <Label htmlFor="stop-desc">Descrição</Label>
               <div className="flex gap-2">
                 <Input
-                  id="setup-desc"
-                  value={newSetup.description}
-                  onChange={(e) => setNewSetup({ ...newSetup, description: e.target.value })}
-                  placeholder="Tipo de setup"
+                  id="stop-desc"
+                  value={newStop.description}
+                  onChange={(e) => setNewStop({ ...newStop, description: e.target.value })}
+                  placeholder="Motivo da parada"
                   className="bg-white"
                 />
-                <Button onClick={handleAdd} className="bg-purple-600 hover:bg-purple-700">
+                <Button onClick={handleAdd} className="bg-red-600 hover:bg-red-700">
                   <Plus className="h-4 w-4" />
                 </Button>
               </div>
             </div>
           </div>
 
-          {setups.length > 0 && (
+          {stops.length > 0 && (
             <div className="space-y-2">
-              {setups.map((setup, index) => (
+              {stops.map((stop, index) => (
                 <div key={index} className="flex items-center justify-between p-2 bg-white rounded border">
                   <div className="flex items-center space-x-4">
-                    <span className="text-sm font-medium">{setup.startTime} - {setup.endTime}</span>
-                    <span className="text-sm">{setup.description}</span>
+                    <span className="text-sm font-medium">{stop.startTime} - {stop.endTime}</span>
+                    <span className="text-sm">{stop.description}</span>
                   </div>
                   <Button 
                     variant="ghost" 

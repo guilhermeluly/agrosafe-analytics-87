@@ -6,87 +6,87 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Plus } from "lucide-react";
 
-interface Setup {
+interface Break {
   startTime: string;
   endTime: string;
   description: string;
 }
 
-interface SetupTimesSectionProps {
-  setups: Setup[];
-  onAdd: (newSetup: Setup) => void;
+interface UnscheduledBreaksSectionProps {
+  breaks: Break[];
+  onAdd: (newBreak: Break) => void;
   onRemove: (index: number) => void;
 }
 
-export default function SetupTimesSection({
-  setups,
+export default function UnscheduledBreaksSection({
+  breaks,
   onAdd,
   onRemove
-}: SetupTimesSectionProps) {
-  const [newSetup, setNewSetup] = useState<Setup>({
+}: UnscheduledBreaksSectionProps) {
+  const [newBreak, setNewBreak] = useState<Break>({
     startTime: '',
     endTime: '',
     description: ''
   });
 
   const handleAdd = () => {
-    if (!newSetup.startTime || !newSetup.endTime || !newSetup.description) return;
-    onAdd(newSetup);
-    setNewSetup({ startTime: '', endTime: '', description: '' });
+    if (!newBreak.startTime || !newBreak.endTime || !newBreak.description) return;
+    onAdd(newBreak);
+    setNewBreak({ startTime: '', endTime: '', description: '' });
   };
 
   return (
-    <Card className="bg-purple-50 border-l-4 border-purple-500">
+    <Card className="bg-yellow-50 border-l-4 border-yellow-500">
       <CardHeader className="pb-2">
-        <CardTitle className="text-base">Tempos de Setup</CardTitle>
+        <CardTitle className="text-base">Intervalos Não Programados</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
           <div className="grid grid-cols-4 gap-4">
             <div>
-              <Label htmlFor="setup-start">Início</Label>
+              <Label htmlFor="break-start">Início</Label>
               <Input
-                id="setup-start"
+                id="break-start"
                 type="time"
-                value={newSetup.startTime}
-                onChange={(e) => setNewSetup({ ...newSetup, startTime: e.target.value })}
+                value={newBreak.startTime}
+                onChange={(e) => setNewBreak({ ...newBreak, startTime: e.target.value })}
                 className="bg-white"
               />
             </div>
             <div>
-              <Label htmlFor="setup-end">Fim</Label>
+              <Label htmlFor="break-end">Fim</Label>
               <Input
-                id="setup-end"
+                id="break-end"
                 type="time"
-                value={newSetup.endTime}
-                onChange={(e) => setNewSetup({ ...newSetup, endTime: e.target.value })}
+                value={newBreak.endTime}
+                onChange={(e) => setNewBreak({ ...newBreak, endTime: e.target.value })}
                 className="bg-white"
               />
             </div>
             <div className="col-span-2">
-              <Label htmlFor="setup-desc">Descrição</Label>
+              <Label htmlFor="break-desc">Descrição</Label>
               <div className="flex gap-2">
                 <Input
-                  id="setup-desc"
-                  value={newSetup.description}
-                  onChange={(e) => setNewSetup({ ...newSetup, description: e.target.value })}
-                  placeholder="Tipo de setup"
+                  id="break-desc"
+                  value={newBreak.description}
+                  onChange={(e) => setNewBreak({ ...newBreak, description: e.target.value })}
+                  placeholder="Ex: Almoço, Café"
                   className="bg-white"
                 />
-                <Button onClick={handleAdd} className="bg-purple-600 hover:bg-purple-700">
+                <Button onClick={handleAdd} className="bg-yellow-600 hover:bg-yellow-700">
                   <Plus className="h-4 w-4" />
                 </Button>
               </div>
             </div>
           </div>
 
-          {setups.length > 0 && (
+          {breaks.length > 0 && (
             <div className="space-y-2">
-              {setups.map((setup, index) => (
+              {breaks.map((breakItem, index) => (
                 <div key={index} className="flex items-center justify-between p-2 bg-white rounded border">
                   <div className="flex items-center space-x-4">
-                    <span className="text-sm font-medium">{setup.startTime} - {setup.endTime}</span>
-                    <span className="text-sm">{setup.description}</span>
+                    <span className="text-sm font-medium">{breakItem.startTime} - {breakItem.endTime}</span>
+                    <span className="text-sm">{breakItem.description}</span>
                   </div>
                   <Button 
                     variant="ghost" 
