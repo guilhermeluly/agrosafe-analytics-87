@@ -23,6 +23,7 @@ export interface ReportSettings {
   customDates?: string[];
   filters?: { location?: string; shift?: string };
   companyId?: string;
+  reportSections?: string[];
 }
 
 export interface User {

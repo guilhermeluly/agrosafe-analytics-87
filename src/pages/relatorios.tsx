@@ -13,7 +13,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ReportSettings } from "@/types";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { BarChart2, Mail, Download, FileText } from "lucide-react";
+import { BarChart2, Mail, Download, FileText, Calendar } from "lucide-react";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
+import { DateRange } from "react-day-picker";
 
 const mockLines = [
   { id: "linha1", name: "Linha 1" },
@@ -46,6 +48,7 @@ export default function Relatorios() {
   const [selectedShift, setSelectedShift] = useState("all");
   const [selectedIndicators, setSelectedIndicators] = useState<string[]>([]);
   const [scheduleOpen, setScheduleOpen] = useState(false);
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   
   // Schedule state
   const [scheduleSettings, setScheduleSettings] = useState<ReportSettings>({
@@ -53,11 +56,20 @@ export default function Relatorios() {
     hour: "08:00",
     method: "email",
     recipients: [],
-    filters: { location: selectedLine, shift: selectedShift }
+    filters: { location: selectedLine, shift: selectedShift },
+    reportSections: []
   });
 
   // Email input state
   const [emailInput, setEmailInput] = useState("");
+
+  // Sections to include in report
+  const reportSections = [
+    { id: "production", name: "Produção" },
+    { id: "stops", name: "Paradas" },
+    { id: "setup", name: "Setup" },
+    { id: "logistics", name: "Logística" }
+  ];
   
   const toggleIndicator = (id: string) => {
     setSelectedIndicators(prev => 
@@ -65,6 +77,20 @@ export default function Relatorios() {
         ? prev.filter(i => i !== id) 
         : [...prev, id]
     );
+  };
+
+  const toggleReportSection = (id: string) => {
+    setScheduleSettings(prev => {
+      const currentSections = prev.reportSections || [];
+      const newSections = currentSections.includes(id)
+        ? currentSections.filter(s => s !== id)
+        : [...currentSections, id];
+      
+      return {
+        ...prev,
+        reportSections: newSections
+      };
+    });
   };
   
   const handleAddEmail = () => {
@@ -140,7 +166,19 @@ export default function Relatorios() {
                   <CardHeader>
                     <CardTitle>Filtros do Relatório</CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <Label htmlFor="date-range" className="mb-2 block font-medium">Período</Label>
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4 text-gray-500" />
+                        <DateRangePicker 
+                          value={dateRange}
+                          onChange={setDateRange}
+                          className="w-full"
+                        />
+                      </div>
+                    </div>
+                    
                     <LineShiftFilter
                       selectedLine={selectedLine}
                       selectedShift={selectedShift}
@@ -253,6 +291,22 @@ export default function Relatorios() {
                               hour: e.target.value
                             })}
                           />
+                        </div>
+                        
+                        <div className="grid gap-2">
+                          <Label>Seções a incluir no relatório</Label>
+                          <div className="space-y-2 border rounded-md p-3">
+                            {reportSections.map(section => (
+                              <div key={section.id} className="flex items-center space-x-2">
+                                <Checkbox 
+                                  id={`section-${section.id}`}
+                                  checked={(scheduleSettings.reportSections || []).includes(section.id)}
+                                  onCheckedChange={() => toggleReportSection(section.id)}
+                                />
+                                <Label htmlFor={`section-${section.id}`}>{section.name}</Label>
+                              </div>
+                            ))}
+                          </div>
                         </div>
                         
                         <div className="grid gap-2">
