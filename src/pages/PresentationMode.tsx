@@ -1,5 +1,5 @@
-
 import React, { useState, useEffect, useCallback } from "react";
+import { DateRange } from "react-day-picker";
 import AppLayout from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -42,7 +42,6 @@ import { useEmpresa } from "@/context/EmpresaContext";
 
 const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#0088FE', '#00C49F'];
 
-// Sample data - in a real implementation this would come from an API
 const barData = [
   { name: 'Jan', meta: 65, atual: 40 },
   { name: 'Fev', meta: 65, atual: 45 },
@@ -82,7 +81,6 @@ const movimentacaoData = [
   { name: 'Sex', entrada: 16, saida: 14, kgPorHoraHomem: 260 },
 ];
 
-// Mock local/shift combinations
 const LOCAL_COMBINATIONS = [
   { id: 'linha1-turno1', name: 'Linha 1 - Turno 1', linha: 'linha-1', turno: 'manhã' },
   { id: 'linha1-turno2', name: 'Linha 1 - Turno 2', linha: 'linha-1', turno: 'tarde' },
@@ -104,7 +102,10 @@ export default function PresentationMode() {
   const [activeMetric, setActiveMetric] = useState("oee");
   const [autoRotate, setAutoRotate] = useState(true);
   const [rotationInterval, setRotationInterval] = useState(15); // seconds
-  const [dateRange, setDateRange] = useState<{ from: Date; to: Date }>({ from: new Date(), to: new Date() });
+  const [dateRange, setDateRange] = useState<DateRange | undefined>({
+    from: new Date(),
+    to: new Date()
+  });
   const [dataScope, setDataScope] = useState("global");
   const [selectedCombinations, setSelectedCombinations] = useState<string[]>(['global']);
   const [currentCombinationIndex, setCurrentCombinationIndex] = useState(0);
@@ -141,7 +142,6 @@ export default function PresentationMode() {
     window.history.back();
   };
   
-  // Auto rotation functionality for tabs
   useEffect(() => {
     if (fullscreen && autoRotate) {
       const timer = setInterval(() => {
@@ -156,7 +156,6 @@ export default function PresentationMode() {
     }
   }, [fullscreen, autoRotate, rotationInterval, allTabs]);
   
-  // Auto rotation functionality for combinations
   useEffect(() => {
     if (fullscreen && autoRotate && selectedCombinations.length > 1) {
       const combinationTimer = setInterval(() => {
@@ -178,30 +177,23 @@ export default function PresentationMode() {
 
   const handleDateRangeChange = (range: DateRange | undefined) => {
     if (range?.from) {
-      setDateRange({ 
-        from: range.from, 
-        to: range.to || range.from 
-      });
+      setDateRange(range);
     }
   };
 
   const handleCombinationToggle = (id: string) => {
     setSelectedCombinations(prev => {
       if (id === 'global') {
-        // If selecting global, unselect everything else
         return ['global'];
       }
       
-      // If global is already selected and selecting something else, remove global
       const newSelection = prev.includes('global') && id !== 'global' 
         ? prev.filter(i => i !== 'global') 
         : [...prev];
       
       if (newSelection.includes(id)) {
-        // Remove if already selected
         return newSelection.filter(i => i !== id);
       } else {
-        // Add if not selected
         return [...newSelection, id];
       }
     });
@@ -216,7 +208,7 @@ export default function PresentationMode() {
             <div className="flex items-center gap-2 text-gray-300 mt-2">
               <Calendar className="h-4 w-4" />
               <span>
-                {dateRange.from.toLocaleDateString()} - {dateRange.to.toLocaleDateString()}
+                {dateRange?.from?.toLocaleDateString()} - {dateRange?.to?.toLocaleDateString()}
               </span>
               <div className="w-px h-4 bg-gray-600 mx-2"></div>
               <MapPin className="h-4 w-4" />
