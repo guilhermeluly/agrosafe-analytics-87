@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useUser } from '../context/UserContext';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { Combobox } from './ui/combobox';
 import { Label } from './ui/label';
 import { Building2 } from 'lucide-react';
 
@@ -12,23 +12,26 @@ export function CompanySelector() {
     return null;
   }
 
+  // Format company options for the combobox
+  const companyOptions = [
+    { value: 'company1', label: 'Company 1' },
+    { value: 'company2', label: 'Company 2' },
+    // In a real implementation, this would come from API
+  ];
+
   return (
     <div className="mb-2 p-2 bg-gray-800 rounded-md border border-gray-700">
       <Label htmlFor="company-select" className="text-xs text-gray-300 mb-1 flex items-center gap-1">
         <Building2 size={14} />
         Visualizar Empresa
       </Label>
-      <Select
+      <Combobox
+        options={companyOptions}
         value={selectedCompanyId}
-        onValueChange={setSelectedCompanyId}
-      >
-        <SelectTrigger id="company-select" className="w-full h-7 text-xs text-gray-200 bg-gray-700 hover:bg-gray-600">
-          <SelectValue placeholder="Selecione uma empresa" />
-        </SelectTrigger>
-        <SelectContent>
-          {/* Dynamic content from API */}
-        </SelectContent>
-      </Select>
+        onSelect={setSelectedCompanyId}
+        placeholder="Selecione uma empresa"
+        className="h-7 text-xs text-gray-200 bg-gray-700 hover:bg-gray-600"
+      />
     </div>
   );
 }

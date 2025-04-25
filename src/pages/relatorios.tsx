@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useEmpresa } from "../context/EmpresaContext";
@@ -11,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
   BarChart4, 
   Calendar, 
@@ -20,8 +22,12 @@ import {
   Tv, 
   Clock,
   Filter,
-  BarChart3
+  BarChart3,
+  Plus,
+  Trash2
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { LOCAL_COMBINATIONS } from "@/utils/combinations";
 
 // Mock data for the reports
 const REPORT_PERIODS = [
@@ -32,13 +38,8 @@ const REPORT_PERIODS = [
 ];
 
 // Mock data for production lines and shifts
-const PRODUCTION_LINES = [
-  { id: "1", name: "Linha de Produção 1" },
-  { id: "2", name: "Linha de Produção 2" },
-  { id: "3", name: "Linha de Produção 3" },
-  { id: "4", name: "Linha de Ensaque Umbra" },
-  { id: "5", name: "Peletizadora Linha 1" }
-];
+const PRODUCTION_LINES = LOCAL_COMBINATIONS.filter(combo => combo.id !== 'global')
+  .map(combo => ({ id: combo.id, name: combo.name }));
 
 const SHIFTS = [
   { id: "1", name: "Turno 1" },
@@ -54,10 +55,21 @@ const REPORT_TYPES = [
   { id: "setup", name: "Tempos de Setup", icon: Clock }
 ];
 
+// Mock chart data
+const chartData = [
+  { name: 'Jan', meta: 65, atual: 40 },
+  { name: 'Fev', meta: 65, atual: 45 },
+  { name: 'Mar', meta: 65, atual: 55 },
+  { name: 'Abr', meta: 65, atual: 58 },
+  { name: 'Mai', meta: 65, atual: 62 },
+  { name: 'Jun', meta: 65, atual: 70 },
+];
+
 export default function Relatorios() {
   const { empresa } = useEmpresa();
   const { user } = useUser();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const isMasterOrAdmin = user.role === "master_admin" || user.role === "admin";
   
   const [selectedReportType, setSelectedReportType] = useState("oee");
@@ -66,20 +78,13 @@ export default function Relatorios() {
   const [endDate, setEndDate] = useState("");
   const [selectedLine, setSelectedLine] = useState("");
   const [selectedShift, setSelectedShift] = useState("");
+  const [schedules, setSchedules] = useState<any[]>([{ id: 1, email: "", frequency: "daily", type: "oee", time: "08:00" }]);
   
   const handleGenerateReport = () => {
     toast({
-      title: "Gerando relatório",
-      description: "Seu relatório está sendo gerado, aguarde um momento."
+      title: "Relatório gerado",
+      description: "O relatório foi gerado com sucesso."
     });
-    
-    // Simulate report generation
-    setTimeout(() => {
-      toast({
-        title: "Relatório gerado",
-        description: "O relatório foi gerado com sucesso."
-      });
-    }, 1500);
   };
   
   const handleExportReport = (format: string) => {
@@ -96,24 +101,38 @@ export default function Relatorios() {
     });
   };
   
+  const handleAddSchedule = () => {
+    setSchedules([
+      ...schedules, 
+      { 
+        id: schedules.length + 1, 
+        email: "", 
+        frequency: "daily", 
+        type: "oee", 
+        time: "08:00" 
+      }
+    ]);
+  };
+  
+  const handleRemoveSchedule = (id: number) => {
+    setSchedules(schedules.filter(s => s.id !== id));
+  };
+  
   const handleScheduleReport = () => {
     toast({
-      title: "Agendamento salvo",
-      description: "O agendamento do relatório foi salvo com sucesso."
+      title: "Agendamentos salvos",
+      description: `Foram salvos ${schedules.length} agendamentos de relatórios.`
     });
   };
   
   const handlePresentationMode = () => {
-    toast({
-      title: "Modo apresentação",
-      description: "O modo apresentação será aberto em uma nova janela."
-    });
+    navigate("/presentation-mode");
   };
   
   return (
     <AppLayout title="Relatórios">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Relatórios de Performance</h1>
+        <h1 className="text-2xl font-bold">Relatórios</h1>
         <LogoDisplay altura={32} />
       </div>
       
@@ -147,11 +166,9 @@ export default function Relatorios() {
                     </SelectTrigger>
                     <SelectContent>
                       {REPORT_TYPES.map(type => (
-                        <SelectItem key={type.id} value={type.id} className="flex items-center">
-                          <div className="flex items-center">
-                            <type.icon className="mr-2" size={16} />
-                            <span>{type.name}</span>
-                          </div>
+                        <SelectItem key={type.id} value={type.id} className="flex items-center gap-2">
+                          <type.icon className="h-4 w-4" />
+                          <span>{type.name}</span>
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -201,7 +218,7 @@ export default function Relatorios() {
                 )}
                 
                 <div className="space-y-2">
-                  <Label htmlFor="production-line">Linha de Produção</Label>
+                  <Label htmlFor="production-line">Linha/Turno</Label>
                   <Select 
                     value={selectedLine}
                     onValueChange={setSelectedLine}
@@ -210,30 +227,10 @@ export default function Relatorios() {
                       <SelectValue placeholder="Todas as linhas" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">Todas as linhas</SelectItem>
+                      <SelectItem value="all">Todas as combinações</SelectItem>
                       {PRODUCTION_LINES.map(line => (
                         <SelectItem key={line.id} value={line.id}>
                           {line.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="shift">Turno</Label>
-                  <Select 
-                    value={selectedShift}
-                    onValueChange={setSelectedShift}
-                  >
-                    <SelectTrigger id="shift">
-                      <SelectValue placeholder="Todos os turnos" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos os turnos</SelectItem>
-                      {SHIFTS.map(shift => (
-                        <SelectItem key={shift.id} value={shift.id}>
-                          {shift.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -256,16 +253,60 @@ export default function Relatorios() {
                   {selectedPeriod !== "custom" ? ` ${REPORT_PERIODS.find(p => p.id === selectedPeriod)?.name}` : ""}
                 </CardTitle>
                 <CardDescription>
-                  {selectedLine && `Linha: ${PRODUCTION_LINES.find(l => l.id === selectedLine)?.name}`}
-                  {selectedShift && selectedLine && " | "}
-                  {selectedShift && `Turno: ${SHIFTS.find(s => s.id === selectedShift)?.name}`}
+                  {selectedLine && selectedLine !== 'all' && 
+                    `Linha/Turno: ${PRODUCTION_LINES.find(l => l.id === selectedLine)?.name}`}
+                  {selectedLine === 'all' && "Todas as combinações"}
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="h-80 flex items-center justify-center bg-gray-100 rounded-md mb-6">
-                  <div className="text-center text-muted-foreground">
-                    <BarChart4 className="mx-auto h-12 w-12 mb-2" />
-                    <p>Selecione os filtros e clique em "Gerar Relatório" para visualizar</p>
+                <div className="h-80 flex items-center justify-center bg-gray-50 rounded-md mb-6">
+                  <div className="w-full h-full p-4">
+                    {/* Simplified example chart - would be a real chart in production */}
+                    <div className="h-full flex">
+                      <div className="flex-1 grid place-items-center">
+                        <div>
+                          <div className="mb-4 text-center font-medium">OEE por Período</div>
+                          <div className="h-56 w-full bg-blue-100 rounded-lg grid place-items-center">
+                            <div className="text-5xl font-bold text-blue-700">87%</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex-1 grid place-items-center">
+                        <div>
+                          <div className="mb-4 text-center font-medium">Comparação com Metas</div>
+                          <div className="space-y-6">
+                            <div>
+                              <div className="flex justify-between text-sm">
+                                <span>Disponibilidade</span>
+                                <span className="font-medium">92%</span>
+                              </div>
+                              <div className="h-2 bg-gray-200 rounded-full mt-1">
+                                <div className="h-2 bg-blue-600 rounded-full" style={{width: "92%"}}></div>
+                              </div>
+                            </div>
+                            <div>
+                              <div className="flex justify-between text-sm">
+                                <span>Performance</span>
+                                <span className="font-medium">85%</span>
+                              </div>
+                              <div className="h-2 bg-gray-200 rounded-full mt-1">
+                                <div className="h-2 bg-green-600 rounded-full" style={{width: "85%"}}></div>
+                              </div>
+                            </div>
+                            <div>
+                              <div className="flex justify-between text-sm">
+                                <span>Qualidade</span>
+                                <span className="font-medium">96%</span>
+                              </div>
+                              <div className="h-2 bg-gray-200 rounded-full mt-1">
+                                <div className="h-2 bg-purple-600 rounded-full" style={{width: "96%"}}></div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 
@@ -297,108 +338,128 @@ export default function Relatorios() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="schedule-type">Tipo de Relatório</Label>
-                    <Select defaultValue="oee">
-                      <SelectTrigger id="schedule-type">
-                        <SelectValue placeholder="Selecione o tipo" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {REPORT_TYPES.map(type => (
-                          <SelectItem key={type.id} value={type.id}>
-                            {type.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="schedule-frequency">Frequência</Label>
-                    <Select defaultValue="daily">
-                      <SelectTrigger id="schedule-frequency">
-                        <SelectValue placeholder="Selecione a frequência" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="daily">Diário</SelectItem>
-                        <SelectItem value="weekly">Semanal</SelectItem>
-                        <SelectItem value="monthly">Mensal</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="schedule-time">Horário de Envio</Label>
-                    <Input
-                      id="schedule-time"
-                      type="time"
-                      defaultValue="08:00"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="schedule-line">Linha de Produção</Label>
-                    <Select defaultValue="">
-                      <SelectTrigger id="schedule-line">
-                        <SelectValue placeholder="Todas as linhas" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all_lines">Todas as linhas</SelectItem>
-                        {PRODUCTION_LINES.map(line => (
-                          <SelectItem key={line.id} value={line.id}>
-                            {line.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+              <ScrollArea className="h-[60vh] pr-4">
+                <div className="space-y-6">
+                  {schedules.map((schedule, index) => (
+                    <div 
+                      key={schedule.id} 
+                      className="p-4 border rounded-md bg-gray-50 relative"
+                    >
+                      <div className="absolute top-2 right-2">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-7 w-7"
+                          onClick={() => handleRemoveSchedule(schedule.id)}
+                        >
+                          <Trash2 className="h-4 w-4 text-red-500" />
+                        </Button>
+                      </div>
+                      
+                      <div className="text-sm font-medium mb-4">
+                        Agendamento #{index + 1}
+                      </div>
+                      
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div className="space-y-4">
+                          <div className="space-y-2">
+                            <Label htmlFor={`schedule-type-${schedule.id}`}>Tipo de Relatório</Label>
+                            <Select defaultValue={schedule.type}>
+                              <SelectTrigger id={`schedule-type-${schedule.id}`}>
+                                <SelectValue placeholder="Selecione o tipo" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {REPORT_TYPES.map(type => (
+                                  <SelectItem key={type.id} value={type.id}>
+                                    {type.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor={`schedule-frequency-${schedule.id}`}>Frequência</Label>
+                            <Select defaultValue={schedule.frequency}>
+                              <SelectTrigger id={`schedule-frequency-${schedule.id}`}>
+                                <SelectValue placeholder="Selecione a frequência" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="daily">Diário</SelectItem>
+                                <SelectItem value="weekly">Semanal</SelectItem>
+                                <SelectItem value="monthly">Mensal</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor={`schedule-time-${schedule.id}`}>Horário de Envio</Label>
+                            <Input
+                              id={`schedule-time-${schedule.id}`}
+                              type="time"
+                              defaultValue={schedule.time}
+                            />
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-4">
+                          <div className="space-y-2">
+                            <Label htmlFor={`schedule-method-${schedule.id}`}>Método de Envio</Label>
+                            <Select defaultValue="email">
+                              <SelectTrigger id={`schedule-method-${schedule.id}`}>
+                                <SelectValue placeholder="Selecione o método" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="email">E-mail</SelectItem>
+                                <SelectItem value="telegram">Telegram</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor={`schedule-recipients-${schedule.id}`}>Destinatários (separados por vírgula)</Label>
+                            <Input
+                              id={`schedule-recipients-${schedule.id}`}
+                              placeholder="email1@exemplo.com, email2@exemplo.com"
+                            />
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor={`schedule-format-${schedule.id}`}>Formato</Label>
+                            <Select defaultValue="pdf">
+                              <SelectTrigger id={`schedule-format-${schedule.id}`}>
+                                <SelectValue placeholder="Selecione o formato" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="pdf">PDF</SelectItem>
+                                <SelectItem value="csv">CSV</SelectItem>
+                                <SelectItem value="both">Ambos (PDF e CSV)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
+              </ScrollArea>
+              
+              <div className="flex gap-4 mt-6">
+                <Button 
+                  onClick={handleAddSchedule}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Adicionar Agendamento
+                </Button>
                 
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="schedule-method">Método de Envio</Label>
-                    <Select defaultValue="email">
-                      <SelectTrigger id="schedule-method">
-                        <SelectValue placeholder="Selecione o método" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="email">E-mail</SelectItem>
-                        <SelectItem value="telegram">Telegram</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="schedule-recipients">Destinatários (separados por vírgula)</Label>
-                    <Input
-                      id="schedule-recipients"
-                      placeholder="email1@exemplo.com, email2@exemplo.com"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="schedule-format">Formato</Label>
-                    <Select defaultValue="pdf">
-                      <SelectTrigger id="schedule-format">
-                        <SelectValue placeholder="Selecione o formato" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="pdf">PDF</SelectItem>
-                        <SelectItem value="csv">CSV</SelectItem>
-                        <SelectItem value="both">Ambos (PDF e CSV)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <Button 
-                    onClick={handleScheduleReport} 
-                    className="w-full mt-8"
-                  >
-                    Salvar Agendamento
-                  </Button>
-                </div>
+                <Button 
+                  onClick={handleScheduleReport}
+                  className="flex-1"
+                >
+                  Salvar Agendamentos
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -414,65 +475,21 @@ export default function Relatorios() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="presentation-indicators">Indicadores</Label>
-                      <Select defaultValue="all">
-                        <SelectTrigger id="presentation-indicators">
-                          <SelectValue placeholder="Selecione os indicadores" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">Todos os indicadores</SelectItem>
-                          <SelectItem value="oee">OEE e componentes</SelectItem>
-                          <SelectItem value="production">Produção e metas</SelectItem>
-                          <SelectItem value="downtime">Paradas e perdas</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="presentation-interval">Intervalo de rotação (segundos)</Label>
-                      <Input
-                        id="presentation-interval"
-                        type="number"
-                        defaultValue="30"
-                        min="10"
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="presentation-filter">Filtrar por linha</Label>
-                      <Select defaultValue="">
-                        <SelectTrigger id="presentation-filter">
-                          <SelectValue placeholder="Todas as linhas" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all_lines">Todas as linhas</SelectItem>
-                          {PRODUCTION_LINES.map(line => (
-                            <SelectItem key={line.id} value={line.id}>
-                              {line.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  
-                  <div className="flex flex-col justify-center items-center bg-gray-100 rounded-md p-6">
-                    <Tv className="h-16 w-16 mb-4 text-blue-500" />
-                    <h3 className="text-lg font-medium mb-2">Modo Apresentação para TVs</h3>
-                    <p className="text-sm text-muted-foreground text-center mb-4">
-                      Exibe seus indicadores principais em rotação automática, ideal para monitores em áreas comuns.
-                    </p>
-                    <Button 
-                      onClick={handlePresentationMode} 
-                      className="w-full max-w-xs"
-                    >
-                      <Tv className="mr-2 h-4 w-4" />
-                      Iniciar Modo Apresentação
-                    </Button>
-                  </div>
+                <div className="text-center p-8">
+                  <Tv className="h-16 w-16 mx-auto mb-4 text-blue-500" />
+                  <h3 className="text-lg font-medium mb-2">Modo Apresentação para TVs</h3>
+                  <p className="text-sm text-muted-foreground text-center mb-6 max-w-md mx-auto">
+                    Configure e exiba seus indicadores principais em rotação automática, 
+                    ideal para monitores em áreas comuns ou salas de controle.
+                  </p>
+                  <Button 
+                    onClick={handlePresentationMode} 
+                    className="w-full max-w-xs"
+                    size="lg"
+                  >
+                    <Tv className="mr-2 h-4 w-4" />
+                    Configurar Modo Apresentação
+                  </Button>
                 </div>
               </CardContent>
             </Card>

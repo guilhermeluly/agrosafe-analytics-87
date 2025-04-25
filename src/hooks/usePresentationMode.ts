@@ -8,37 +8,45 @@ interface UsePresentationModeProps {
   autoRotate: boolean;
   rotationInterval: number;
   selectedCombinations: string[];
+  selectedIndicators: string[];
 }
 
 export function usePresentationMode({ 
   fullscreen, 
   autoRotate, 
   rotationInterval, 
-  selectedCombinations 
+  selectedCombinations,
+  selectedIndicators
 }: UsePresentationModeProps) {
-  const [activeMetric, setActiveMetric] = useState("oee");
+  const [activeMetric, setActiveMetric] = useState(selectedIndicators[0] || "oee");
   const [currentCombinationIndex, setCurrentCombinationIndex] = useState(0);
 
+  // Reset active metric if the selected indicators change
   useEffect(() => {
-    if (fullscreen && autoRotate) {
+    if (selectedIndicators.length > 0 && !selectedIndicators.includes(activeMetric)) {
+      setActiveMetric(selectedIndicators[0]);
+    }
+  }, [selectedIndicators, activeMetric]);
+
+  useEffect(() => {
+    if (fullscreen && autoRotate && selectedIndicators.length > 1) {
       const timer = setInterval(() => {
         setActiveMetric(prevMetric => {
-          const metrics = ["oee", "componentes", "paradas", "rejects", "setup", "movimentacao", "produtividade", "loadTime"];
-          const currentIndex = metrics.indexOf(prevMetric);
-          const nextIndex = (currentIndex + 1) % metrics.length;
-          return metrics[nextIndex];
+          const currentIndex = selectedIndicators.indexOf(prevMetric);
+          const nextIndex = (currentIndex + 1) % selectedIndicators.length;
+          return selectedIndicators[nextIndex];
         });
       }, rotationInterval * 1000);
       
       return () => clearInterval(timer);
     }
-  }, [fullscreen, autoRotate, rotationInterval]);
+  }, [fullscreen, autoRotate, rotationInterval, selectedIndicators]);
   
   useEffect(() => {
     if (fullscreen && autoRotate && selectedCombinations.length > 1) {
       const combinationTimer = setInterval(() => {
         setCurrentCombinationIndex(prevIndex => (prevIndex + 1) % selectedCombinations.length);
-      }, rotationInterval * 2000);
+      }, rotationInterval * 2000); // Change combinations less frequently than metrics
       
       return () => clearInterval(combinationTimer);
     }

@@ -22,13 +22,14 @@ export default function PresentationMode() {
     to: new Date()
   });
   const [selectedCombinations, setSelectedCombinations] = useState<string[]>(['global']);
-  const [selectedIndicators, setSelectedIndicators] = useState<string[]>(['oee', 'components']);
+  const [selectedIndicators, setSelectedIndicators] = useState<string[]>(['oee', 'componentes']);
 
   const { activeMetric, setActiveMetric, currentCombinationIndex } = usePresentationMode({
     fullscreen,
     autoRotate,
     rotationInterval,
-    selectedCombinations
+    selectedCombinations,
+    selectedIndicators
   });
 
   const toggleFullscreen = () => {
@@ -100,6 +101,7 @@ export default function PresentationMode() {
           selectedIndicators={selectedIndicators}
           onIndicatorToggle={handleIndicatorToggle}
           selectedCombinations={selectedCombinations}
+          setSelectedCombinations={setSelectedCombinations}
           onStartPresentation={toggleFullscreen}
         />
       </div>
