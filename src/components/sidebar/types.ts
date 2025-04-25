@@ -1,3 +1,4 @@
+
 import { LucideIcon } from "lucide-react";
 
 export interface MenuItem {
@@ -35,4 +36,12 @@ export interface SetupMetrics {
   averageSetupTime: number;    // Average setup time in minutes
   totalSetups: number;         // Total number of setups
   setupTimePerLine: Record<string, number>; // Setup time by line
+}
+
+export interface ChartDisplayOptions {
+  showValues: boolean;
+  showGrid: boolean;
+  darkMode: boolean;
+  showTrendline: boolean;
+  dataSource?: string;
 }

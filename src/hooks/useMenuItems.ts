@@ -49,18 +49,6 @@ export function useMenuItems() {
         roles: ["master_admin", "admin", "operator"]
       },
       {
-        icon: FileUp,
-        label: "Importar CSV",
-        path: "/import-csv",
-        roles: ["master_admin", "admin", "operator"],
-        onClick: () => {
-          toast({
-            title: "Importação de CSV",
-            description: "Funcionalidade de importação ainda em desenvolvimento."
-          });
-        }
-      },
-      {
         icon: LayoutDashboard,
         label: "Dashboard",
         path: "/dashboard",
@@ -110,6 +98,12 @@ export function useMenuItems() {
             description: "Os dados estão sendo exportados para CSV."
           });
         }
+      },
+      {
+        icon: Trash2,
+        label: "Reset de Dados",
+        path: "/reset-data",
+        roles: ["master_admin"]
       }
     ];
 
@@ -130,12 +124,6 @@ export function useMenuItems() {
         icon: Users,
         label: "Usuários",
         path: "/users",
-        roles: ["master_admin"]
-      },
-      {
-        icon: Trash2,
-        label: "Reset de Dados",
-        path: "/reset-data",
         roles: ["master_admin"]
       },
       {
@@ -179,7 +167,7 @@ export function useMenuItems() {
     let menuItems = baseItems;
     
     if (user && user.role === "admin") {
-      menuItems = [...menuItems, ...adminItems];
+      menuItems = [...menuItems, ...adminItems.filter(item => item.label !== "Reset de Dados")];
     }
     
     if (user && user.role === "master_admin") {
