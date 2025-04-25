@@ -165,15 +165,15 @@ export function useMenuItems() {
 
     let menuItems = baseItems;
     
-    if (user.role === "admin") {
+    if (user && user.role === "admin") {
       menuItems = [...menuItems, ...adminItems];
     }
     
-    if (user.role === "master_admin") {
+    if (user && user.role === "master_admin") {
       menuItems = [...menuItems, ...adminItems, ...masterAdminItems];
     }
     
-    return menuItems.filter(item => item.roles.includes(user.role));
+    return menuItems.filter(item => user && user.role && item.roles && item.roles.includes(user.role));
   };
 
   return { getMenuItems };

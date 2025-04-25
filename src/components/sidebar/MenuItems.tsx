@@ -19,7 +19,7 @@ export function MenuItems({ items, isActive, onMobileClick }: MenuItemsProps) {
     <>
       {items.map((item) => {
         // Skip if user doesn't have required role
-        if (!item.roles.includes(user.role)) return null;
+        if (!item.roles || !user?.role || !item.roles.includes(user.role)) return null;
         
         // Skip premium features for non-premium plans
         if (item.isPremium && plano?.id !== "completo") return null;

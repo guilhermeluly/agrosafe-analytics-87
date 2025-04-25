@@ -1,8 +1,7 @@
-
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, MapPin, Users, BarChart3, PieChart, LineChart, CircleSlash, TruckIcon, Scale } from "lucide-react";
+import { Calendar, MapPin, Users, BarChart3, PieChart, LineChart, CircleSlash, TruckIcon, Scale, Info } from "lucide-react";
 import { DateRange } from "react-day-picker";
 import {
   Select,
@@ -105,15 +104,17 @@ export function PresentationDisplay({
   };
 
   const allTabs = [
-    { id: "oee", label: "OEE Geral", icon: <BarChart3 className="h-4 w-4 mr-2" /> },
-    { id: "componentes", label: "Componentes OEE", icon: <LineChart className="h-4 w-4 mr-2" /> },
-    { id: "paradas", label: "Análise de Paradas", icon: <PieChart className="h-4 w-4 mr-2" /> },
-    { id: "rejects", label: "Rejeitos e Reprocesso", icon: <CircleSlash className="h-4 w-4 mr-2" /> },
+    { id: "oee", label: "OEE Geral", icon: <BarChart3 className="h-4 w-4 mr-2" />, source: "Dados de Produção" },
+    { id: "componentes", label: "Componentes OEE", icon: <LineChart className="h-4 w-4 mr-2" />, source: "Análise de Performance" },
+    { id: "paradas", label: "Análise de Paradas", icon: <PieChart className="h-4 w-4 mr-2" />, source: "Registro de Paradas" },
+    { id: "rejects", label: "Rejeitos e Reprocesso", icon: <CircleSlash className="h-4 w-4 mr-2" />, source: "Controle de Qualidade" },
     ...(isPremium ? [
-      { id: "movimentacao", label: "Caminhões", icon: <TruckIcon className="h-4 w-4 mr-2" /> },
-      { id: "produtividade", label: "Kg/Hora/Homem", icon: <Scale className="h-4 w-4 mr-2" /> }
+      { id: "movimentacao", label: "Caminhões", icon: <TruckIcon className="h-4 w-4 mr-2" />, source: "Logística de Transporte" },
+      { id: "produtividade", label: "Kg/Hora/Homem", icon: <Scale className="h-4 w-4 mr-2" />, source: "RH e Produtividade" }
     ] : [])
   ];
+
+  const currentTab = allTabs.find(tab => tab.id === activeMetric);
 
   return (
     <div className="bg-black text-white min-h-screen p-6">
@@ -178,6 +179,13 @@ export function PresentationDisplay({
                 </TabsTrigger>
               ))}
             </TabsList>
+            
+            {currentTab && (
+              <div className="bg-gray-800 bg-opacity-60 px-3 py-1 rounded-md flex items-center justify-center mt-2 text-sm">
+                <Info className="h-3 w-3 mr-1 text-blue-300" /> 
+                Fonte de dados: <span className="font-semibold ml-1">{currentTab.source}</span>
+              </div>
+            )}
             
             <div className="flex-1 relative">
               <TabsContent value="oee" className="absolute inset-0">
@@ -305,4 +313,3 @@ export function PresentationDisplay({
     </div>
   );
 }
-
