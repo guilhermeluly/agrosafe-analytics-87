@@ -14,10 +14,11 @@ interface UserContextType {
     photo: string;
     originalRole?: UserRole; // Adicionado para guardar o papel original
   };
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (email: string, password: string, rememberMe?: boolean) => Promise<boolean>;
   logout: () => void;
   isAuthorized: (allowedRoles: UserRole[]) => boolean;
   updateUserPhoto: (photoUrl: string) => void;
+  updateUserPassword: (currentPassword: string, newPassword: string) => Promise<boolean>;
   selectedCompanyId: string | null;
   setSelectedCompanyId: (id: string | null) => void;
   switchUserRole: (role: UserRole) => void; // Nova função para trocar papel
@@ -52,7 +53,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
 
   // Simula login com usuários mockados
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const login = async (email: string, password: string, rememberMe?: boolean): Promise<boolean> => {
     // Dados mockados para testes
     const mockUsers = [
       {
@@ -139,6 +140,47 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     setUser({ ...user, photo: photoUrl });
   };
 
+  // Nova função para alterar a senha do usuário
+  const updateUserPassword = async (currentPassword: string, newPassword: string): Promise<boolean> => {
+    // Em um sistema real, aqui teria uma chamada para a API para alterar a senha
+    // Para demonstração, vamos apenas simular uma verificação do password atual
+    
+    // Dados mockados para testes
+    const mockUsers = [
+      {
+        id: "1",
+        email: "master@example.com",
+        password: "123456",
+      },
+      {
+        id: "2",
+        email: "admin@example.com",
+        password: "123456",
+      },
+      {
+        id: "3",
+        email: "operator@example.com",
+        password: "123456",
+      },
+      {
+        id: "4",
+        email: "viewer@example.com",
+        password: "123456",
+      }
+    ];
+    
+    // Verificar se a senha atual está correta
+    const foundUser = mockUsers.find(u => u.email === user.email && u.password === currentPassword);
+    
+    if (foundUser) {
+      // Em um sistema real, aqui atualizaria a senha no banco de dados
+      // Para demonstração, apenas retornamos sucesso
+      return true;
+    }
+    
+    return false;
+  };
+
   // Nova função para trocar o papel do usuário
   const switchUserRole = (role: UserRole) => {
     const originalRole = user.originalRole || user.role;
@@ -158,6 +200,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
         logout,
         isAuthorized,
         updateUserPhoto,
+        updateUserPassword,
         selectedCompanyId,
         setSelectedCompanyId,
         switchUserRole
