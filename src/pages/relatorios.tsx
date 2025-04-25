@@ -1,12 +1,18 @@
+
 import React, { useState } from 'react';
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LineShiftFilter } from '@/components/filters/LineShiftFilter';
 import AppLayout from '@/components/AppLayout';
+import { DateRange } from 'react-day-picker';
 
 export default function Relatorios() {
   const [selectedLine, setSelectedLine] = useState('all');
   const [selectedShift, setSelectedShift] = useState('all');
+  const [dateRange, setDateRange] = useState<DateRange | undefined>({
+    from: new Date(),
+    to: new Date()
+  });
   
   // Example data - in a real app, this would come from your backend
   const allLines = [
@@ -21,6 +27,10 @@ export default function Relatorios() {
     { id: 'turno-3', name: 'Noite' },
   ];
 
+  const handleDateRangeChange = (range: DateRange | undefined) => {
+    setDateRange(range);
+  };
+
   return (
     <AppLayout title="Relatórios">
       <div className="container mx-auto p-4">
@@ -29,7 +39,11 @@ export default function Relatorios() {
             <CardTitle>Filtros do Relatório</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <DateRangePicker className="w-full" />
+            <DateRangePicker 
+              className="w-full"
+              value={dateRange}
+              onChange={handleDateRangeChange}
+            />
             <LineShiftFilter
               selectedLine={selectedLine}
               selectedShift={selectedShift}

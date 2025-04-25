@@ -27,6 +27,8 @@ interface PresentationConfigProps {
   onShiftChange: (shift: string) => void;
   allLines: { id: string; name: string }[];
   allShifts: { id: string; name: string }[];
+  selectedCombinations?: string[];
+  setSelectedCombinations?: (combinations: string[]) => void;
 }
 
 export function PresentationConfig({
@@ -44,7 +46,9 @@ export function PresentationConfig({
   onLineChange,
   onShiftChange,
   allLines,
-  allShifts
+  allShifts,
+  selectedCombinations = [],
+  setSelectedCombinations = () => {}
 }: PresentationConfigProps) {
   return (
     <div className="container mx-auto py-6 px-4">

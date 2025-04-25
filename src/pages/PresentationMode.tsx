@@ -21,6 +21,8 @@ export default function PresentationMode() {
     from: new Date(),
     to: new Date()
   });
+  const [selectedLine, setSelectedLine] = useState<string>('all');
+  const [selectedShift, setSelectedShift] = useState<string>('all');
   const [selectedCombinations, setSelectedCombinations] = useState<string[]>(['global']);
   const [selectedIndicators, setSelectedIndicators] = useState<string[]>(['oee', 'componentes']);
 
@@ -37,6 +39,10 @@ export default function PresentationMode() {
     { id: '2', name: 'Tarde', startTime: '14:00', endTime: '22:00' },
     { id: '3', name: 'Noite', startTime: '22:00', endTime: '06:00' },
   ];
+
+  // Map lines and shifts to the format expected by LineShiftFilter
+  const allLines = productionLines.map(line => ({ id: line.id, name: line.name }));
+  const allShifts = shifts.map(shift => ({ id: shift.id, name: shift.name }));
   
   // Generate combinations based on registered lines and shifts
   const lineTurnoCombos: LineTurnoCombo[] = [
@@ -127,6 +133,12 @@ export default function PresentationMode() {
           setAutoRotate={setAutoRotate}
           selectedIndicators={selectedIndicators}
           onIndicatorToggle={handleIndicatorToggle}
+          selectedLine={selectedLine}
+          selectedShift={selectedShift}
+          onLineChange={setSelectedLine}
+          onShiftChange={setSelectedShift}
+          allLines={allLines}
+          allShifts={allShifts}
           selectedCombinations={selectedCombinations}
           setSelectedCombinations={setSelectedCombinations}
           onStartPresentation={toggleFullscreen}
