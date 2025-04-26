@@ -15,7 +15,6 @@ import MasterAdmin from "./pages/master-admin";
 import Login from "./pages/login";
 import Unauthorized from "./pages/unauthorized";
 import ProductionForm from "./pages/production-form";
-import DatabasePage from "./pages/database";
 import { EmpresaProvider } from "./context/EmpresaContext";
 import { UserProvider } from "./context/UserContext";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -24,13 +23,12 @@ import Users from "./pages/master/Users";
 import Plans from "./pages/master/Plans";
 import MobileApp from "./pages/master/MobileApp";
 import Help from "./pages/Help";
-import DnsConfig from "./pages/master/DnsConfig";
 import ChangePassword from "./pages/master/ChangePassword";
 import LogoConfig from "./pages/master/LogoConfig";
 import Cadastros from "./pages/admin/Cadastros";
-import ResetData from "./pages/master/ResetData";
 import PresentationMode from "./pages/PresentationMode";
 import GoalsSettings from "./pages/GoalsSettings";
+import Settings from "./pages/settings";
 
 const queryClient = new QueryClient();
 
@@ -120,28 +118,10 @@ const App = () => (
                 />
                 
                 <Route 
-                  path="/database" 
-                  element={
-                    <ProtectedRoute requiredRoles={["master_admin", "admin"]}>
-                      <DatabasePage />
-                    </ProtectedRoute>
-                  } 
-                />
-                
-                <Route 
-                  path="/master-admin" 
+                  path="/settings" 
                   element={
                     <ProtectedRoute requiredRoles={["master_admin"]}>
-                      <MasterAdmin />
-                    </ProtectedRoute>
-                  } 
-                />
-                
-                <Route 
-                  path="/reset-data" 
-                  element={
-                    <ProtectedRoute requiredRoles={["master_admin"]}>
-                      <ResetData />
+                      <Settings />
                     </ProtectedRoute>
                   } 
                 />
@@ -165,28 +145,10 @@ const App = () => (
                 />
                 
                 <Route 
-                  path="/plans" 
-                  element={
-                    <ProtectedRoute requiredRoles={["master_admin"]}>
-                      <Plans />
-                    </ProtectedRoute>
-                  } 
-                />
-                
-                <Route 
                   path="/mobile-app" 
                   element={
                     <ProtectedRoute requiredRoles={["master_admin"]}>
                       <MobileApp />
-                    </ProtectedRoute>
-                  } 
-                />
-                
-                <Route 
-                  path="/dns-config" 
-                  element={
-                    <ProtectedRoute requiredRoles={["master_admin"]}>
-                      <DnsConfig />
                     </ProtectedRoute>
                   } 
                 />

@@ -1,7 +1,7 @@
 
 import React from "react";
 import { useLocation } from "react-router-dom";
-import { Menu } from "lucide-react";
+import { Menu, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sidebar,
@@ -18,6 +18,9 @@ import { MenuItems } from "./sidebar/MenuItems";
 import { UserProfile } from "./sidebar/UserProfile";
 import LogoDisplay from "./LogoDisplay";
 import { MenuItem } from "./sidebar/types";
+import { CompanySelector } from "./CompanySelector";
+import { RoleSwitcher } from "./RoleSwitcher";
+import { PlanSwitcher } from "./PlanSwitcher";
 
 export default function SidebarNavigation() {
   const location = useLocation();
@@ -52,7 +55,7 @@ export default function SidebarNavigation() {
       
       <SidebarContent className="py-2 bg-gray-900 text-white">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-gray-400">Menu Principal</SidebarGroupLabel>
+          <SidebarGroupLabel>Menu Principal</SidebarGroupLabel>
           <SidebarMenu>
             <MenuItems 
               items={menuItems}
@@ -60,6 +63,18 @@ export default function SidebarNavigation() {
               onMobileClick={handleSidebarTrigger}
             />
           </SidebarMenu>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>
+            <Eye className="w-4 h-4 mr-2" />
+            Visualização
+          </SidebarGroupLabel>
+          <div className="px-3 space-y-2">
+            <CompanySelector />
+            <RoleSwitcher />
+            <PlanSwitcher />
+          </div>
         </SidebarGroup>
       </SidebarContent>
       
