@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Plus } from "lucide-react";
 
-interface Setup {
+// Make this interface export to use it elsewhere
+export interface Setup {
   minutes: number;
   description: string;
 }

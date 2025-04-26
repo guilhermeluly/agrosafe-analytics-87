@@ -5,19 +5,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import StopsSection from './StopsSection';
-import SetupTimesSectionComponent from './SetupTimesSection';
+import SetupTimesSectionComponent, { Setup } from './SetupTimesSection';
 import { v4 as uuidv4 } from 'uuid';
 import { useToast } from "@/hooks/use-toast";
 import { SetupTime, StopTime } from '@/types';
 import ScheduledBreaksSection from './UnscheduledBreaksSection';
 import UnscheduledStopsSection from './UnscheduledStopsSection';
-
-// Define the Setup interface to match what SetupTimesSection expects
-interface Setup {
-  startTime: string;
-  endTime: string;
-  description: string;
-}
 
 const ProductionFormFields: React.FC = () => {
   const { toast } = useToast();
@@ -38,8 +31,7 @@ const ProductionFormFields: React.FC = () => {
   // Helper function to convert SetupTime to Setup
   const mapSetupTimeToSetup = (setupTime: SetupTime): Setup => {
     return {
-      startTime: setupTime.horarioInicio || '',
-      endTime: setupTime.horarioFim || '',
+      minutes: setupTime.tempo || 0,
       description: setupTime.descricao
     };
   };
@@ -48,10 +40,10 @@ const ProductionFormFields: React.FC = () => {
   const mapSetupToSetupTime = (setup: Setup): SetupTime => {
     return {
       id: uuidv4(),
-      tempo: 0, // Calculate time difference if needed
+      tempo: setup.minutes,
       descricao: setup.description,
-      horarioInicio: setup.startTime,
-      horarioFim: setup.endTime
+      horarioInicio: '',
+      horarioFim: ''
     };
   };
 
