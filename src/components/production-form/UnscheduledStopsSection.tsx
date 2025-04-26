@@ -4,7 +4,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus } from "lucide-react";
+
+const STOP_REASONS = [
+  "Ajuste de Máquina",
+  "Falta de Mão de Obra",
+  "Falta de Matéria Prima",
+  "Manutenção Mecânica",
+  "Manutenção Elétrica",
+  "Troca de Ferramental",
+  "Problemas de Qualidade"
+];
 
 interface Stop {
   startTime: string;
@@ -64,15 +75,23 @@ export default function UnscheduledStopsSection({
               />
             </div>
             <div className="col-span-2">
-              <Label htmlFor="stop-desc">Descrição</Label>
+              <Label htmlFor="stop-desc">Motivo da Parada</Label>
               <div className="flex gap-2">
-                <Input
-                  id="stop-desc"
+                <Select
                   value={newStop.description}
-                  onChange={(e) => setNewStop({ ...newStop, description: e.target.value })}
-                  placeholder="Motivo da parada"
-                  className="bg-white"
-                />
+                  onValueChange={(value) => setNewStop({ ...newStop, description: value })}
+                >
+                  <SelectTrigger className="bg-white">
+                    <SelectValue placeholder="Selecione o motivo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {STOP_REASONS.map((reason) => (
+                      <SelectItem key={reason} value={reason}>
+                        {reason}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <Button onClick={handleAdd} className="bg-red-600 hover:bg-red-700">
                   <Plus className="h-4 w-4" />
                 </Button>

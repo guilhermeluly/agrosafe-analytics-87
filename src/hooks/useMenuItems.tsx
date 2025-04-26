@@ -1,7 +1,8 @@
 
 import { 
-  LayoutDashboard, Settings, FileText, Database, 
-  Users, HelpCircle, Eye, BarChart2
+  LayoutDashboard, FileText, Settings, BarChart2, Home,
+  UserCog, Database, Users, Package, Smartphone, HelpCircle,
+  Eye, Globe
 } from "lucide-react";
 import { useUser } from "@/context/UserContext";
 
@@ -9,11 +10,11 @@ export function useMenuItems() {
   const { user } = useUser();
 
   const getMenuItems = () => {
-    const menuItems = [
+    const baseItems = [
       {
-        title: "Dashboard",
-        icon: LayoutDashboard,
-        href: "/dashboard",
+        title: "Início",
+        icon: Home,
+        href: "/home",
         roles: ["master_admin", "admin", "operator", "viewer"]
       },
       {
@@ -23,11 +24,46 @@ export function useMenuItems() {
         roles: ["master_admin", "admin", "operator"]
       },
       {
+        title: "Dashboard",
+        icon: LayoutDashboard,
+        href: "/dashboard",
+        roles: ["master_admin", "admin", "operator", "viewer"]
+      },
+      {
         title: "Relatórios",
         icon: BarChart2,
         href: "/relatorios",
         roles: ["master_admin", "admin", "operator", "viewer"]
-      },
+      }
+    ];
+
+    const adminItems = [
+      {
+        title: "Configurações",
+        icon: Settings,
+        href: "/admin",
+        roles: ["master_admin", "admin"],
+        submenu: [
+          {
+            title: "Cadastros",
+            href: "/admin/cadastros",
+            roles: ["master_admin", "admin"]
+          },
+          {
+            title: "Banco de Dados",
+            href: "/database",
+            roles: ["master_admin", "admin"]
+          },
+          {
+            title: "Configuração DNS",
+            href: "/dns-config",
+            roles: ["master_admin"]
+          }
+        ]
+      }
+    ];
+
+    const masterAdminItems = [
       {
         title: "Visualização",
         icon: Eye,
@@ -50,44 +86,19 @@ export function useMenuItems() {
             roles: ["master_admin"]
           }
         ]
-      },
-      {
-        title: "Configurações",
-        icon: Settings,
-        href: "/admin",
-        roles: ["master_admin", "admin"],
-        submenu: [
-          {
-            title: "Cadastros",
-            href: "/admin/cadastros",
-            roles: ["master_admin", "admin"]
-          },
-          {
-            title: "Metas",
-            href: "/goals",
-            roles: ["master_admin", "admin"]
-          },
-          {
-            title: "Configurações Avançadas",
-            href: "/dns-config",
-            roles: ["master_admin"]
-          }
-        ]
-      },
-      {
-        title: "Banco de Dados",
-        icon: Database,
-        href: "/database",
-        roles: ["master_admin", "admin"]
-      },
-      {
-        title: "Suporte Técnico",
-        icon: HelpCircle,
-        href: "/help",
-        roles: ["master_admin", "admin", "operator", "viewer"]
       }
     ];
 
+    let menuItems = baseItems;
+    
+    if (user.role === "admin") {
+      menuItems = [...menuItems, ...adminItems];
+    }
+    
+    if (user.role === "master_admin") {
+      menuItems = [...menuItems, ...adminItems, ...masterAdminItems];
+    }
+    
     return menuItems.filter(item => item.roles.includes(user.role));
   };
 

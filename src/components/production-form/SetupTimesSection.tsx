@@ -6,15 +6,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Plus } from "lucide-react";
 
-export interface Setup {
-  startTime: string;
-  endTime: string;
+interface Setup {
+  minutes: number;
   description: string;
 }
 
 interface SetupTimesSectionProps {
   setups: Setup[];
-  onAdd: (newSetup: Setup) => void;
+  onAdd: (setup: Setup) => void;
   onRemove: (index: number) => void;
 }
 
@@ -24,15 +23,14 @@ export default function SetupTimesSection({
   onRemove
 }: SetupTimesSectionProps) {
   const [newSetup, setNewSetup] = useState<Setup>({
-    startTime: '',
-    endTime: '',
+    minutes: 0,
     description: ''
   });
 
   const handleAdd = () => {
-    if (!newSetup.startTime || !newSetup.endTime || !newSetup.description) return;
+    if (!newSetup.minutes || !newSetup.description) return;
     onAdd(newSetup);
-    setNewSetup({ startTime: '', endTime: '', description: '' });
+    setNewSetup({ minutes: 0, description: '' });
   };
 
   return (
@@ -42,24 +40,15 @@ export default function SetupTimesSection({
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <div>
-              <Label htmlFor="setup-start">Início</Label>
+              <Label htmlFor="setup-time">Tempo (minutos)</Label>
               <Input
-                id="setup-start"
-                type="time"
-                value={newSetup.startTime}
-                onChange={(e) => setNewSetup({ ...newSetup, startTime: e.target.value })}
-                className="bg-white"
-              />
-            </div>
-            <div>
-              <Label htmlFor="setup-end">Fim</Label>
-              <Input
-                id="setup-end"
-                type="time"
-                value={newSetup.endTime}
-                onChange={(e) => setNewSetup({ ...newSetup, endTime: e.target.value })}
+                id="setup-time"
+                type="number"
+                min={0}
+                value={newSetup.minutes || ''}
+                onChange={(e) => setNewSetup({ ...newSetup, minutes: Number(e.target.value) })}
                 className="bg-white"
               />
             </div>
@@ -85,13 +74,13 @@ export default function SetupTimesSection({
               {setups.map((setup, index) => (
                 <div key={index} className="flex items-center justify-between p-2 bg-white rounded border">
                   <div className="flex items-center space-x-4">
-                    <span className="text-sm font-medium">{setup.startTime} - {setup.endTime}</span>
+                    <span className="text-sm font-medium">{setup.minutes} minutos</span>
                     <span className="text-sm">{setup.description}</span>
                   </div>
                   <Button 
                     variant="ghost" 
                     onClick={() => onRemove(index)}
-                    className="h-8 px-2 text-red-600 hover:text-red-700"
+                    className="h-8 px-2 text-purple-600 hover:text-purple-700"
                   >
                     Remover
                   </Button>
