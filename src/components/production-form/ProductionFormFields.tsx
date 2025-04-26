@@ -9,7 +9,7 @@ import SetupTimesSectionComponent from './SetupTimesSection';
 import { v4 as uuidv4 } from 'uuid';
 import { useToast } from "@/hooks/use-toast";
 import { SetupTime, StopTime } from '@/types';
-import UnscheduledBreaksSection from './UnscheduledBreaksSection';
+import ScheduledBreaksSection from './UnscheduledBreaksSection';
 import UnscheduledStopsSection from './UnscheduledStopsSection';
 
 // Define the Setup interface to match what SetupTimesSection expects
@@ -173,7 +173,7 @@ const ProductionFormFields: React.FC = () => {
         </CardContent>
       </Card>
 
-      <UnscheduledBreaksSection 
+      <ScheduledBreaksSection 
         breaks={unscheduledBreaks}
         onAdd={(newBreak) => setUnscheduledBreaks([...unscheduledBreaks, newBreak])}
         onRemove={(index) => setUnscheduledBreaks(unscheduledBreaks.filter((_, i) => i !== index))}

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,24 +5,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Plus } from "lucide-react";
 
-interface Break {
-  startTime: string;
-  endTime: string;
-  description: string;
-}
-
-interface UnscheduledBreaksSectionProps {
-  breaks: Break[];
-  onAdd: (newBreak: Break) => void;
+interface ScheduledBreaksSectionProps {
+  breaks: { startTime: string; endTime: string; description: string; }[];
+  onAdd: (newBreak: { startTime: string; endTime: string; description: string; }) => void;
   onRemove: (index: number) => void;
 }
 
-export default function UnscheduledBreaksSection({
+export default function ScheduledBreaksSection({
   breaks,
   onAdd,
   onRemove
-}: UnscheduledBreaksSectionProps) {
-  const [newBreak, setNewBreak] = useState<Break>({
+}: ScheduledBreaksSectionProps) {
+  const [newBreak, setNewBreak] = useState({
     startTime: '',
     endTime: '',
     description: ''
@@ -36,9 +29,9 @@ export default function UnscheduledBreaksSection({
   };
 
   return (
-    <Card className="bg-yellow-50 border-l-4 border-yellow-500">
+    <Card className="bg-blue-50 border-l-4 border-blue-500">
       <CardHeader className="pb-2">
-        <CardTitle className="text-base">Intervalos Não Programados</CardTitle>
+        <CardTitle className="text-base">Intervalos Programados</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
@@ -70,10 +63,10 @@ export default function UnscheduledBreaksSection({
                   id="break-desc"
                   value={newBreak.description}
                   onChange={(e) => setNewBreak({ ...newBreak, description: e.target.value })}
-                  placeholder="Ex: Almoço, Café"
+                  placeholder="Tipo de intervalo"
                   className="bg-white"
                 />
-                <Button onClick={handleAdd} className="bg-yellow-600 hover:bg-yellow-700">
+                <Button onClick={handleAdd} className="bg-blue-600 hover:bg-blue-700">
                   <Plus className="h-4 w-4" />
                 </Button>
               </div>

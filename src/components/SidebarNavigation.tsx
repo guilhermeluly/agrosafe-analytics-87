@@ -21,11 +21,13 @@ import { MenuItem } from "./sidebar/types";
 import { CompanySelector } from "./CompanySelector";
 import { RoleSwitcher } from "./RoleSwitcher";
 import { PlanSwitcher } from "./PlanSwitcher";
+import { useUser } from "@/context/UserContext";
 
 export default function SidebarNavigation() {
   const location = useLocation();
   const isMobile = useIsMobile();
   const { getMenuItems } = useMenuItems();
+  const { user } = useUser();
   const isActive = (path: string) => location.pathname === path;
 
   const handleSidebarTrigger = () => {
@@ -65,17 +67,19 @@ export default function SidebarNavigation() {
           </SidebarMenu>
         </SidebarGroup>
 
-        <SidebarGroup>
-          <SidebarGroupLabel>
-            <Eye className="w-4 h-4 mr-2" />
-            Visualização
-          </SidebarGroupLabel>
-          <div className="px-3 space-y-2">
-            <CompanySelector />
-            <RoleSwitcher />
-            <PlanSwitcher />
-          </div>
-        </SidebarGroup>
+        {user.role === "master_admin" && (
+          <SidebarGroup>
+            <SidebarGroupLabel>
+              <Eye className="w-4 h-4 mr-2" />
+              Visualização
+            </SidebarGroupLabel>
+            <div className="px-3 space-y-2">
+              <CompanySelector />
+              <RoleSwitcher />
+              <PlanSwitcher />
+            </div>
+          </SidebarGroup>
+        )}
       </SidebarContent>
       
       <SidebarFooter className="p-4 border-t bg-gray-900 text-white mt-auto">
