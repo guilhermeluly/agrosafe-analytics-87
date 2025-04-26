@@ -12,6 +12,13 @@ import { SetupTime, StopTime } from '@/types';
 import UnscheduledBreaksSection from './UnscheduledBreaksSection';
 import UnscheduledStopsSection from './UnscheduledStopsSection';
 
+// Define the Setup interface to match what SetupTimesSection expects
+interface Setup {
+  startTime: string;
+  endTime: string;
+  description: string;
+}
+
 const ProductionFormFields: React.FC = () => {
   const { toast } = useToast();
   const [formData, setFormData] = useState({
@@ -27,6 +34,26 @@ const ProductionFormFields: React.FC = () => {
 
   const [setupTimes, setSetupTimes] = useState<SetupTime[]>([]);
   const [stopTimes, setStopTimes] = useState<StopTime[]>([]);
+
+  // Helper function to convert SetupTime to Setup
+  const mapSetupTimeToSetup = (setupTime: SetupTime): Setup => {
+    return {
+      startTime: setupTime.horarioInicio || '',
+      endTime: setupTime.horarioFim || '',
+      description: setupTime.descricao
+    };
+  };
+
+  // Helper function to convert Setup to SetupTime
+  const mapSetupToSetupTime = (setup: Setup): SetupTime => {
+    return {
+      id: uuidv4(),
+      tempo: 0, // Calculate time difference if needed
+      descricao: setup.description,
+      horarioInicio: setup.startTime,
+      horarioFim: setup.endTime
+    };
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -159,10 +186,9 @@ const ProductionFormFields: React.FC = () => {
       />
 
       <SetupTimesSectionComponent 
-        setups={setupTimes}
-        addSetup={(setup) => setSetupTimes([...setupTimes, { ...setup, id: uuidv4() }])}
-        removeSetup={(index) => setSetupTimes(setupTimes.filter((_, i) => i !== index))}
-        standardSetupTime={30}
+        setups={setupTimes.map(mapSetupTimeToSetup)}
+        onAdd={(setup) => setSetupTimes([...setupTimes, mapSetupToSetupTime(setup)])}
+        onRemove={(index) => setSetupTimes(setupTimes.filter((_, i) => i !== index))}
       />
 
       <div className="flex justify-end">

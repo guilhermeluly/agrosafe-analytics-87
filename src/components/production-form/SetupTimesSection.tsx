@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Plus } from "lucide-react";
 
-interface Setup {
+export interface Setup {
   startTime: string;
   endTime: string;
   description: string;
