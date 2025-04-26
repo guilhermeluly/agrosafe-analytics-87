@@ -1,3 +1,4 @@
+
 import { LucideIcon } from "lucide-react";
 
 export interface MenuItem {
@@ -13,6 +14,7 @@ export interface MenuItem {
     title: string;
     href: string;
     roles: string[];
+    onClick?: () => void;
   }[];
 }
 
