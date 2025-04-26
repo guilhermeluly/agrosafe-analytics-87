@@ -18,10 +18,10 @@ export function CompanySelector() {
   const { user, selectedCompanyId, setSelectedCompanyId } = useUser();
   const { setEmpresa } = useEmpresa();
 
-  // Só mostrar para admin master
-  if (user.role !== 'master_admin') {
-    return null;
-  }
+  // Só mostrar para admin master - removido aqui pois agora será controlado pelo menu
+  // if (user.role !== 'master_admin') {
+  //   return null;
+  // }
 
   // Ensure we have a valid array of options
   const companyOptions = MOCK_COMPANIES ? MOCK_COMPANIES.map(company => ({

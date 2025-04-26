@@ -59,14 +59,14 @@ export function MenuItems({ items, isActive, onMobileClick }: MenuItemsProps) {
           return (
             <Collapsible
               key={item.path}
-              open={openSubmenus[item.title] || false}
-              onOpenChange={() => toggleSubmenu(item.title)}
+              open={openSubmenus[item.label || item.title || ""] || false}
+              onOpenChange={() => toggleSubmenu(item.label || item.title || "")}
             >
               <SidebarMenuItem>
                 <CollapsibleTrigger className="flex items-center justify-between w-full px-2 py-2 text-sm rounded-md hover:bg-sidebar-accent">
                   <div className="flex items-center">
                     {item.icon && <item.icon className="h-4 w-4 mr-2" />}
-                    <span>{item.title}</span>
+                    <span>{item.label || item.title}</span>
                   </div>
                   <ChevronDown className="h-4 w-4" />
                 </CollapsibleTrigger>
@@ -84,7 +84,10 @@ export function MenuItems({ items, isActive, onMobileClick }: MenuItemsProps) {
                         <SidebarMenuButton
                           asChild
                           isActive={subActive}
-                          onClick={onMobileClick}
+                          onClick={() => {
+                            if (onMobileClick) onMobileClick();
+                            if (subItem.onClick) subItem.onClick();
+                          }}
                         >
                           <Link to={subItem.href}>
                             <span>{subItem.title}</span>
@@ -104,7 +107,10 @@ export function MenuItems({ items, isActive, onMobileClick }: MenuItemsProps) {
             <SidebarMenuButton
               asChild
               isActive={active}
-              onClick={onMobileClick}
+              onClick={() => {
+                if (onMobileClick) onMobileClick();
+                if (item.onClick) item.onClick();
+              }}
             >
               <Link to={item.path}>
                 {item.icon && <item.icon className="h-4 w-4" />}

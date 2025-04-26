@@ -18,6 +18,7 @@ import {
   Edit,
   FileSpreadsheet,
   Trash2,
+  Eye,
   FileUp
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -65,96 +66,6 @@ export function useMenuItems() {
         label: "Modo Apresentação",
         path: "/presentation-mode",
         roles: ["master_admin", "admin", "operator", "viewer"]
-      }
-    ];
-
-    const adminItems: MenuItem[] = [
-      {
-        icon: Settings,
-        label: "Configurações",
-        path: "/admin",
-        roles: ["master_admin", "admin"]
-      },
-      {
-        icon: Edit,
-        label: "Cadastros",
-        path: "/admin/cadastros",
-        roles: ["master_admin", "admin"]
-      },
-      {
-        icon: Database,
-        label: "Banco de Dados",
-        path: "/database",
-        roles: ["master_admin", "admin"]
-      },
-      {
-        icon: Download,
-        label: "Exportar Dados",
-        path: "#",
-        roles: ["master_admin", "admin"],
-        onClick: () => {
-          toast({
-            title: "Exportação iniciada",
-            description: "Os dados estão sendo exportados para CSV."
-          });
-        }
-      },
-      {
-        icon: Trash2,
-        label: "Reset de Dados",
-        path: "/reset-data",
-        roles: ["master_admin"]
-      }
-    ];
-
-    const masterAdminItems: MenuItem[] = [
-      {
-        icon: UserCog,
-        label: "Gerenciamento do Sistema",
-        path: "/master-admin",
-        roles: ["master_admin"]
-      },
-      {
-        icon: Database,
-        label: "Empresas",
-        path: "/companies",
-        roles: ["master_admin"]
-      },
-      {
-        icon: Users,
-        label: "Usuários",
-        path: "/users",
-        roles: ["master_admin"]
-      },
-      {
-        icon: Lock,
-        label: "Alterar Senha",
-        path: "/change-password",
-        roles: ["master_admin"]
-      },
-      {
-        icon: Package,
-        label: "Planos",
-        path: "/plans",
-        roles: ["master_admin"]
-      },
-      {
-        icon: Globe,
-        label: "Configuração DNS",
-        path: "/dns-config",
-        roles: ["master_admin"]
-      },
-      {
-        icon: Edit,
-        label: "Logotipo",
-        path: "/logo-config",
-        roles: ["master_admin"]
-      },
-      {
-        icon: Smartphone,
-        label: "Aplicativo Mobile",
-        path: "/mobile-app",
-        roles: ["master_admin"]
       },
       {
         icon: HelpCircle,
@@ -164,18 +75,135 @@ export function useMenuItems() {
       }
     ];
 
-    let menuItems = baseItems;
+    // Only master_admin can see the visualization menu
+    if (user.role === "master_admin") {
+      baseItems.push({
+        icon: Eye,
+        label: "Visualização",
+        path: "#",
+        roles: ["master_admin"],
+        submenu: [
+          {
+            title: "Alternar Nível de Acesso",
+            href: "/role-switch",
+            roles: ["master_admin"]
+          },
+          {
+            title: "Alternar Plano",
+            href: "/plan-switch",
+            roles: ["master_admin"]
+          },
+          {
+            title: "Visualizar Empresa",
+            href: "/company-view",
+            roles: ["master_admin"]
+          }
+        ]
+      });
+    }
+
+    // Admin settings items
+    const adminSettingsSubmenu = [
+      {
+        title: "Cadastros",
+        href: "/admin/cadastros",
+        roles: ["master_admin", "admin"]
+      },
+      {
+        title: "Banco de Dados",
+        href: "/database",
+        roles: ["master_admin", "admin"]
+      },
+      {
+        title: "Exportar Dados",
+        href: "#",
+        roles: ["master_admin", "admin"],
+        onClick: () => {
+          toast({
+            title: "Exportação iniciada",
+            description: "Os dados estão sendo exportados para CSV."
+          });
+        }
+      }
+    ];
+
+    // Add DNS Config to admin settings submenu if master_admin
+    if (user.role === "master_admin") {
+      adminSettingsSubmenu.push({
+        title: "Configuração DNS",
+        href: "/dns-config",
+        roles: ["master_admin"]
+      });
+      
+      adminSettingsSubmenu.push({
+        title: "Reset de Dados",
+        href: "/reset-data",
+        roles: ["master_admin"]
+      });
+    }
+
+    // Add the settings menu for admin and master_admin
+    if (user.role === "admin" || user.role === "master_admin") {
+      baseItems.push({
+        icon: Settings,
+        label: "Configurações",
+        path: "/admin",
+        roles: ["master_admin", "admin"],
+        submenu: adminSettingsSubmenu
+      });
+    }
+
+    // Add master admin specific items
+    const masterAdminItems: MenuItem[] = [];
     
-    if (user && user.role === "admin") {
-      menuItems = [...menuItems, ...adminItems.filter(item => item.label !== "Reset de Dados")];
+    if (user.role === "master_admin") {
+      masterAdminItems.push(
+        {
+          icon: Database,
+          label: "Empresas",
+          path: "/companies",
+          roles: ["master_admin"]
+        },
+        {
+          icon: Users,
+          label: "Usuários",
+          path: "/users",
+          roles: ["master_admin"]
+        },
+        {
+          icon: Lock,
+          label: "Alterar Senha",
+          path: "/change-password",
+          roles: ["master_admin"]
+        },
+        {
+          icon: Package,
+          label: "Planos",
+          path: "/plans",
+          roles: ["master_admin"]
+        },
+        {
+          icon: Edit,
+          label: "Logotipo",
+          path: "/logo-config",
+          roles: ["master_admin"]
+        },
+        {
+          icon: Smartphone,
+          label: "Aplicativo Mobile",
+          path: "/mobile-app",
+          roles: ["master_admin"]
+        }
+      );
     }
     
-    if (user && user.role === "master_admin") {
-      menuItems = [...menuItems, ...adminItems, ...masterAdminItems];
+    // Combine all menus
+    if (user.role === "master_admin") {
+      baseItems.push(...masterAdminItems);
     }
     
-    // Ensure roles are defined and filter based on user role
-    return menuItems.filter(item => {
+    // Filter items based on user role
+    return baseItems.filter(item => {
       return user && user.role && item.roles && item.roles.includes(user.role);
     });
   };

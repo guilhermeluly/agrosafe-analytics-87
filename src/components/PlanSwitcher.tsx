@@ -9,10 +9,10 @@ import { PLANOS } from '../config/planos';
 export function PlanSwitcher() {
   const { user, switchPlan } = useUser();
 
-  // Only show for master admin
-  if (user.role !== 'master_admin') {
-    return null;
-  }
+  // Remove conditional rendering - it will be controlled by the menu now
+  // if (user.role !== 'master_admin') {
+  //   return null;
+  // }
 
   return (
     <div className="mb-2 p-2 bg-gray-800 rounded-md border border-gray-700">

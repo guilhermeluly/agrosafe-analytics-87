@@ -9,11 +9,10 @@ import { toast } from './ui/use-toast';
 export function RoleSwitcher() {
   const { user, switchUserRole } = useUser();
 
-  // Always show if user has an original role (meaning they switched roles)
-  // or if they are master_admin
-  if (user.role !== 'master_admin' && !user.originalRole) {
-    return null;
-  }
+  // Remove conditional rendering - it will be controlled by the menu now
+  // if (user.role !== 'master_admin' && !user.originalRole) {
+  //   return null;
+  // }
 
   const roles: { value: UserRole; label: string }[] = [
     { value: 'master_admin', label: 'Administrador Master' },
