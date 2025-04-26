@@ -9,11 +9,6 @@ import { toast } from './ui/use-toast';
 export function RoleSwitcher() {
   const { user, switchUserRole } = useUser();
 
-  // Remove conditional rendering - it will be controlled by the menu now
-  // if (user.role !== 'master_admin' && !user.originalRole) {
-  //   return null;
-  // }
-
   const roles: { value: UserRole; label: string }[] = [
     { value: 'master_admin', label: 'Administrador Master' },
     { value: 'admin', label: 'Administrador' },
@@ -30,7 +25,7 @@ export function RoleSwitcher() {
   };
 
   return (
-    <div className="mb-2 p-2 bg-gray-800 rounded-md border border-gray-700">
+    <div className="p-2 bg-gray-800 rounded-md border border-gray-700">
       <Label htmlFor="role-select" className="text-xs text-gray-300 mb-1 flex items-center gap-1">
         <Shield size={14} />
         Alternar Nível de Acesso

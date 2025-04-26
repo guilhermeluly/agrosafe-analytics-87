@@ -18,11 +18,6 @@ export function CompanySelector() {
   const { user, selectedCompanyId, setSelectedCompanyId } = useUser();
   const { setEmpresa } = useEmpresa();
 
-  // Só mostrar para admin master - removido aqui pois agora será controlado pelo menu
-  // if (user.role !== 'master_admin') {
-  //   return null;
-  // }
-
   // Ensure we have a valid array of options
   const companyOptions = MOCK_COMPANIES ? MOCK_COMPANIES.map(company => ({
     value: company.id,
@@ -62,7 +57,7 @@ export function CompanySelector() {
   };
 
   return (
-    <div className="mb-2 p-2 bg-gray-800 rounded-md border border-gray-700">
+    <div className="p-2 bg-gray-800 rounded-md border border-gray-700">
       <Label htmlFor="company-select" className="text-xs text-gray-300 mb-1 flex items-center gap-1">
         <Building2 size={14} />
         Visualizar Empresa

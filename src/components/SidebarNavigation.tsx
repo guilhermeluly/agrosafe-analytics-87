@@ -19,6 +19,9 @@ import { UserProfile } from "./sidebar/UserProfile";
 import LogoDisplay from "./LogoDisplay";
 import { MenuItem } from "./sidebar/types";
 import { useUser } from "@/context/UserContext";
+import { RoleSwitcher } from "./RoleSwitcher";
+import { PlanSwitcher } from "./PlanSwitcher";
+import { CompanySelector } from "./CompanySelector";
 
 export default function SidebarNavigation() {
   const location = useLocation();
@@ -35,6 +38,9 @@ export default function SidebarNavigation() {
   };
 
   const menuItems = getMenuItems() as MenuItem[];
+
+  // Determine if we should show the admin controls
+  const showAdminControls = user.role === "master_admin";
 
   return (
     <Sidebar>
@@ -63,6 +69,20 @@ export default function SidebarNavigation() {
             />
           </SidebarMenu>
         </SidebarGroup>
+        
+        {/* Only display admin controls in side panel if we're in a dedicated page for them */}
+        {(location.pathname === "/role-switch" || 
+          location.pathname === "/plan-switch" || 
+          location.pathname === "/company-view") && showAdminControls && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Controles de Visualização</SidebarGroupLabel>
+            <div className="px-2 space-y-2">
+              {location.pathname === "/role-switch" && <RoleSwitcher />}
+              {location.pathname === "/plan-switch" && <PlanSwitcher />}
+              {location.pathname === "/company-view" && <CompanySelector />}
+            </div>
+          </SidebarGroup>
+        )}
       </SidebarContent>
       
       <SidebarFooter className="p-4 border-t bg-gray-900 text-white mt-auto">

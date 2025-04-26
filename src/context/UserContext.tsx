@@ -173,24 +173,27 @@ export const UserProvider = ({ children }: UserProviderProps) => {
   };
 
   const switchUserRole = (role: UserRole) => {
+    // Save the original role if we're switching for the first time
     const originalRole = user.originalRole || user.role;
     
     setUser({
       ...user,
       role,
-      originalRole
+      // Keep the original role tracking
+      originalRole: role !== originalRole ? originalRole : undefined
     });
   };
 
   const switchPlan = (planId: string) => {
-    setSelectedCompanyId(prevId => {
-      if (prevId) {
-        toast({
-          title: "Plano alterado",
-          description: `O plano foi alterado para: ${PLANOS.find(p => p.id === planId)?.nome}`
-        });
-      }
-      return prevId;
+    // This function now just signals that a plan switch was attempted
+    // The actual plan switching happens in the PlanSwitcher component
+    // which updates the empresa context
+    
+    const planName = PLANOS.find(p => p.id === planId)?.nome || planId;
+    
+    toast({
+      title: "Tentativa de alteração de plano",
+      description: `Para alterar o plano para ${planName}, use o componente PlanSwitcher.`
     });
   };
 
